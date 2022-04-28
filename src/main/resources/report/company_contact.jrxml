@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="company_contact" pageWidth="290" pageHeight="842" columnWidth="250" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="1a1c1a59-2d89-49f5-891b-596671b5161c">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="address" class="java.lang.String"/>
+	<field name="ville" class="java.lang.String"/>
+	<field name="contact" class="java.lang.String"/>
+	<field name="emcef" class="java.lang.String"/>
+	<detail>
+		<band height="130" splitType="Stretch">
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="2" width="250" height="126" uuid="15b9fc3a-b80a-441b-b4a8-aa6171f78e82"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="11" y="12" width="49" height="19" uuid="61cf4d4f-b4af-443b-8838-3734ebe13b92"/>
+				<text><![CDATA[Adresse : ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="11" y="41" width="49" height="26" uuid="3f774827-cf85-43eb-88d5-655c6a100b5c"/>
+				<text><![CDATA[Ville : ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="10" y="67" width="49" height="28" uuid="638cf0e2-a165-4546-9508-1c1935fb11dc"/>
+				<text><![CDATA[Contact : ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="10" y="95" width="49" height="19" uuid="33df831e-0763-45de-8bda-e968342f1c5b"/>
+				<text><![CDATA[e-MCeF :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="60" y="12" width="180" height="30" uuid="b2090ced-84a2-45bf-bc16-37333c538e9f"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{address} != null ? $F{address} : ""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="60" y="41" width="180" height="26" uuid="2471a6e8-f504-44ef-a697-540aeb8abf8a"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ville} != null ? $F{ville} : ""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="60" y="67" width="180" height="28" uuid="4e944619-b031-48f9-9a6d-35fccd137ff1"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{contact} != null ? $F{contact} : ""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="59" y="95" width="181" height="16" uuid="b0c7b01b-b3a9-4be8-ad53-042a105747f4"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{emcef} != null ? $F{emcef} : ""]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

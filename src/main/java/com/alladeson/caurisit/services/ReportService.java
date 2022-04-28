@@ -1,0 +1,280 @@
+package com.alladeson.caurisit.services;
+
+import com.alladeson.caurisit.config.AppConfig;
+import com.alladeson.caurisit.models.entities.Client;
+import com.alladeson.caurisit.models.entities.DetailFacture;
+import com.alladeson.caurisit.models.entities.Facture;
+import com.alladeson.caurisit.models.entities.FactureResponseDgi;
+import com.alladeson.caurisit.models.entities.Parametre;
+import com.alladeson.caurisit.models.entities.ReglementFacture;
+import com.alladeson.caurisit.models.reports.ClientData;
+import com.alladeson.caurisit.models.reports.CompanyContact;
+import com.alladeson.caurisit.models.reports.InvoiceData;
+import com.alladeson.caurisit.models.reports.InvoiceDetailData;
+import com.alladeson.caurisit.models.reports.InvoicePayement;
+import com.alladeson.caurisit.models.reports.InvoiceRecapData;
+import com.alladeson.caurisit.utils.Tool;
+import net.sf.jasperreports.engine.JRException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+
+@Service
+public class ReportService {
+
+	@Autowired
+	private Tool tool;
+	@Autowired
+	private AppConfig appConfig;
+
+	/**
+	 * Instanciation et mise à jour des informations du client pour l'impression de
+	 * la facture
+	 * 
+	 * @param client
+	 * @return {@link ClientData}
+	 */
+	public ClientData setClientData(Client client) {
+		// Instanciation de ClientData
+		ClientData clientData = new ClientData();
+		// Mise à jour des champs
+		clientData.setName(client.getName());
+		clientData.setIfu(client.getIfu());
+		clientData.setAddress(client.getAddress());
+		clientData.setContact(client.getContact());
+
+		return clientData;
+	}
+
+	/**
+	 * Instanciation de remplissage de la liste des lignes de la facture pour
+	 * l'impression
+	 * 
+	 * @param facture
+	 * @return {@link List<InvoiceDetailData>}
+	 */
+	public List<InvoiceDetailData> setInvoiceDetailData(Facture facture) {
+		// Instanciation de la liste des InvoiceDetailData
+		List<InvoiceDetailData> liste = new ArrayList<InvoiceDetailData>();
+
+		// Récupération de la liste des détails de la facture
+		var details = facture.getDetails();
+
+		int i = 1;
+		for (DetailFacture detail : details) {
+			var invoiceDetail = new InvoiceDetailData();
+//			System.out.println("Id de ligne de la facture : " + detail.getId());
+			invoiceDetail.setNumero(i);
+			invoiceDetail.setName(detail.getName());
+			invoiceDetail.setPrix_u(detail.getPrixUnitaire().longValue());
+			invoiceDetail.setQte(detail.getQuantite());
+			invoiceDetail.setMontant_ttc(
+					Math.round(detail.getMontantTtc()) + " [" + detail.getTaxe().getGroupe().name() + "]");
+			liste.add(invoiceDetail);
+			// Gestion de la taxe spécifique
+			if (detail.getTs() != null) {
+				var invoiceDetailTs = new InvoiceDetailData();
+				invoiceDetailTs.setNumero(++i);
+				invoiceDetailTs.setName("TS (" + detail.getName() + ")");
+				invoiceDetailTs.setPrix_u(Math.round(detail.getTs().getTsUnitaireTtc()));
+				invoiceDetailTs.setQte(detail.getTs().getQuantite());
+				invoiceDetailTs.setMontant_ttc(Math.round(detail.getTs().getTsTotal()) + " ["
+						+ detail.getTs().getTaxe().getGroupe().name() + "]");
+				liste.add(invoiceDetailTs);
+			}
+			i++;
+		}
+
+		return liste;
+	}
+
+	/**
+	 * Intantiation de mise à jour des données de payement de la facture pour
+	 * l'impression
+	 * 
+	 * @param reglement
+	 * @return {@link InvoicePayement}
+	 */
+	public InvoicePayement setInvoicePayement(ReglementFacture reglement) {
+		// Intanciation de InvoicePayement
+		InvoicePayement payement = new InvoicePayement();
+		// Mise à jour des champs
+		payement.setType_payement(reglement.getTypePaiement().getType().name());
+		payement.setMontant(reglement.getMontantRecu().longValue());
+		payement.setPayer(reglement.getMontantPayer().longValue());
+		payement.setRendu(reglement.getMontantRendu().longValue());
+		return payement;
+	}
+
+	/**
+	 * Définition de la liste des recaps de la facture
+	 * 
+	 * @param recapdgi
+	 * @param facture
+	 * @return
+	 */
+	public List<InvoiceRecapData> setInvoiceRecapData(FactureResponseDgi recapdgi, Facture facture) {
+		// Instanciation de la liste InvoiceRecapData
+		List<InvoiceRecapData> recaps = new ArrayList<InvoiceRecapData>();
+		// Instancition et mise à jour de recaps
+		// Pour le groupe exonéré A (0%)
+		if (recapdgi.getTaa() != 0) {
+			InvoiceRecapData recap = new InvoiceRecapData();
+			recap.setTaxe_group("A - Exonéré");
+			recap.setTotal(recapdgi.getTaa());
+			recap.setImposable(0l);
+			recap.setImpot(0l);
+			// Ajout à la liste des recaps
+			recaps.add(recap);
+		}
+		// Pour le groupe de taxation B (18%)
+		if (recapdgi.getTab() != 0) {
+			InvoiceRecapData recap = new InvoiceRecapData();
+			recap.setTaxe_group("B - Taxable (18%)");
+			recap.setTotal(recapdgi.getTab());
+			recap.setImposable(recapdgi.getHab());
+			recap.setImpot(recapdgi.getVab());
+			// Ajout à la liste des recaps
+			recaps.add(recap);
+		}
+		// Pour le groupe C (Exportation de produits taxables) 0%
+		if (recapdgi.getTac() != 0) {
+			InvoiceRecapData recap = new InvoiceRecapData();
+			recap.setTaxe_group("C - Exportation");
+			recap.setTotal(recapdgi.getTac());
+			recap.setImposable(0l);
+			recap.setImpot(0l);
+			// Ajout à la liste des recaps
+			recaps.add(recap);
+		}
+		// Pour le groupe de taxation D (18%)
+		if (recapdgi.getTad() != 0) {
+			InvoiceRecapData recap = new InvoiceRecapData();
+			recap.setTaxe_group("D - Exception (18%)");
+			recap.setTotal(recapdgi.getTad());
+			recap.setImposable(recapdgi.getHad());
+			recap.setImpot(recapdgi.getVad());
+			// Ajout à la liste des recaps
+			recaps.add(recap);
+		}
+		// Pour le groupe E (Régime fiscal TPS) 0%
+		if (recapdgi.getTae() != 0) {
+			InvoiceRecapData recap = new InvoiceRecapData();
+			recap.setTaxe_group("E - TPS");
+			recap.setTotal(recapdgi.getTae());
+			recap.setImposable(0l);
+			recap.setImpot(0l);
+			// Ajout à la liste des recaps
+			recaps.add(recap);
+		}
+		// Pour le groupe F (Réservé) 0%
+		if (recapdgi.getTaf() != 0) {
+			InvoiceRecapData recap = new InvoiceRecapData();
+			recap.setTaxe_group("F - Réservé");
+			recap.setTotal(recapdgi.getTaf());
+			recap.setImposable(0l);
+			recap.setImpot(0l);
+			// Ajout à la liste des recaps
+			recaps.add(recap);
+		}
+		// Pour la taxe spécifique
+		if (recapdgi.getTs() != 0) {
+			InvoiceRecapData recap = new InvoiceRecapData();
+			recap.setTaxe_group("TS");
+			recap.setTotal(recapdgi.getTs());
+			recap.setImposable(0l);
+			recap.setImpot(0l);
+			// Ajout à la liste des recaps
+			recaps.add(recap);
+		}
+
+		// Pour le groupe Aib
+		if (facture.getAib() != null) {
+			InvoiceRecapData recap = new InvoiceRecapData();
+			var aib = facture.getAib();
+//			recap.setTaxe_group(aib.getGroupe().name() + " (" + aib.getValeur() + "%)");
+			recap.setTaxe_group("AIB (" + aib.getValeur() + "%)");
+			recap.setTotal(recapdgi.getAib());
+			recap.setImposable(0l);
+			recap.setImpot(0l);
+			// Ajout à la liste des recaps
+			recaps.add(recap);
+		}
+
+		return recaps;
+	}
+
+	/**
+	 * Mise en place des données de la facture pour l'impression
+	 * 
+	 * @param facture
+	 * @param params
+	 * @return {@link InvoiceData}
+	 */
+	public InvoiceData setInvoiceData(Facture facture, Parametre params) {
+		// Instanciation de InvoiceData
+		var invoice = new InvoiceData();
+		// Mise à jour des champs pour la facture
+		invoice.setInvoice_id(facture.getNumero());
+		invoice.setInvoice_date(facture.getDate());
+		invoice.setInvoice_type(facture.getType().getDescription());
+		invoice.setInvoice_total(Math.round(facture.getMontantTtc()));
+		invoice.setInvoice_total_toWord(Tool.convert(Math.abs(invoice.getInvoice_total().longValue())));
+		invoice.setInvoice_operator(facture.getOperateur().getId() + " " + facture.getOperateur().getFullname());
+		// Mise à jour des champs pour la société
+		invoice.setSte_name(params.getName());
+		invoice.setSte_ifu(params.getIfu());
+		invoice.setSte_address(params.getAddress());
+		invoice.setSte_contact(params.getContact());
+		invoice.setSte_email(params.getEmail());
+		invoice.setSte_pays(params.getPays());
+		invoice.setSte_rccm(params.getRcm());
+		invoice.setSte_telephone(params.getTelephone());
+		invoice.setSte_raisonSociale(params.getRaisonSociale());
+		invoice.setSte_ville(params.getVille());
+		// Mise à jour du logo de la société
+		invoice.setSte_logo(appConfig.getUploadDir() + "/" + params.getLogo());
+		// Mise à jour du numéro nim de la machine e-mcef
+		invoice.setEmcef_nim(params.getNim());
+		return invoice;
+	}
+
+	/**
+	 * Définition des infos de contact de la société
+	 * 
+	 * @param params Les infos de paramètre de la socité
+	 * @return {@link CompanyContact} Le contact défini
+	 */
+	public CompanyContact setCompanyContact(Parametre params) {
+		// Instanciation de companyContact
+		var contact = new CompanyContact();
+		// Mise à jour des champs de contact
+		contact.setAddress(params.getAddress());
+		contact.setVille(params.getVille());
+		contact.setContact(params.getContact());
+		contact.setEmcef(params.getNim());
+		// Renvoie du contact
+		return contact;
+	}
+
+	/**
+	 * Générer la facture normalisée
+	 * 
+	 * @param invoice
+	 * @param params
+	 * @return
+	 * @throws IOException
+	 * @throws JRException
+	 */
+	public ResponseEntity<byte[]> invoiceReport(InvoiceData invoice, HashMap<String, Object> params)
+			throws IOException, JRException {
+
+		return tool.generateInvoice(Collections.singleton(invoice), params, "report/facture.jrxml", "facture.pdf");
+	}
+}

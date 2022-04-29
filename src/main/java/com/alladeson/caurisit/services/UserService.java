@@ -46,8 +46,8 @@ public class UserService {
     @Autowired
     private Tool tool;
 
-    public List<User> getAll(String search) {
-        return repository.findByLastnameContaining(search);
+    public List<User> getAll() {
+        return repository.findAll();
     }
 
     public User find(Long id) {
@@ -70,8 +70,9 @@ public class UserService {
 
         // génère un mot de passe par défaut s'il n'est pas fourni
         if (!StringUtils.hasText(user.getDefaultPassword()))
-            user.setDefaultPassword(RandomStringUtils.randomAlphanumeric(10));
-        logger.trace("--> defaultPassword : " + user.getDefaultPassword());
+//            user.setDefaultPassword(RandomStringUtils.randomAlphanumeric(10));
+//        logger.trace("--> defaultPassword : " + user.getDefaultPassword());
+        	throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Mot de passe non défini");
 
         var u = new User();
         u.setDefaultPassword(user.getDefaultPassword());
@@ -97,6 +98,13 @@ public class UserService {
         if (!user.getUsername().equals(user1.getUsername()) &&
                 accountService.existsByUsername(user.getUsername()))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Identifiant non disponible");
+        
+        // génère un mot de passe par défaut s'il n'est pas fourni
+        if (StringUtils.hasText(user.getDefaultPassword())) {
+        	user1.setDefaultPassword(user.getDefaultPassword());
+        	user1.setPassword(passwordEncoder.encode(user1.getDefaultPassword()));        	
+        }
+
       
         user1 = save(user, user1);
 

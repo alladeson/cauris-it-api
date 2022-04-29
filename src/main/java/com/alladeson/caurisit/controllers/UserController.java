@@ -24,8 +24,8 @@ public class UserController {
     }
 
     @GetMapping("parametre/users")
-    public List<User> getAll(@RequestParam(name = "search", required = false, defaultValue = "") String search) {
-        return service.getAll(search);
+    public List<User> getAll() {
+        return service.getAll();
     }
 
     @GetMapping("parametre/users/{id}")

@@ -210,6 +210,14 @@ public class User extends BaseEntity {
 	public void setRole(TypeRole role) {
 		this.role = role;
 	}
+	
+	/**
+	 * Récupérer le numero de téléphone de l'utilisateur
+	 * @return the phone
+	 */
+	public String getTelephone() {
+		return this.account.getPhone();
+	}
 
 	/**
 	 * @return the serialversionuid

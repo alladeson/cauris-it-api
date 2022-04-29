@@ -44,6 +44,10 @@ public class User extends BaseEntity {
     // Gestion du role de l'utilisateur, utile pour la récupérer depuis le client
     private TypeRole role;
     
+    // Pour vérifier si les paramètres du systems sont définies une fois déjà
+    @Transient
+    private Boolean systemParams;
+    
     /**
      * @return the id
      */
@@ -217,6 +221,20 @@ public class User extends BaseEntity {
 	 */
 	public String getTelephone() {
 		return this.account.getPhone();
+	}
+	
+	/**
+	 * @return the systemParams
+	 */
+	public Boolean getSystemParams() {
+		return systemParams;
+	}
+
+	/**
+	 * @param systemParams the systemParams to set
+	 */
+	public void setSystemParams(Boolean systemParams) {
+		this.systemParams = systemParams;
 	}
 
 	/**

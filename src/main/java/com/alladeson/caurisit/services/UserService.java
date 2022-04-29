@@ -11,7 +11,6 @@ import com.alladeson.caurisit.security.core.PasswordResetPayload;
 import com.alladeson.caurisit.security.core.RoleService;
 import com.alladeson.caurisit.security.entities.Account;
 import com.alladeson.caurisit.security.entities.Role;
-import com.alladeson.caurisit.security.entities.TypeRole;
 import com.alladeson.caurisit.utils.Tool;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -41,6 +40,8 @@ public class UserService {
     private RoleService roleService;
     @Autowired
     private FileService fileService;
+    @Autowired
+    private ParametreService paramService;
     @Autowired
     private AppConfig config;
     @Autowired
@@ -151,8 +152,13 @@ public class UserService {
 
     public User getAuthenticated() {
         Account account = accountService.getAuthenticated();
-        return repository.findByAccount(account)
+        User user = repository.findByAccount(account)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé"));
+        
+        if(!paramService.getAllParametre().isEmpty())
+        	user.setSystemParams(true);
+        
+        return user;
     }
 
     public boolean existsByUsername(String username) {

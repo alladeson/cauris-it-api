@@ -41,8 +41,6 @@ public class UserService {
     @Autowired
     private FileService fileService;
     @Autowired
-    private ParametreService paramService;
-    @Autowired
     private AppConfig config;
     @Autowired
     private Tool tool;
@@ -152,13 +150,8 @@ public class UserService {
 
     public User getAuthenticated() {
         Account account = accountService.getAuthenticated();
-        User user = repository.findByAccount(account)
+        return repository.findByAccount(account)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé"));
-        
-        if(!paramService.getAllParametre().isEmpty())
-        	user.setSystemParams(true);
-        
-        return user;
     }
 
     public boolean existsByUsername(String username) {

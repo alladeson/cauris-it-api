@@ -174,9 +174,9 @@
 	<field name="ste_logo" class="java.lang.String"/>
 	<field name="invoice_total_toWord" class="java.lang.String"/>
 	<title>
-		<band height="135" splitType="Stretch">
+		<band height="149" splitType="Stretch">
 			<line>
-				<reportElement x="0" y="80" width="556" height="1" uuid="806ce5df-1219-4876-ae0c-ca7405b1f246">
+				<reportElement x="0" y="83" width="560" height="1" uuid="806ce5df-1219-4876-ae0c-ca7405b1f246">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -230,16 +230,16 @@
 				<textFieldExpression><![CDATA[$F{ste_name}]]></textFieldExpression>
 			</textField>
 			<image>
-				<reportElement x="0" y="0" width="80" height="81" uuid="f0498b68-c119-4339-876c-99cf38cbb8d3"/>
+				<reportElement x="2" y="1" width="80" height="78" uuid="f0498b68-c119-4339-876c-99cf38cbb8d3"/>
 				<imageExpression><![CDATA[$F{ste_logo}]]></imageExpression>
 			</image>
 			<subreport>
-				<reportElement x="235" y="80" width="345" height="54" uuid="c52dcb36-f57c-4b31-a432-5d9004b0aba4"/>
+				<reportElement x="235" y="90" width="345" height="54" uuid="c52dcb36-f57c-4b31-a432-5d9004b0aba4"/>
 				<dataSourceExpression><![CDATA[$P{client}]]></dataSourceExpression>
 				<subreportExpression><![CDATA["report/sub_report_client.jasper"]]></subreportExpression>
 			</subreport>
 			<subreport>
-				<reportElement x="-20" y="80" width="255" height="54" uuid="c730b8b6-0ba4-471d-895e-200c1857337f"/>
+				<reportElement x="-20" y="90" width="255" height="54" uuid="c730b8b6-0ba4-471d-895e-200c1857337f"/>
 				<dataSourceExpression><![CDATA[$P{company_contact}]]></dataSourceExpression>
 				<subreportExpression><![CDATA["report/company_contact.jasper"]]></subreportExpression>
 			</subreport>
@@ -262,7 +262,7 @@
 		</band>
 	</title>
 	<detail>
-		<band height="144">
+		<band height="140">
 			<subreport>
 				<reportElement x="-20" y="5" width="600" height="130" uuid="155f18de-68b4-4558-a44f-242d4b6822bf"/>
 				<dataSourceExpression><![CDATA[$P{emcef}]]></dataSourceExpression>
@@ -276,7 +276,7 @@
 				<text><![CDATA[-- ELÉMENTS DE SÉCURITÉ DE LA FACTURE NORMALISÉE --]]></text>
 			</staticText>
 		</band>
-		<band height="82">
+		<band height="71">
 			<componentElement>
 				<reportElement x="0" y="9" width="559" height="60" uuid="9dd2f1c4-688e-49f6-9ea4-c1babeecfa9b">
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
@@ -482,14 +482,14 @@
 		</band>
 	</detail>
 	<summary>
-		<band height="167" splitType="Stretch">
+		<band height="185" splitType="Stretch">
 			<property name="local_mesure_unitheight" value="pixel"/>
 			<staticText>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="137" width="560" height="30" backcolor="#E6E8E9" uuid="36aa233d-4305-48e6-974a-1bbf89bb3c8f"/>
+				<reportElement positionType="Float" mode="Opaque" x="-20" y="155" width="600" height="30" backcolor="#E6E8E9" uuid="36aa233d-4305-48e6-974a-1bbf89bb3c8f"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Serif" size="11" isBold="false" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[MERCI DE VOTRE PASSAGE ET À LA PROCHAINE !]]></text>
+				<text><![CDATA[CECI EST UNE FACTURE NORMALISÉE DEPUIS UNE MACHINE ELECTRONIQUE DE TEST]]></text>
 			</staticText>
 			<componentElement>
 				<reportElement x="0" y="27" width="560" height="60" uuid="dd1d569b-b715-4d61-8bce-b742a23886fd">
@@ -587,7 +587,7 @@
 				<text><![CDATA[]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="0" y="102" width="559" height="35" uuid="3cc11cd9-41e0-4a96-9ad1-4e6d904eb5cf"/>
+				<reportElement x="0" y="104" width="559" height="35" uuid="3cc11cd9-41e0-4a96-9ad1-4e6d904eb5cf"/>
 				<textElement textAlignment="Justified" markup="html">
 					<font size="11" isBold="false"/>
 				</textElement>

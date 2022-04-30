@@ -73,48 +73,56 @@ public class SystemService {
 			if (paramService.getAllTaxe().isEmpty()) {
 				// Groupe A
 				var taxe = new Taxe();
+				taxe.setType(TypeData.TAXE);
 				taxe.setGroupe(TaxeGroups.A);
 				taxe.setLibelle("Exonéré");
 				taxe.setValeur(0);
 				paramService.createTaxe(taxe);
 				// Groupe B
 				taxe = new Taxe();
+				taxe.setType(TypeData.TAXE);
 				taxe.setGroupe(TaxeGroups.B);
 				taxe.setLibelle("Taxable");
 				taxe.setValeur(18);
 				paramService.createTaxe(taxe);
 				// Groupe C
 				taxe = new Taxe();
+				taxe.setType(TypeData.TAXE);
 				taxe.setGroupe(TaxeGroups.C);
 				taxe.setLibelle("Exportation de produits taxables");
 				taxe.setValeur(0);
 				paramService.createTaxe(taxe);
 				// Groupe D
 				taxe = new Taxe();
+				taxe.setType(TypeData.TAXE);
 				taxe.setGroupe(TaxeGroups.D);
 				taxe.setLibelle("TVA régime d'exception");
 				taxe.setValeur(18);
 				paramService.createTaxe(taxe);
 				// Groupe E
 				taxe = new Taxe();
+				taxe.setType(TypeData.TAXE);
 				taxe.setGroupe(TaxeGroups.E);
 				taxe.setLibelle("Régime fiscal TPS");
 				taxe.setValeur(0);
 				paramService.createTaxe(taxe);
 				// Groupe F
 				taxe = new Taxe();
+				taxe.setType(TypeData.TAXE);
 				taxe.setGroupe(TaxeGroups.F);
 				taxe.setLibelle("Réservé");
 				taxe.setValeur(0);
 				paramService.createTaxe(taxe);
 				// Groupe aibA
 				taxe = new Taxe();
+				taxe.setType(TypeData.AIB);
 				taxe.setGroupe(TaxeGroups.AibA);
 				taxe.setLibelle("Aib 1%");
 				taxe.setValeur(1);
 				paramService.createTaxe(taxe);
 				// Groupe aibB
 				taxe = new Taxe();
+				taxe.setType(TypeData.AIB);
 				taxe.setGroupe(TaxeGroups.AibB);
 				taxe.setLibelle("Aib 5%");
 				taxe.setValeur(5);

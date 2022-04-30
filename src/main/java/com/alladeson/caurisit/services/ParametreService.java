@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.alladeson.caurisit.models.entities.Taxe;
+import com.alladeson.caurisit.models.entities.TypeData;
 import com.alladeson.caurisit.models.entities.TypeFacture;
 import com.alladeson.caurisit.models.entities.TypePaiement;
 import com.alladeson.caurisit.models.entities.Parametre;
@@ -20,6 +21,8 @@ import com.alladeson.caurisit.repositories.ParametreRepository;
 import com.alladeson.caurisit.repositories.TaxeRepository;
 import com.alladeson.caurisit.repositories.TypeFactureRepository;
 import com.alladeson.caurisit.repositories.TypePaiementRepository;
+
+import aj.org.objectweb.asm.Type;
 
 /**
  * @author allad
@@ -91,7 +94,11 @@ public class ParametreService {
 	}
 
 	public List<Taxe> getAllTaxe() {
-		return taxeRepos.findAll();
+		return taxeRepos.findAllByType(TypeData.TAXE);
+	}
+	
+	public List<Taxe> getAllTaxeAib() {
+		return taxeRepos.findAllByType(TypeData.AIB);
 	}
 
 	public Taxe updateTaxe(Taxe taxe, Long taxeId) {

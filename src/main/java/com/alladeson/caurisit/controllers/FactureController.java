@@ -61,15 +61,17 @@ public class FactureController {
 		return service.getAll(search);
 	}
 
-//	/**
-//	 * @param detailId
-//	 * @param detail
-//	 * @return
-//	 */
-//	@PutMapping("/factures/{fId}/detail/{dtId}")
-//	public Facture updateDetailFacture(@PathVariable(value = "fId") Long factureId, @PathVariable(value = "dtId") Long detailId, @RequestBody DetailFacture detail) {
-//		return service.updateDetailFacture(factureId, detailId, detail);
-//	}
+	// /**
+	// * @param detailId
+	// * @param detail
+	// * @return
+	// */
+	// @PutMapping("/factures/{fId}/detail/{dtId}")
+	// public Facture updateDetailFacture(@PathVariable(value = "fId") Long
+	// factureId, @PathVariable(value = "dtId") Long detailId, @RequestBody
+	// DetailFacture detail) {
+	// return service.updateDetailFacture(factureId, detailId, detail);
+	// }
 
 	/**
 	 * @param id
@@ -160,8 +162,9 @@ public class FactureController {
 	 * @throws JRException
 	 * @see com.alladeson.caurisit.services.FactureService#genererFacture(java.lang.Long)
 	 */
-	@GetMapping("/factures/{id}/imprimer")
-	public ResponseEntity<byte[]> genererFacture(@PathVariable(value = "id") Long factureId) throws IOException, JRException {
+	@GetMapping("/public/facture/{id}/imprimer")
+	public ResponseEntity<byte[]> genererFacture(@PathVariable(value = "id") Long factureId)
+			throws IOException, JRException {
 		return service.genererFacture(factureId);
 	}
 
@@ -169,10 +172,12 @@ public class FactureController {
 	 * @param typeId
 	 * @param factureId
 	 * @return
-	 * @see com.alladeson.caurisit.services.FactureService#createFactureAvoir(java.lang.Long, java.lang.Long)
+	 * @see com.alladeson.caurisit.services.FactureService#createFactureAvoir(java.lang.Long,
+	 *      java.lang.Long)
 	 */
 	@PostMapping("/facture-avoir/type/{tId}/facture-vente/{id}")
-	public Facture setFactureAvoir(@PathVariable(value = "tId") Long typeId, @PathVariable(value = "id") Long factureId) {
+	public Facture setFactureAvoir(@PathVariable(value = "tId") Long typeId,
+			@PathVariable(value = "id") Long factureId) {
 		return service.createFactureAvoir(typeId, factureId);
 	}
 

@@ -147,7 +147,7 @@ public class FactureService {
 	 * @return {@link List<Facture>}
 	 */
 	public List<Facture> getAll(String search) {
-//		return repository.findByClientNameContaining(search);
+		// return repository.findByClientNameContaining(search);
 		return repository.findAll();
 	}
 
@@ -184,7 +184,8 @@ public class FactureService {
 		// Tentative de récupération du detail pour cet article
 		Optional<DetailFacture> optional = dfRepos.findByFactureIdAndArticleId(factureId, articleId);
 		if (optional.isEmpty())
-//			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ligne Facture non trouvée");
+			// throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ligne Facture non
+			// trouvée");
 			return null;
 
 		return optional.get();
@@ -212,8 +213,8 @@ public class FactureService {
 		if (facture == null) {
 			facture = new Facture();
 			facture.setClient(client);
-//					// Mise à jour du personnel créateur (ou déclencheur) de la fracture
-//					facture.setCreatedBy(getAuthPersonnel());
+			// // Mise à jour du personnel créateur (ou déclencheur) de la fracture
+			// facture.setCreatedBy(getAuthPersonnel());
 			facture = repository.save(facture);
 		}
 
@@ -262,15 +263,16 @@ public class FactureService {
 	private DetailFacture setTaxeSpecifique(DetailFacture detailPayload, DetailFacture detail) {
 		if (detailPayload.getTaxeSpecifique() != null) {
 			detail.setTaxeSpecifique(detailPayload.getTaxeSpecifique());
-			detail.setTsTtc((detail.getTaxeSpecifique() * (100 + detail.getTaxe().getValeur())) / 100);
-//			System.out.println("ts ttc : " + detail.getTsTtc());
+			detail.setTsTtc(
+					(double) Math.round((detail.getTaxeSpecifique() * (100 + detail.getTaxe().getValeur())) / 100));
+			// System.out.println("ts ttc : " + detail.getTsTtc());
 			var ts = new TaxeSpecifique();
 			ts.setQuantite(detail.getQuantite());
 			ts.setTsTotalHt(detail.getTaxeSpecifique());
 			ts.setTsUnitaire(ts.getTsTotalHt() / ts.getQuantite());
 			ts.setTaxe(detail.getTaxe());
 			// tsTotal = tsTotalHt * (1+taux)
-			ts.setTsTotal((ts.getTsTotalHt() * (100 + ts.getTaxe().getValeur())) / 100);
+			ts.setTsTotal((double) Math.round((ts.getTsTotalHt() * (100 + ts.getTaxe().getValeur())) / 100));
 			// Prix Unitaire T.T.C
 			ts.setTsUnitaireTtc(ts.getTsTotal() / ts.getQuantite());
 			ts = tsRepos.save(ts);
@@ -296,12 +298,12 @@ public class FactureService {
 		detail.setName(article.getDesignation());
 		detail.setPrixUnitaire(detailPayload.getPrixUnitaire());
 		// Le prix unitaire HT = prix unitaire ttc / (1+taux)
-		detail.setPrixUht((detail.getPrixUnitaire()*100) / (100 + detail.getTaxe().getValeur()));
+		detail.setPrixUht((detail.getPrixUnitaire() * 100) / (100 + detail.getTaxe().getValeur()));
 		detail.setQuantite(detailPayload.getQuantite());
 		detail.setUnite(detailPayload.getUnite());
-		detail.setMontantHt(detail.getQuantite() * detail.getPrixUht());
-		detail.setMontantTva((detail.getMontantHt() * detail.getTaxe().getValeur()) / 100);
-		detail.setMontantTtc(detail.getPrixUnitaire() * detail.getQuantite());
+		detail.setMontantHt((double) Math.round(detail.getQuantite() * detail.getPrixUht()));
+		detail.setMontantTva((double) Math.round((detail.getMontantHt() * detail.getTaxe().getValeur()) / 100));
+		detail.setMontantTtc((double) Math.round(detail.getPrixUnitaire() * detail.getQuantite()));
 		// Gestion des remise
 		if (detailPayload.isRemise()) {
 			detail.setRemise(true);
@@ -333,7 +335,7 @@ public class FactureService {
 		// Mise à jour du montantTTC : somme des montantTtc des lignes de la facture
 		facture.setMontantTtc(repository.calcMontantTtc(facture));
 		// Ajout du montant de la taxe spécifique HT au montantHT
-		if(facture.getTsHt() != null)
+		if (facture.getTsHt() != null)
 			facture.setMontantHt(facture.getMontantHt() + facture.getTsHt());
 		// Ajout du montant de la taxe spécifique TTC au montantTtc
 		if (facture.getTsTtc() != null)
@@ -359,7 +361,7 @@ public class FactureService {
 		// Validation du detailFacture
 		df.setValid(true);
 		// Mise à jour du personnel qui met à jour (qui valide le detailFacture)
-//		df.setUpdatedBy(getAuthPersonnel());
+		// df.setUpdatedBy(getAuthPersonnel());
 		// Enregistrement et renvoie de la facture
 		df = dfRepos.save(df);
 		return df.getFacture();
@@ -404,10 +406,10 @@ public class FactureService {
 		if (facture.getDetails().isEmpty())
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Facture vide");
 
-//		 Validation de la facture
-//		facture.setValid(true);
+		// Validation de la facture
+		// facture.setValid(true);
 		// Mise à jour du personnel qui met à jour (qui valide la facture)
-//		facture.setUpdatedBy(getAuthPersonnel());
+		// facture.setUpdatedBy(getAuthPersonnel());
 
 		// Gestion de l'aib
 		if (payload.getAibId() != null) {
@@ -415,7 +417,7 @@ public class FactureService {
 					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aib non trouvée"));
 			facture.setAib(aib);
 			facture.setMontantAib((facture.getMontantHt() * aib.getValeur()) / 100);
-			facture.setMontantTtc((double)(Math.round(facture.getMontantTtc()) + Math.round(facture.getMontantAib())));
+			facture.setMontantTtc((double) (Math.round(facture.getMontantTtc()) + Math.round(facture.getMontantAib())));
 			facture = repository.save(facture);
 		}
 
@@ -506,14 +508,14 @@ public class FactureService {
 			InfoResponseDto infoResponseDto = apiInfoInstance.apiInfoStatusGet();
 			System.out.println(infoResponseDto);
 
-//			var invoiceTypesDto = apiInfoInstance.apiInfoInvoiceTypesGet();
-//			System.out.println(invoiceTypesDto);
-//
-//			var taxGroupsDto = apiInfoInstance.apiInfoTaxGroupsGet();
-//			System.out.println(taxGroupsDto);
-//
-//			var paymentTypesDto = apiInfoInstance.apiInfoPaymentTypesGet();
-//			System.out.println(paymentTypesDto);
+			// var invoiceTypesDto = apiInfoInstance.apiInfoInvoiceTypesGet();
+			// System.out.println(invoiceTypesDto);
+			//
+			// var taxGroupsDto = apiInfoInstance.apiInfoTaxGroupsGet();
+			// System.out.println(taxGroupsDto);
+			//
+			// var paymentTypesDto = apiInfoInstance.apiInfoPaymentTypesGet();
+			// System.out.println(paymentTypesDto);
 
 			// INVOICE
 			StatusResponseDto statusResponseDto = apiInvoiceInstance.apiInvoiceGet();
@@ -550,7 +552,7 @@ public class FactureService {
 				invoiceRequestDataDto.setReference(facture.getReference());
 
 			// Mise à jour du type de la facture
-//    	    invoiceRequestDataDto.setType(InvoiceTypeEnum.FV);
+			// invoiceRequestDataDto.setType(InvoiceTypeEnum.FV);
 			invoiceRequestDataDto.setType(InvoiceTypeEnum.fromValue(tf.getType().name()));
 			// En cas des facture d'avoir, on met la référence de la facture d'origine
 			if (tf.getType() == TypeFactureEnum.FA || tf.getType() == TypeFactureEnum.EA)

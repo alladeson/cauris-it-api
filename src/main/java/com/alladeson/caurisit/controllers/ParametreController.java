@@ -128,6 +128,15 @@ public class ParametreController {
 	}
 
 	/**
+	 * @return
+	 * @see com.alladeson.caurisit.services.ParametreService#getAllTaxeAib()
+	 */
+	@GetMapping("parametre/taxe-aib")
+	public List<Taxe> getAllTaxeAib() {
+		return paramService.getAllTaxeAib();
+	}
+
+	/**
 	 * @param taxe
 	 * @param taxeId
 	 * @return

@@ -23,6 +23,7 @@ public class Taxe extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
+	private TypeData type;
 	private TaxeGroups groupe;
 	private String libelle;
 	private Integer valeur;
@@ -39,6 +40,20 @@ public class Taxe extends BaseEntity {
 	 */
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public TypeData getType() {
+		return type;
+	}
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(TypeData type) {
+		this.type = type;
 	}
 
 	/**

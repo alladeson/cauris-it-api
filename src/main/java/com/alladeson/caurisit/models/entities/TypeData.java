@@ -8,5 +8,5 @@ package com.alladeson.caurisit.models.entities;
  *
  */
 public enum TypeData {
-	U
+	U, TAXE, AIB
 }

@@ -306,7 +306,7 @@ public class FactureService {
 		detail.setMontantTtc((double) Math.round(detail.getPrixUnitaire() * detail.getQuantite()));
 		// Gestion des remise
 		// if (detailPayload.isRemise()) {
-		detail.setRemise(true);
+		detail.setRemise(detailPayload.isRemise());
 		detail.setOriginalPrice(detailPayload.getOriginalPrice());
 		detail.setPriceModification(detailPayload.getPriceModification());
 		// }

@@ -189,10 +189,10 @@ public class Client extends BaseEntity {
 	 */
 	public String getContact() {
 		String contact = "";
-		if (this.telephone != "" || this.telephone != null)
+		if (this.telephone != null && this.telephone != "")
 			contact += this.telephone;
-		if (this.email != null || this.email != "") {
-			if (this.telephone != "" || this.telephone != null)
+		if (this.email != null && this.email != "") {
+			if (this.telephone != "" && this.telephone != "")
 				contact += "," + this.email;
 			else
 				contact += this.email;

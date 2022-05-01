@@ -305,11 +305,11 @@ public class FactureService {
 		detail.setMontantTva((double) Math.round((detail.getMontantHt() * detail.getTaxe().getValeur()) / 100));
 		detail.setMontantTtc((double) Math.round(detail.getPrixUnitaire() * detail.getQuantite()));
 		// Gestion des remise
-		if (detailPayload.isRemise()) {
-			detail.setRemise(true);
-			detail.setOriginalPrice(detailPayload.getOriginalPrice());
-			detail.setPriceModification(detailPayload.getPriceModification());
-		}
+		// if (detailPayload.isRemise()) {
+		detail.setRemise(true);
+		detail.setOriginalPrice(detailPayload.getOriginalPrice());
+		detail.setPriceModification(detailPayload.getPriceModification());
+		// }
 		// Mise à jour de la taxe spécifique
 		detail = setTaxeSpecifique(detailPayload, detail);
 

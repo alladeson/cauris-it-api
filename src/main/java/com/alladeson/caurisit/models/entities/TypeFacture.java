@@ -23,9 +23,10 @@ public class TypeFacture extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	
+	private TypeData group;
 	// Le type de la facture
 	private TypeFactureEnum type;
+	
 	// La description du type de la facture
 	private String description;
 	/**
@@ -39,6 +40,19 @@ public class TypeFacture extends BaseEntity {
 	 */
 	public void setId(Long id) {
 		this.id = id;
+	}
+	
+	/**
+	 * @return the group
+	 */
+	public TypeData getGroup() {
+		return group;
+	}
+	/**
+	 * @param group the group to set
+	 */
+	public void setGroup(TypeData group) {
+		this.group = group;
 	}
 	/**
 	 * @return the type

@@ -94,7 +94,7 @@ public class ParametreService {
 	}
 
 	public List<Taxe> getAllTaxe() {
-		return taxeRepos.findAllByType(TypeData.TAXE);
+		return taxeRepos.findAllByType(TypeData.IMPOT);
 	}
 	
 	public List<Taxe> getAllTaxeAib() {
@@ -128,7 +128,11 @@ public class ParametreService {
 	}
 
 	public List<TypeFacture> getAllTypeFacture() {
-		return tfRepos.findAll();
+		return tfRepos.findAllByGroup(TypeData.FV);
+	}
+	
+	public List<TypeFacture> getAllTypeFactureAvoir() {
+		return tfRepos.findAllByGroup(TypeData.FA);
 	}
 
 	public TypeFacture updateTypeFacture(TypeFacture typeFacture, Long typeFactureId) {

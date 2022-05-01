@@ -182,9 +182,18 @@ public class ParametreController {
 	 * @return
 	 * @see com.alladeson.caurisit.services.ParametreService#getAllTypeFacture()
 	 */
-	@GetMapping("parametre/type-facture")
+	@GetMapping("parametre/type-facture/vente")
 	public List<TypeFacture> getAllTypeFacture() {
 		return paramService.getAllTypeFacture();
+	}
+
+	/**
+	 * @return
+	 * @see com.alladeson.caurisit.services.ParametreService#getAllTypeFactureAvoir()
+	 */
+	@GetMapping("parametre/type-facture/avoir")
+	public List<TypeFacture> getAllTypeFactureAvoir() {
+		return paramService.getAllTypeFactureAvoir();
 	}
 
 	/**

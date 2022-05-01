@@ -73,42 +73,42 @@ public class SystemService {
 			if (paramService.getAllTaxe().isEmpty()) {
 				// Groupe A
 				var taxe = new Taxe();
-				taxe.setType(TypeData.TAXE);
+				taxe.setType(TypeData.IMPOT);
 				taxe.setGroupe(TaxeGroups.A);
 				taxe.setLibelle("Exonéré");
 				taxe.setValeur(0);
 				paramService.createTaxe(taxe);
 				// Groupe B
 				taxe = new Taxe();
-				taxe.setType(TypeData.TAXE);
+				taxe.setType(TypeData.IMPOT);
 				taxe.setGroupe(TaxeGroups.B);
 				taxe.setLibelle("Taxable");
 				taxe.setValeur(18);
 				paramService.createTaxe(taxe);
 				// Groupe C
 				taxe = new Taxe();
-				taxe.setType(TypeData.TAXE);
+				taxe.setType(TypeData.IMPOT);
 				taxe.setGroupe(TaxeGroups.C);
 				taxe.setLibelle("Exportation de produits taxables");
 				taxe.setValeur(0);
 				paramService.createTaxe(taxe);
 				// Groupe D
 				taxe = new Taxe();
-				taxe.setType(TypeData.TAXE);
+				taxe.setType(TypeData.IMPOT);
 				taxe.setGroupe(TaxeGroups.D);
 				taxe.setLibelle("TVA régime d'exception");
 				taxe.setValeur(18);
 				paramService.createTaxe(taxe);
 				// Groupe E
 				taxe = new Taxe();
-				taxe.setType(TypeData.TAXE);
+				taxe.setType(TypeData.IMPOT);
 				taxe.setGroupe(TaxeGroups.E);
 				taxe.setLibelle("Régime fiscal TPS");
 				taxe.setValeur(0);
 				paramService.createTaxe(taxe);
 				// Groupe F
 				taxe = new Taxe();
-				taxe.setType(TypeData.TAXE);
+				taxe.setType(TypeData.IMPOT);
 				taxe.setGroupe(TaxeGroups.F);
 				taxe.setLibelle("Réservé");
 				taxe.setValeur(0);
@@ -132,21 +132,25 @@ public class SystemService {
 			if (paramService.getAllTypeFacture().isEmpty()) {
 				// Facture de vente FV
 				var tf = new TypeFacture();
+				tf.setGroup(TypeData.FV);
 				tf.setType(TypeFactureEnum.FV);
 				tf.setDescription("Facture de vente");
 				paramService.createTypeFacture(tf);
 				// Facture d'avoir FA
 				tf = new TypeFacture();
+				tf.setGroup(TypeData.FA);
 				tf.setType(TypeFactureEnum.FA);
 				tf.setDescription("Facture d'avoir");
 				paramService.createTypeFacture(tf);
 				// Facture de vente à l'exportation EV
 				tf = new TypeFacture();
+				tf.setGroup(TypeData.FV);
 				tf.setType(TypeFactureEnum.EV);
 				tf.setDescription("Facture de vente à l'exportation");
 				paramService.createTypeFacture(tf);
 				// Facture d'avoir à l'exportation EA
 				tf = new TypeFacture();
+				tf.setGroup(TypeData.FA);
 				tf.setType(TypeFactureEnum.EA);
 				tf.setDescription("Facture d'avoir à l'exportation");
 				paramService.createTypeFacture(tf);

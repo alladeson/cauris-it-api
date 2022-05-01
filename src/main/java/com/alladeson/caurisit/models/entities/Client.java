@@ -191,10 +191,10 @@ public class Client extends BaseEntity {
 		String contact = "";
 		if (this.telephone != null)
 			contact += this.telephone;
-		if (this.telephone != null && this.email != null)
-			contact += "," + this.email;
 		else if (this.email != null)
 			contact += this.email;
+		if (this.telephone != null && this.email != null)
+			contact += "," + this.email;
 		return contact;
 	}
 }

@@ -4,13 +4,17 @@
 package com.alladeson.caurisit.services;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import com.alladeson.caurisit.repositories.*;
@@ -33,10 +37,12 @@ import com.alladeson.caurisit.models.entities.Parametre;
 import com.alladeson.caurisit.models.entities.ReglementFacture;
 import com.alladeson.caurisit.models.entities.Taxe;
 import com.alladeson.caurisit.models.entities.TaxeSpecifique;
+import com.alladeson.caurisit.models.entities.TypeData;
 import com.alladeson.caurisit.models.entities.TypeFacture;
 import com.alladeson.caurisit.models.entities.TypeFactureEnum;
 import com.alladeson.caurisit.models.entities.TypeSystem;
 import com.alladeson.caurisit.models.entities.User;
+import com.alladeson.caurisit.models.paylaods.FactureAutocomplete;
 import com.alladeson.caurisit.models.paylaods.FacturePayload;
 import com.alladeson.caurisit.models.reports.ClientData;
 import com.alladeson.caurisit.models.reports.InvoiceData;
@@ -102,6 +108,19 @@ public class FactureService {
 	}
 
 	/**
+	 * Récupérer une facture par sa référence
+	 * 
+	 * @param reference La référence de la facture
+	 * @return {@link Facture}
+	 */
+	public Facture getFactureByReference(String reference) {
+		Optional<Facture> optional = repository.findByReferenceAndConfirmTrue(reference);
+		if (optional.isEmpty())
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Facture non trouvée");
+		return optional.get();
+	}
+
+	/**
 	 * Récupère une facture non validée d'un client
 	 * 
 	 * @param clientId L'identifiant du client
@@ -149,6 +168,35 @@ public class FactureService {
 	public List<Facture> getAll(String search) {
 		// return repository.findByClientNameContaining(search);
 		return repository.findAll();
+	}
+
+	/**
+	 * Récupérer FactureAutocomplete, utile lors de la création de la facture
+	 * d'avoir pour récupération de vente correspondante
+	 * 
+	 * @param typeId Le type de la facture d'avoir
+	 * @param search Le début de la référence servant de recherche
+	 * @return {@link List<FactureAutocomplete>}
+	 */
+	public List<FactureAutocomplete> getListFactureAutocomplete(Long typeId, String search) {
+		// Récupération du type de la facture d'avoir
+		TypeFacture tf = tfRepos.findByIdAndGroup(typeId, TypeData.FA).orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Le type de la facture non trouvé"));
+
+		return repository.getFactureFaExistForAutocomplete(tf.getOrigine().getId(), typeId, search);
+//		// Définition de la liste de facture
+//		List<FactureAutocomplete> list = new ArrayList<>();
+//		// Récupération si au moins une facture d'avoir existe déjà
+//		if (repository.getOneFactureAvoirByType(typeId).isPresent()) {
+//			System.out.println("Fa trouvé \n");
+////			return list;
+//		}
+//		else {
+//			// Si non
+//			System.out.println("Fa non trouvé \n");
+//			list = repository.getFactureForAutocomplete(tf.getOrigine().getId(), search);
+//		}
+//		return list;
 	}
 
 	/**
@@ -800,11 +848,16 @@ public class FactureService {
 	 */
 	public Facture createFactureAvoir(Long typeId, Long factureId) {
 		// Récupération du type de la facture
-		TypeFacture tf = tfRepos.findById(typeId).orElseThrow(
+		TypeFacture tf = tfRepos.findByIdAndGroup(typeId, TypeData.FA).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Le type de la facture non trouvé"));
 		// Récupération de la facture d'origine
 		Facture factureOrigine = repository.findByIdAndConfirmTrue(factureId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Facture non trouvée"));
+		// Tentative de récupération de la facture d'avoir associée à la facture de
+		// vente
+		if (repository.findByOrigineRef(factureOrigine.getReference()).isPresent())
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+					"Une facture d'avoir existe déjà pour cette facture de vente");
 
 		// Création et mise à jour de la facture d'avoir
 		Facture facture = setFactureAvoir(tf, factureOrigine);

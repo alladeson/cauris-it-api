@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.alladeson.caurisit.models.entities.DetailFacture;
 import com.alladeson.caurisit.models.entities.Facture;
+import com.alladeson.caurisit.models.paylaods.FactureAutocomplete;
 import com.alladeson.caurisit.models.paylaods.FacturePayload;
 import com.alladeson.caurisit.services.FactureService;
 
@@ -35,6 +36,16 @@ public class FactureController {
 	}
 
 	/**
+	 * @param reference
+	 * @return
+	 * @see com.alladeson.caurisit.services.FactureService#getFactureByReference(java.lang.String)
+	 */
+	@GetMapping("/factures/reference/{ref}")
+	public Facture getFactureByReference(@PathVariable(value = "ref") String reference) {
+		return service.getFactureByReference(reference);
+	}
+
+	/**
 	 * @param clientId
 	 * @return
 	 */
@@ -61,17 +72,18 @@ public class FactureController {
 		return service.getAll(search);
 	}
 
-	// /**
-	// * @param detailId
-	// * @param detail
-	// * @return
-	// */
-	// @PutMapping("/factures/{fId}/detail/{dtId}")
-	// public Facture updateDetailFacture(@PathVariable(value = "fId") Long
-	// factureId, @PathVariable(value = "dtId") Long detailId, @RequestBody
-	// DetailFacture detail) {
-	// return service.updateDetailFacture(factureId, detailId, detail);
-	// }
+	/**
+	 * @param typeId
+	 * @param search
+	 * @return
+	 * @see com.alladeson.caurisit.services.FactureService#getListFactureAutocomplete(java.lang.Long,
+	 *      java.lang.String)
+	 */
+	@GetMapping("/factures/autocomplete/type/{typeId}")
+	public List<FactureAutocomplete> getListFactureAutocomplete(@PathVariable(value = "typeId") Long typeId,
+			@RequestParam(name = "search", required = true) String search) {
+		return service.getListFactureAutocomplete(typeId, search);
+	}
 
 	/**
 	 * @param id

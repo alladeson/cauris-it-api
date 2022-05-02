@@ -131,28 +131,30 @@ public class SystemService {
 			/* Chargment des types de facture */
 			if (paramService.getAllTypeFacture().isEmpty()) {
 				// Facture de vente FV
-				var tf = new TypeFacture();
-				tf.setGroup(TypeData.FV);
-				tf.setType(TypeFactureEnum.FV);
-				tf.setDescription("Facture de vente");
-				paramService.createTypeFacture(tf);
+				var tf1 = new TypeFacture();
+				tf1.setGroup(TypeData.FV);
+				tf1.setType(TypeFactureEnum.FV);
+				tf1.setDescription("Facture de vente");
+				tf1 = paramService.createTypeFacture(tf1);
 				// Facture d'avoir FA
-				tf = new TypeFacture();
+				var tf = new TypeFacture();
 				tf.setGroup(TypeData.FA);
 				tf.setType(TypeFactureEnum.FA);
 				tf.setDescription("Facture d'avoir");
+				tf.setOrigine(tf1);
 				paramService.createTypeFacture(tf);
 				// Facture de vente à l'exportation EV
-				tf = new TypeFacture();
-				tf.setGroup(TypeData.FV);
-				tf.setType(TypeFactureEnum.EV);
-				tf.setDescription("Facture de vente à l'exportation");
-				paramService.createTypeFacture(tf);
+				var tf2 = new TypeFacture();
+				tf2.setGroup(TypeData.FV);
+				tf2.setType(TypeFactureEnum.EV);
+				tf2.setDescription("Facture de vente à l'exportation");
+				tf2 = paramService.createTypeFacture(tf2);
 				// Facture d'avoir à l'exportation EA
 				tf = new TypeFacture();
 				tf.setGroup(TypeData.FA);
 				tf.setType(TypeFactureEnum.EA);
 				tf.setDescription("Facture d'avoir à l'exportation");
+				tf.setOrigine(tf2);
 				paramService.createTypeFacture(tf);
 			}
 			/* Chargement des types de paiement */

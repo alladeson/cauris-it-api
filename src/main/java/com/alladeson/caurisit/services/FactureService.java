@@ -183,20 +183,7 @@ public class FactureService {
 		TypeFacture tf = tfRepos.findByIdAndGroup(typeId, TypeData.FA).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Le type de la facture non trouvé"));
 
-		return repository.getFactureFaExistForAutocomplete(tf.getOrigine().getId(), typeId, search);
-//		// Définition de la liste de facture
-//		List<FactureAutocomplete> list = new ArrayList<>();
-//		// Récupération si au moins une facture d'avoir existe déjà
-//		if (repository.getOneFactureAvoirByType(typeId).isPresent()) {
-//			System.out.println("Fa trouvé \n");
-////			return list;
-//		}
-//		else {
-//			// Si non
-//			System.out.println("Fa non trouvé \n");
-//			list = repository.getFactureForAutocomplete(tf.getOrigine().getId(), search);
-//		}
-//		return list;
+		return repository.getFactureForAutocomplete(tf.getOrigine().getId(), typeId, search);
 	}
 
 	/**

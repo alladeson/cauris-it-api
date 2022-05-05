@@ -16,6 +16,7 @@ import com.alladeson.caurisit.models.entities.Taxe;
 import com.alladeson.caurisit.models.entities.TypeData;
 import com.alladeson.caurisit.models.entities.TypeFacture;
 import com.alladeson.caurisit.models.entities.TypePaiement;
+import com.alladeson.caurisit.models.entities.TypeSystem;
 import com.alladeson.caurisit.models.entities.Parametre;
 import com.alladeson.caurisit.repositories.ParametreRepository;
 import com.alladeson.caurisit.repositories.TaxeRepository;
@@ -23,6 +24,12 @@ import com.alladeson.caurisit.repositories.TypeFactureRepository;
 import com.alladeson.caurisit.repositories.TypePaiementRepository;
 
 import aj.org.objectweb.asm.Type;
+import bj.impots.dgi.ApiClient;
+import bj.impots.dgi.ApiException;
+import bj.impots.dgi.Configuration;
+import bj.impots.dgi.auth.ApiKeyAuth;
+import bj.impots.dgi.emcf.InfoResponseDto;
+import bj.impots.dgi.emcf.SfeInfoApi;
 
 /**
  * @author allad
@@ -42,6 +49,50 @@ public class ParametreService {
 
 	@Autowired
 	private FileService fileService;
+	
+	// E-mcef
+	/**
+	 * Récupération des informations de l'e-mcef depuis le serveur de la dgi
+	 * @return {@link InfoResponseDto}
+	 */
+	public InfoResponseDto getStatusInfoMcef() {
+		// Initialisation des données
+		// Récupération du parametre system
+		Parametre param = this.getOneParametre();
+
+		// Les données de connection au serveur de la dgi
+		ApiClient defaultClient = Configuration.getDefaultApiClient();
+
+		// Configure API key authorization: Bearer
+		ApiKeyAuth Bearer = (ApiKeyAuth) defaultClient.getAuthentication("Bearer");
+		// YOUR API TOKEN HERE
+		Bearer.setApiKey(param.getToken());
+
+		// By default, SDK is configured with SyGMEF-test
+		// Enable following line in order to configure SDK for SyGMEF-production
+		if (param.getTypeSystem() == TypeSystem.Production)
+			defaultClient.setBasePath("https://sygmef.impots.bj/emcf");
+
+		// Instanciation pour la gestion des informations utiles
+		SfeInfoApi apiInfoInstance = new SfeInfoApi();
+
+		// Instanciation de status info
+		InfoResponseDto infoResponseDto = new InfoResponseDto();
+
+		System.out.println(Bearer);
+
+		try {
+			// INFO
+			infoResponseDto = apiInfoInstance.apiInfoStatusGet();
+			System.out.println(infoResponseDto);
+
+		} catch (ApiException e) {
+			System.err.println("Exception when calling SfeInvoiceApi");
+			e.printStackTrace();
+		}
+
+		return infoResponseDto;
+	}
 
 	// Gestion du parametre
 	public Parametre createParametre(Parametre parametre) {
@@ -52,16 +103,22 @@ public class ParametreService {
 		return paramRepos.findById(parametreId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Parametre non trouvé"));
 	}
+	
+	public Parametre getOneParametre() {
+		return paramRepos.findOneParams()
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Votre système n'est pas encore paramètré."));
+	}
 
 	public List<Parametre> getAllParametre() {
 		return paramRepos.findAll();
 	}
 
 	public Parametre updateParametre(Parametre parametre, Long parametreId) {
-		paramRepos.findById(parametreId)
+		var params = paramRepos.findById(parametreId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Parametre non trouvé"));
 
 		parametre.setId(parametreId);
+		parametre.setToken(params.getToken());
 
 		return paramRepos.save(parametre);
 	}
@@ -76,7 +133,7 @@ public class ParametreService {
 	public Parametre setParamLogo(Long paramId, MultipartFile file) {
 		Parametre param = this.getParametre(paramId);
 		var filename = "logo_" + paramId + "." + FilenameUtils.getExtension(file.getOriginalFilename());
-		var filepath = fileService.store(file, filename);
+		fileService.store(file, filename);
 		// Mise à jour du logo du parametre
 		param.setLogo(filename);
 		// Enregistrement et renvoie du parametre

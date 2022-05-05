@@ -22,6 +22,8 @@ import com.alladeson.caurisit.models.entities.TypeFacture;
 import com.alladeson.caurisit.models.entities.TypePaiement;
 import com.alladeson.caurisit.services.ParametreService;
 
+import bj.impots.dgi.emcf.InfoResponseDto;
+
 /**
  * @author allad
  *
@@ -30,6 +32,15 @@ import com.alladeson.caurisit.services.ParametreService;
 public class ParametreController {
 	@Autowired
 	private ParametreService paramService;
+	
+	/**
+	 * @return
+	 * @see com.alladeson.caurisit.services.ParametreService#getStatusInfoMcef()
+	 */
+	@GetMapping("/parametre/emcef/api/info/status")
+	public InfoResponseDto getStatusInfoMcef() {
+		return paramService.getStatusInfoMcef();
+	}
 
 	/**
 	 * @param parametre
@@ -55,13 +66,22 @@ public class ParametreController {
 
 	/**
 	 * @return
+	 * @see com.alladeson.caurisit.services.ParametreService#getOneParametre()
+	 */
+	@GetMapping("parametre/params/one")
+	public Parametre getOneParametre() {
+		return paramService.getOneParametre();
+	}
+
+	/**
+	 * @return
 	 * @see com.alladeson.caurisit.services.ParametreService#getAllParametre()
 	 */
 	@GetMapping("parametre/params")
 	public List<Parametre> getAllParametre() {
 		return paramService.getAllParametre();
 	}
-
+	
 	/**
 	 * @param parametre
 	 * @param parametreId

@@ -70,6 +70,9 @@ public class Facture extends BaseEntity {
 
 	// La reference de la facture d'origine en cas de facture d'avoir
 	private String origineRef;
+	
+	// Pour la sauveagarde du nom de la facture
+	private String filename;
 
 	/**
 	 * @return the id
@@ -372,5 +375,19 @@ public class Facture extends BaseEntity {
 	 */
 	public void setTsTtc(Double tsTtc) {
 		this.tsTtc = tsTtc;
+	}
+
+	/**
+	 * @return the filename
+	 */
+	public String getFilename() {
+		return filename;
+	}
+
+	/**
+	 * @param filename the filename to set
+	 */
+	public void setFilename(String filename) {
+		this.filename = filename;
 	}
 }

@@ -1,5 +1,6 @@
 package com.alladeson.caurisit.utils;
 
+import com.alladeson.caurisit.config.AppConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
@@ -46,6 +47,8 @@ public class Tool {
 	private SpringTemplateEngine templateEngine;
 	@Autowired
 	private ApplicationContext applicationContext;
+	@Autowired
+	private AppConfig appConfig;
 
 	private ObjectMapper jsonSerializer = null;
 
@@ -197,15 +200,21 @@ public class Tool {
 		return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF).body(reportPdf);
 	}
 
+	public String generateInvoiceAndStoreIt(Collection<?> collection, HashMap<String, Object> params,
+			String invoiceTemplate, String invoiceFileName) throws JRException, IOException {
+		JRBeanCollectionDataSource beanCollectionDataSource = new JRBeanCollectionDataSource(collection);
+		JasperReport compileReport = JasperCompileManager.compileReport(this.getResourceAsStream(invoiceTemplate));
+		JasperPrint report = JasperFillManager.fillReport(compileReport, params, beanCollectionDataSource);
+		JasperExportManager.exportReportToPdfFile(report, appConfig.getUploadDir() + "/" +invoiceFileName);
+		return invoiceFileName;	
+	}
+	
 	public ResponseEntity<byte[]> generateInvoice(Collection<?> collection, HashMap<String, Object> params,
 			String invoiceTemplate, String invoiceFileName) throws JRException, IOException {
 		JRBeanCollectionDataSource beanCollectionDataSource = new JRBeanCollectionDataSource(collection);
 		JasperReport compileReport = JasperCompileManager.compileReport(this.getResourceAsStream(invoiceTemplate));
-		// JasperReport compileReport = JasperCompileManager.compileReport(new
-		// FileInputStream(reportTemplate));
-//        HashMap<String, Object> map = new HashMap<>();
 		JasperPrint report = JasperFillManager.fillReport(compileReport, params, beanCollectionDataSource);
-
+		JasperExportManager.exportReportToPdfFile(report, appConfig.getUploadDir() + "/" +invoiceFileName);
 		byte[] reportPdf = JasperExportManager.exportReportToPdf(report);
 		HttpHeaders headers = new HttpHeaders();
 		headers.set(HttpHeaders.CONTENT_DISPOSITION, "inline;filename=" + invoiceFileName);

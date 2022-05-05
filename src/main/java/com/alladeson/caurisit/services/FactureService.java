@@ -91,6 +91,9 @@ public class FactureService {
 	@Autowired
 	private UserService userService;
 
+	private static final String INVOICE_REPORT_TEMPLATE = "report/facture.jrxml";
+	private static final String INVOICE_REPORT_BASE_NAME = "facture-";
+
 	/**
 	 * Récupère une facture dont l'identifiant est renseigné
 	 * 
@@ -441,21 +444,67 @@ public class FactureService {
 		if (facture.getDetails().isEmpty())
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Facture vide");
 
-		// Validation de la facture
-		// facture.setValid(true);
-		// Mise à jour du personnel qui met à jour (qui valide la facture)
-		// facture.setUpdatedBy(getAuthPersonnel());
-
 		// Gestion de l'aib
-		if (payload.getAibId() != null) {
-			Taxe aib = taxeRepos.findById(payload.getAibId())
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aib non trouvée"));
-			facture.setAib(aib);
-			facture.setMontantAib((facture.getMontantHt() * aib.getValeur()) / 100);
-			facture.setMontantTtc((double) (Math.round(facture.getMontantTtc()) + Math.round(facture.getMontantAib())));
-			facture = repository.save(facture);
+		var aibId = payload.getAibId();
+		if (aibId != null) {
+			facture = setFactureAib(facture, aibId);
 		}
 
+		ReglementFacture reglement = setFactureReglement(payload);
+
+		// Mise à jour du reglement de la facture
+		facture.setReglement(reglement);
+
+		// Enregistrement et renvoie de la facture validée
+		facture = repository.save(facture);
+
+		// Finalisation de la facture
+		var resultat = finalisationDgi(facture);
+
+		// Enregistrement
+		facture = repository.save(resultat);
+
+		// Tentatif d'impression de la facture
+		try {
+			var filename = this.printInvoiceAndStoreIt(facture);
+			facture.setFilename(filename);
+			facture = repository.save(facture);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JRException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// Renvoie de la facture
+		return facture;
+	}
+
+	/**
+	 * Mettre à jour l'aib de la facture
+	 * 
+	 * @param facture
+	 * @param aibId
+	 * @return
+	 */
+	private Facture setFactureAib(Facture facture, Long aibId) {
+		Taxe aib = taxeRepos.findById(aibId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aib non trouvée"));
+		facture.setAib(aib);
+		facture.setMontantAib((double) Math.round((facture.getMontantHt() * aib.getValeur()) / 100));
+		facture.setMontantTtc((double) (Math.round(facture.getMontantTtc()) + Math.round(facture.getMontantAib())));
+		facture = repository.save(facture);
+		return facture;
+	}
+
+	/**
+	 * Définir le règlement de la facture
+	 * 
+	 * @param payload
+	 * @return
+	 */
+	private ReglementFacture setFactureReglement(FacturePayload payload) {
 		// Instanciation du reglement
 		ReglementFacture reglement = new ReglementFacture();
 		// Mise à jour des champs
@@ -472,18 +521,7 @@ public class FactureService {
 		}
 		// Enregistrement du reglement
 		reglement = reglementRepos.save(reglement);
-
-		// Mise à jour du reglement de la facture
-		facture.setReglement(reglement);
-
-		// Enregistrement et renvoie de la facture validée
-		facture = repository.save(facture);
-
-		// Finalisation de la facture
-		var resultat = finalisationDgi(facture);
-
-		// Enregistrement et renvoie de la facture après la finalisation
-		return repository.save(resultat);
+		return reglement;
 	}
 
 	/**
@@ -510,7 +548,9 @@ public class FactureService {
 	public Facture finalisationDgi(Facture facture) {
 		// Initialisation des données
 		// Récupération du parametre system
-		Parametre param = (paramRepos.findAll()).get(0);
+		Parametre param = paramRepos.findOneParams().orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Votre système n'est pas encore paramètré."));
+
 		// Rcupération de l'utilisateur connecté
 		User operateur = userService.getAuthenticated();
 		// Récupération du client de la facture
@@ -609,13 +649,13 @@ public class FactureService {
 			for (DetailFacture detail : details) {
 				var item = new ItemDto();
 				item.setName(detail.getArticle().getDesignation());
-				item.setPrice(detail.getPrixUnitaire().longValue());
+				item.setPrice(Math.abs(detail.getPrixUnitaire().longValue()));
 				item.setQuantity(detail.getQuantite());
 				item.setTaxGroup(TaxGroupTypeEnum.fromValue(detail.getTaxe().getGroupe().name()));
 				if (detail.getTaxeSpecifique() != null)
-					item.setTaxSpecific(detail.getTaxeSpecifique().longValue());
+					item.setTaxSpecific(Math.abs(detail.getTaxeSpecifique().longValue()));
 				if (detail.getOriginalPrice() != null) {
-					item.setOriginalPrice(detail.getOriginalPrice());
+					item.setOriginalPrice(Math.abs(detail.getOriginalPrice()));
 					item.setPriceModification(detail.getPriceModification());
 				}
 				items.add(item);
@@ -736,45 +776,6 @@ public class FactureService {
 
 	}
 
-	public InfoResponseDto getStatusInfoMcef() {
-		// Initialisation des données
-		// Récupération du parametre system
-		Parametre param = (paramRepos.findAll()).get(0);
-
-		// Les données de connection au serveur de la dgi
-		ApiClient defaultClient = Configuration.getDefaultApiClient();
-
-		// Configure API key authorization: Bearer
-		ApiKeyAuth Bearer = (ApiKeyAuth) defaultClient.getAuthentication("Bearer");
-		// YOUR API TOKEN HERE
-		Bearer.setApiKey(param.getToken());
-
-		// By default, SDK is configured with SyGMEF-test
-		// Enable following line in order to configure SDK for SyGMEF-production
-		if (param.getTypeSystem() == TypeSystem.Production)
-			defaultClient.setBasePath("https://sygmef.impots.bj/emcf");
-
-		// Instanciation pour la gestion des informations utiles
-		SfeInfoApi apiInfoInstance = new SfeInfoApi();
-
-		// Instanciation de status info
-		InfoResponseDto infoResponseDto = new InfoResponseDto();
-
-		System.out.println(Bearer);
-
-		try {
-			// INFO
-			infoResponseDto = apiInfoInstance.apiInfoStatusGet();
-			System.out.println(infoResponseDto);
-
-		} catch (ApiException e) {
-			System.err.println("Exception when calling SfeInvoiceApi");
-			e.printStackTrace();
-		}
-
-		return infoResponseDto;
-	}
-
 	/**
 	 * Générer la facture normalisée
 	 * 
@@ -789,18 +790,72 @@ public class FactureService {
 		Optional<Facture> optional = repository.findByIdAndConfirmTrue(id);
 		if (optional.isEmpty())
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Facture non trouvée");
-
 		Facture facture = optional.get();
 
+		return getInvoicePrint(facture);
+	}
+
+	/**
+	 * Imprimer la facture et l'envoiyer telle quelle
+	 * 
+	 * @param facture La facture confirmée par l'emcef
+	 * @return
+	 * @throws IOException
+	 * @throws JRException
+	 */
+	private ResponseEntity<byte[]> getInvoicePrint(Facture facture) throws IOException, JRException {
 		// Récupération des données du parametres
-		Parametre param = (paramRepos.findAll()).get(0);
-		// Récupération de FactureResponseDgi pour la facture
-		FactureResponseDgi fresp = frRepos.findByFactureId(id);
-		// Récupération des données de finalisation de la facture après sa confirmation
-		FactureFinalisationDgi ffin = ffRepos.findByFactureId(id);
+		Parametre param = paramRepos.findOneParams().orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Votre système n'est pas encore paramètré."));
 
 		// Les données de la facture
 		InvoiceData invoice = reportService.setInvoiceData(facture, param);
+
+		// Setting Invoice Report Params
+		HashMap<String, Object> map = setInvoiceReportParams(facture, param);
+
+		// Générer la facture
+		return reportService.invoiceReport(invoice, map, INVOICE_REPORT_TEMPLATE,
+				INVOICE_REPORT_BASE_NAME + facture.getNumero() + ".pdf");
+	}
+
+	/**
+	 * Imprimer la facture et l'enregistrement en local
+	 * 
+	 * @param facture La facture confirmée par l'emcef
+	 * @return
+	 * @throws IOException
+	 * @throws JRException
+	 */
+	private String printInvoiceAndStoreIt(Facture facture) throws IOException, JRException {
+		// Récupération des données du parametres
+		Parametre param = paramRepos.findOneParams().orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Votre système n'est pas encore paramètré."));
+
+		// Les données de la facture
+		InvoiceData invoice = reportService.setInvoiceData(facture, param);
+
+		// Setting Invoice Report Params
+		HashMap<String, Object> map = setInvoiceReportParams(facture, param);
+
+		// Générer la facture
+		return reportService.invoiceReportAndStoreIt(invoice, map, INVOICE_REPORT_TEMPLATE,
+				INVOICE_REPORT_BASE_NAME + facture.getNumero() + ".pdf");
+	}
+
+	/**
+	 * Dénfinir les données de paramètre pour l'impression de la facture
+	 * 
+	 * @param facture
+	 * @param param
+	 * @return
+	 */
+	private HashMap<String, Object> setInvoiceReportParams(Facture facture, Parametre param) {
+		// Récupération de FactureResponseDgi pour la facture
+		FactureResponseDgi fresp = frRepos.findByFactureId(facture.getId());
+		// Récupération des données de finalisation de la facture après sa confirmation
+		FactureFinalisationDgi ffin = ffRepos.findByFactureId(facture.getId());
+
 		// Les données des détails de la facture
 		List<InvoiceDetailData> details = reportService.setInvoiceDetailData(facture);
 		System.out.println("Nom de ligne de la facture : " + facture.getDetails().size());
@@ -822,8 +877,7 @@ public class FactureService {
 		map.put("payement", new JRBeanCollectionDataSource(Collections.singleton(payement)));
 		map.put("emcef", new JRBeanCollectionDataSource(Collections.singleton(ffin)));
 		map.put("company_contact", new JRBeanCollectionDataSource(Collections.singleton(contact)));
-		// Générer la facture
-		return reportService.invoiceReport(invoice, map);
+		return map;
 	}
 
 	/**
@@ -902,9 +956,9 @@ public class FactureService {
 		var reglement = new ReglementFacture();
 		// Mise à jour des champs du nouveau règlement
 		reglement.setTypePaiement(reglementOrigine.getTypePaiement());
-		reglement.setMontantRecu(reglementOrigine.getMontantRecu() * (-1));
+		reglement.setMontantRecu(reglementOrigine.getMontantRecu());
 		reglement.setMontantPayer(reglementOrigine.getMontantPayer() * (-1));
-		reglement.setMontantRendu(reglementOrigine.getMontantRendu() * (-1));
+		reglement.setMontantRendu(reglementOrigine.getMontantRendu());
 		reglement.setDescription(reglementOrigine.getDescription());
 		facture.setReglement(reglementRepos.save(reglement));
 		// Sauvegarde de la facture
@@ -989,8 +1043,24 @@ public class FactureService {
 		// Finalisation de la facture
 		var resultat = finalisationDgi(facture);
 
-		// Enregistrement et renvoie de la facture après la finalisation
-		return repository.save(resultat);
+		// Enregistrement
+		facture = repository.save(resultat);
+
+		// Tentatif d'impression de la facture
+		try {
+			var filename = this.printInvoiceAndStoreIt(facture);
+			facture.setFilename(filename);
+			facture = repository.save(facture);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JRException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		// renvoie de la facture après la finalisation
+		return facture;
 	}
 
 }

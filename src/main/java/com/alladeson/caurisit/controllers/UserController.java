@@ -7,6 +7,7 @@ import com.alladeson.caurisit.security.core.PasswordResetPayload;
 import com.alladeson.caurisit.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -38,25 +39,37 @@ public class UserController {
         return service.create(user);
     }
 
-    @PostMapping("parametre/users/connected/activate-password")
-    public User activate(@RequestBody @Valid PasswordPayload payload) {
-        return service.activatePassword(payload);
-    }
-
     @PutMapping("parametre/users/{id}")
     public User update(@RequestBody User user,
                        @PathVariable(value = "id") Long id
     ) throws JsonProcessingException {
         return service.update(id, user);
     }
-    
-    @PutMapping("parametre/users/{id}/reset-password")
-    public User deactivate(@PathVariable(value = "id") Long id, @RequestBody PasswordResetPayload reset) {
-        return service.deactivatePassword(id, reset);
-    }
 
     @DeleteMapping("parametre/users/{id}")
     public boolean delete(@PathVariable(value = "id") Long id) throws JsonProcessingException {
         return service.delete(id);
     }
+
+	/**
+	 * @param id
+	 * @param file
+	 * @return
+	 * @see com.alladeson.caurisit.services.UserService#updatePhoto(java.lang.Long, org.springframework.web.multipart.MultipartFile)
+	 */
+    @PutMapping("parametre/users/{id}/photo")
+	public User updatePhoto(@PathVariable(value = "id") Long id, @RequestParam("file") MultipartFile file) {
+		return service.updatePhoto(id, file);
+	}
+
+	/**
+	 * @param password
+	 * @return
+	 * @see com.alladeson.caurisit.services.UserService#changePassword(com.alladeson.caurisit.security.core.PasswordPayload)
+	 */
+    @PutMapping("parametre/users/{id}/reset-password")
+	public User changePassword(@RequestBody PasswordPayload password) {
+		return service.changePassword(password);
+	}
+    
 }

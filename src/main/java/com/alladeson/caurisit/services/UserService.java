@@ -121,6 +121,7 @@ public class UserService {
         user1.setLastname(user.getLastname());
         user1.setPhone(user.getPhone());
         user1.setRole(user.getRole());
+        user1.setEmail(user.getEmail());
 
         var account = user1.getAccount();
         if (account.getRoles().isEmpty()) {
@@ -161,12 +162,11 @@ public class UserService {
 
     public User updatePhoto(Long id, MultipartFile file) {
         var u = this.find(id);
-        var filename = id + "." + FilenameUtils.getExtension(file.getOriginalFilename());
+        var filename = "photo_" +id + "." + FilenameUtils.getExtension(file.getOriginalFilename());
         fileService.store(file, filename);
-
-        //logger.info(filepath.toString());
-
+        // Mise à jour de la photo
         u.setPhoto(filename);
+        // Enregistrement et renvoie de l'utilisateur
         return repository.save(u);
     }
 

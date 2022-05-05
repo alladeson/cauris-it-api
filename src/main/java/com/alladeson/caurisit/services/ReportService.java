@@ -7,6 +7,7 @@ import com.alladeson.caurisit.models.entities.Facture;
 import com.alladeson.caurisit.models.entities.FactureResponseDgi;
 import com.alladeson.caurisit.models.entities.Parametre;
 import com.alladeson.caurisit.models.entities.ReglementFacture;
+import com.alladeson.caurisit.models.entities.TypeData;
 import com.alladeson.caurisit.models.reports.ClientData;
 import com.alladeson.caurisit.models.reports.CompanyContact;
 import com.alladeson.caurisit.models.reports.InvoiceData;
@@ -120,6 +121,8 @@ public class ReportService {
 	 * @return
 	 */
 	public List<InvoiceRecapData> setInvoiceRecapData(FactureResponseDgi recapdgi, Facture facture) {
+		// Récupération du typ de la facture, utile en cas de factures d'avoir
+		var fa = facture.getType().getGroup() == TypeData.FA;
 		// Instanciation de la liste InvoiceRecapData
 		List<InvoiceRecapData> recaps = new ArrayList<InvoiceRecapData>();
 		// Instancition et mise à jour de recaps
@@ -127,7 +130,7 @@ public class ReportService {
 		if (recapdgi.getTaa() != 0) {
 			InvoiceRecapData recap = new InvoiceRecapData();
 			recap.setTaxe_group("A - Exonéré");
-			recap.setTotal(recapdgi.getTaa());
+			recap.setTotal(fa ? (recapdgi.getTaa() * (-1)) : recapdgi.getTaa());
 			recap.setImposable(0l);
 			recap.setImpot(0l);
 			// Ajout à la liste des recaps
@@ -137,9 +140,9 @@ public class ReportService {
 		if (recapdgi.getTab() != 0) {
 			InvoiceRecapData recap = new InvoiceRecapData();
 			recap.setTaxe_group("B - Taxable (18%)");
-			recap.setTotal(recapdgi.getTab());
-			recap.setImposable(recapdgi.getHab());
-			recap.setImpot(recapdgi.getVab());
+			recap.setTotal(fa ? (recapdgi.getTab() * (-1)) : recapdgi.getTab());
+			recap.setImposable(fa ? (recapdgi.getHab() * (-1)) : recapdgi.getHab());
+			recap.setImpot(fa ? (recapdgi.getVab() * (-1)) : recapdgi.getVab());
 			// Ajout à la liste des recaps
 			recaps.add(recap);
 		}
@@ -147,7 +150,7 @@ public class ReportService {
 		if (recapdgi.getTac() != 0) {
 			InvoiceRecapData recap = new InvoiceRecapData();
 			recap.setTaxe_group("C - Exportation");
-			recap.setTotal(recapdgi.getTac());
+			recap.setTotal(fa ? (recapdgi.getTac() * (-1)) : recapdgi.getTac());
 			recap.setImposable(0l);
 			recap.setImpot(0l);
 			// Ajout à la liste des recaps
@@ -157,9 +160,9 @@ public class ReportService {
 		if (recapdgi.getTad() != 0) {
 			InvoiceRecapData recap = new InvoiceRecapData();
 			recap.setTaxe_group("D - Exception (18%)");
-			recap.setTotal(recapdgi.getTad());
-			recap.setImposable(recapdgi.getHad());
-			recap.setImpot(recapdgi.getVad());
+			recap.setTotal(fa ? (recapdgi.getTad() * (-1)) : recapdgi.getTad());
+			recap.setImposable(fa ? (recapdgi.getHad() * (-1)) : recapdgi.getHad());
+			recap.setImpot(fa ? (recapdgi.getVad() * (-1)) : recapdgi.getVad());
 			// Ajout à la liste des recaps
 			recaps.add(recap);
 		}
@@ -167,7 +170,7 @@ public class ReportService {
 		if (recapdgi.getTae() != 0) {
 			InvoiceRecapData recap = new InvoiceRecapData();
 			recap.setTaxe_group("E - TPS");
-			recap.setTotal(recapdgi.getTae());
+			recap.setTotal(fa ? (recapdgi.getTae() * (-1)) : recapdgi.getTae());
 			recap.setImposable(0l);
 			recap.setImpot(0l);
 			// Ajout à la liste des recaps
@@ -177,7 +180,7 @@ public class ReportService {
 		if (recapdgi.getTaf() != 0) {
 			InvoiceRecapData recap = new InvoiceRecapData();
 			recap.setTaxe_group("F - Réservé");
-			recap.setTotal(recapdgi.getTaf());
+			recap.setTotal(fa ? (recapdgi.getTaf() * (-1)) : recapdgi.getTaf());
 			recap.setImposable(0l);
 			recap.setImpot(0l);
 			// Ajout à la liste des recaps
@@ -187,7 +190,7 @@ public class ReportService {
 		if (recapdgi.getTs() != 0) {
 			InvoiceRecapData recap = new InvoiceRecapData();
 			recap.setTaxe_group("TS");
-			recap.setTotal(recapdgi.getTs());
+			recap.setTotal(fa ? (recapdgi.getTs() * (-1)) : recapdgi.getTs());
 			recap.setImposable(0l);
 			recap.setImpot(0l);
 			// Ajout à la liste des recaps
@@ -200,7 +203,7 @@ public class ReportService {
 			var aib = facture.getAib();
 //			recap.setTaxe_group(aib.getGroupe().name() + " (" + aib.getValeur() + "%)");
 			recap.setTaxe_group("AIB (" + aib.getValeur() + "%)");
-			recap.setTotal(recapdgi.getAib());
+			recap.setTotal(fa ? (recapdgi.getAib() * (-1)) : recapdgi.getAib());
 			recap.setImposable(0l);
 			recap.setImpot(0l);
 			// Ajout à la liste des recaps
@@ -268,13 +271,29 @@ public class ReportService {
 	 * 
 	 * @param invoice
 	 * @param params
+	 * @param invoiceTemplate
+	 * @param invoiceFileName
 	 * @return
 	 * @throws IOException
 	 * @throws JRException
 	 */
-	public ResponseEntity<byte[]> invoiceReport(InvoiceData invoice, HashMap<String, Object> params)
+	public ResponseEntity<byte[]> invoiceReport(InvoiceData invoice, HashMap<String, Object> params, String invoiceTemplate, String invoiceFileName)
 			throws IOException, JRException {
-
-		return tool.generateInvoice(Collections.singleton(invoice), params, "report/facture.jrxml", "facture.pdf");
+		return tool.generateInvoice(Collections.singleton(invoice), params, invoiceTemplate, invoiceFileName);
+	}
+	
+	/**
+	 * Générer la facture normalisée et l'enregistrer
+	 * @param invoice
+	 * @param params
+	 * @param invoiceTemplate
+	 * @param invoiceFileName
+	 * @return
+	 * @throws IOException
+	 * @throws JRException
+	 */
+	public String invoiceReportAndStoreIt(InvoiceData invoice, HashMap<String, Object> params, String invoiceTemplate, String invoiceFileName)
+			throws IOException, JRException {
+		return tool.generateInvoiceAndStoreIt(Collections.singleton(invoice), params, invoiceTemplate, invoiceFileName);
 	}
 }

@@ -10,7 +10,6 @@ import com.alladeson.caurisit.models.paylaods.FactureAutocomplete;
 import com.alladeson.caurisit.models.paylaods.FacturePayload;
 import com.alladeson.caurisit.services.FactureService;
 
-import bj.impots.dgi.emcf.InfoResponseDto;
 import net.sf.jasperreports.engine.JRException;
 
 import java.io.IOException;
@@ -156,15 +155,6 @@ public class FactureController {
 	public Facture ajouterDetailFacture(@PathVariable(value = "clientId") Long clientId,
 			@PathVariable(value = "articleId") Long articleId, @RequestBody DetailFacture objet) {
 		return service.ajouterDetailFacture(clientId, articleId, objet);
-	}
-
-	/**
-	 * @return
-	 * @see com.alladeson.caurisit.services.FactureService#getStatusInfoMcef()
-	 */
-	@GetMapping("/factures/emcef/api/info/status")
-	public InfoResponseDto getStatusInfoMcef() {
-		return service.getStatusInfoMcef();
 	}
 
 	/**

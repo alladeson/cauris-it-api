@@ -89,6 +89,10 @@ public class ReportService {
 						+ detail.getTs().getTaxe().getGroupe().name() + "]");
 				liste.add(invoiceDetailTs);
 			}
+			// Gestion de la remise
+			if(detail.isRemise()) {
+				invoiceDetail.setRemise(detail.getDiscount().getTaux() + "%");
+			}
 			i++;
 		}
 
@@ -230,6 +234,7 @@ public class ReportService {
 		invoice.setInvoice_total(Math.round(facture.getMontantTtc()));
 		invoice.setInvoice_total_toWord(Tool.convert(Math.abs(invoice.getInvoice_total().longValue())));
 		invoice.setInvoice_operator(facture.getOperateur().getId() + " " + facture.getOperateur().getFullname());
+		invoice.setInvoice_origine_ref(facture.getOrigineRef());
 		// Mise à jour des champs pour la société
 		invoice.setSte_name(params.getName());
 		invoice.setSte_ifu(params.getIfu());

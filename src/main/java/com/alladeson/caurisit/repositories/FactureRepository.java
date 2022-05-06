@@ -15,6 +15,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.alladeson.caurisit.models.entities.Client;
 import com.alladeson.caurisit.models.entities.Facture;
+import com.alladeson.caurisit.models.entities.TypeFacture;
 import com.alladeson.caurisit.models.paylaods.FactureAutocomplete;
 
 /**
@@ -69,4 +70,14 @@ public interface FactureRepository extends JpaRepository<Facture, Long> {
 			+ "and fv.confirm is true and fv.reference LIKE :search%", nativeQuery = true)
 	<T> List<T> getFactureForAutocomplete(@Param("typefvId") Long typefvId, @Param("typefaId") Long typefaId,
 			@Param("search") String search);
+
+	/**
+	 * Récupération la facture non validée d'un client en fonction du type de
+	 * facture
+	 * 
+	 * @param client L'objet Client
+	 * @param type   L'objet TypeFacture
+	 * @return
+	 */
+	Facture findByClientAndTypeAndValidFalse(Client client, TypeFacture type);
 }

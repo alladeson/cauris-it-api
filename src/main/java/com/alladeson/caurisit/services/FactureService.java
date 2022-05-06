@@ -35,6 +35,7 @@ import com.alladeson.caurisit.models.entities.FactureFinalisationDgi;
 import com.alladeson.caurisit.models.entities.FactureResponseDgi;
 import com.alladeson.caurisit.models.entities.Parametre;
 import com.alladeson.caurisit.models.entities.ReglementFacture;
+import com.alladeson.caurisit.models.entities.Remise;
 import com.alladeson.caurisit.models.entities.Taxe;
 import com.alladeson.caurisit.models.entities.TaxeSpecifique;
 import com.alladeson.caurisit.models.entities.TypeData;
@@ -86,13 +87,18 @@ public class FactureService {
 	@Autowired
 	private TypePaiementRepository tpRepos;
 	@Autowired
+	private RemiseRepository remiseRepos;
+	@Autowired
 	private ReportService reportService;
 
 	@Autowired
 	private UserService userService;
 
-	private static final String INVOICE_REPORT_TEMPLATE = "report/facture.jrxml";
 	private static final String INVOICE_REPORT_BASE_NAME = "facture-";
+	private static final String INVOICE_REPORT_TEMPLATE_FV = "report/facture-vente.jrxml";
+	private static final String INVOICE_REPORT_TEMPLATE_FA = "report/facture-avoir.jrxml";
+	private static final String INVOICE_REPORT_TEMPLATE_FV_REMISE = "report/facture-vente-remise.jrxml";
+	private static final String INVOICE_REPORT_TEMPLATE_FA_REMISE = "report/facture-avoir-remise.jrxml";
 
 	/**
 	 * Récupère une facture dont l'identifiant est renseigné
@@ -245,25 +251,24 @@ public class FactureService {
 		Article article = articleRepos.findById(articleId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Article non trouvé"));
 
-		// Récupération de la facture du client
-		Facture facture = repository.findByClientAndValidFalse(client);
+		// Récupération du type de la facture
+		TypeFacture tf = null;
+		if (detailPayload.getTfId() != null) {
+			tf = tfRepos.findById(detailPayload.getTfId()).orElseThrow(
+					() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Le type de facture non trouvé"));
+		} else {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Le type de facture non défini");
+		}
+
+		// Récupération de la facture non validée du client en fonction du type de
+		// facture et du client
+		Facture facture = repository.findByClientAndTypeAndValidFalse(client, tf);
 		//
 		if (facture == null) {
 			facture = new Facture();
 			facture.setClient(client);
-			// // Mise à jour du personnel créateur (ou déclencheur) de la fracture
-			// facture.setCreatedBy(getAuthPersonnel());
-			facture = repository.save(facture);
-		}
-
-		// Mise à jour du type de la facture
-		if (detailPayload.getTfId() != null) {
-			TypeFacture tf = tfRepos.findById(detailPayload.getTfId()).orElseThrow(
-					() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Le type de facture non trouvé"));
 			facture.setType(tf);
 			facture = repository.save(facture);
-		} else {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Le type de facture non défini");
 		}
 
 		// Instanciation d'un detailFacture
@@ -343,11 +348,23 @@ public class FactureService {
 		detail.setMontantTva((double) Math.round((detail.getMontantHt() * detail.getTaxe().getValeur()) / 100));
 		detail.setMontantTtc((double) Math.round(detail.getPrixUnitaire() * detail.getQuantite()));
 		// Gestion des remise
-		// if (detailPayload.isRemise()) {
 		detail.setRemise(detailPayload.isRemise());
-		detail.setOriginalPrice(detailPayload.getOriginalPrice());
-		detail.setPriceModification(detailPayload.getPriceModification());
-		// }
+		// Récupération d'une probable ancien remise
+		var ancienneRemise = detail.getDiscount();
+		if (detail.isRemise()) {
+			var remise = new Remise();
+			remise.setTaux(detailPayload.getTaux());
+			remise.setOriginalPrice(detailPayload.getOriginalPrice());
+			remise.setPriceModification(detailPayload.getPriceModification());
+			detail.setDiscount(remiseRepos.save(remise));
+		} else {
+			detail.setDiscount(null);
+		}
+		// Suppression de la probable ancienne remise
+		if (ancienneRemise != null) {
+			remiseRepos.delete(ancienneRemise);
+		}
+
 		// Mise à jour de la taxe spécifique
 		detail = setTaxeSpecifique(detailPayload, detail);
 
@@ -378,6 +395,16 @@ public class FactureService {
 		// Ajout du montant de la taxe spécifique TTC au montantTtc
 		if (facture.getTsTtc() != null)
 			facture.setMontantTtc(facture.getMontantTtc() + facture.getTsTtc());
+
+		// Mise à jour de l'option remise de la facture
+		var details = facture.getDetails();
+		for (DetailFacture detail : details) {
+			if (detail.isRemise() && !facture.isRemise()) {
+				facture.setRemise(true);
+				break;
+			}
+		}
+
 		// Enregistrement dans la base de données
 		facture = repository.save(facture);
 		// Renvoie de la facture
@@ -652,11 +679,14 @@ public class FactureService {
 				item.setPrice(Math.abs(detail.getPrixUnitaire().longValue()));
 				item.setQuantity(detail.getQuantite());
 				item.setTaxGroup(TaxGroupTypeEnum.fromValue(detail.getTaxe().getGroupe().name()));
+				// Ajout de la taxe spécifique
 				if (detail.getTaxeSpecifique() != null)
 					item.setTaxSpecific(Math.abs(detail.getTaxeSpecifique().longValue()));
-				if (detail.getOriginalPrice() != null) {
-					item.setOriginalPrice(Math.abs(detail.getOriginalPrice()));
-					item.setPriceModification(detail.getPriceModification());
+				// Ajout de remise
+				if (detail.isRemise()) {
+					var remise = detail.getDiscount();
+					item.setOriginalPrice(Math.abs(remise.getOriginalPrice()));
+					item.setPriceModification(remise.getPriceModification());
 				}
 				items.add(item);
 			}
@@ -808,6 +838,19 @@ public class FactureService {
 		Parametre param = paramRepos.findOneParams().orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Votre système n'est pas encore paramètré."));
 
+		// Récupération du type de la facture
+		var type = facture.getType();
+		var template = "";
+		if (type.getGroup().equals(TypeData.FV)) {
+			template = INVOICE_REPORT_TEMPLATE_FV;
+			if (facture.isRemise())
+				template = INVOICE_REPORT_TEMPLATE_FV_REMISE;
+		} else if (type.getGroup().equals(TypeData.FA)) {
+			template = INVOICE_REPORT_TEMPLATE_FA;
+			if (facture.isRemise())
+				template = INVOICE_REPORT_TEMPLATE_FA_REMISE;
+		}
+
 		// Les données de la facture
 		InvoiceData invoice = reportService.setInvoiceData(facture, param);
 
@@ -815,7 +858,7 @@ public class FactureService {
 		HashMap<String, Object> map = setInvoiceReportParams(facture, param);
 
 		// Générer la facture
-		return reportService.invoiceReport(invoice, map, INVOICE_REPORT_TEMPLATE,
+		return reportService.invoiceReport(invoice, map, template,
 				INVOICE_REPORT_BASE_NAME + facture.getNumero() + ".pdf");
 	}
 
@@ -832,6 +875,19 @@ public class FactureService {
 		Parametre param = paramRepos.findOneParams().orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Votre système n'est pas encore paramètré."));
 
+		// Récupération du type de la facture
+		var type = facture.getType();
+		var template = "";
+		if (type.getGroup().equals(TypeData.FV)) {
+			template = INVOICE_REPORT_TEMPLATE_FV;
+			if (facture.isRemise())
+				template = INVOICE_REPORT_TEMPLATE_FV_REMISE;
+		} else if (type.getGroup().equals(TypeData.FA)) {
+			template = INVOICE_REPORT_TEMPLATE_FA;
+			if (facture.isRemise())
+				template = INVOICE_REPORT_TEMPLATE_FA_REMISE;
+		}
+
 		// Les données de la facture
 		InvoiceData invoice = reportService.setInvoiceData(facture, param);
 
@@ -839,7 +895,7 @@ public class FactureService {
 		HashMap<String, Object> map = setInvoiceReportParams(facture, param);
 
 		// Générer la facture
-		return reportService.invoiceReportAndStoreIt(invoice, map, INVOICE_REPORT_TEMPLATE,
+		return reportService.invoiceReportAndStoreIt(invoice, map, template,
 				INVOICE_REPORT_BASE_NAME + facture.getNumero() + ".pdf");
 	}
 
@@ -915,6 +971,8 @@ public class FactureService {
 
 		// Mise à jour de la référence de la facture d'origine
 		facture.setOrigineRef(factureOrigine.getReference());
+		// Mise à jour de la remise
+		facture.setRemise(factureOrigine.isRemise());
 		// Sauvegarde et renvoie de la nouvelle facture
 		return repository.save(facture);
 	}
@@ -956,7 +1014,7 @@ public class FactureService {
 		var reglement = new ReglementFacture();
 		// Mise à jour des champs du nouveau règlement
 		reglement.setTypePaiement(reglementOrigine.getTypePaiement());
-		reglement.setMontantRecu(reglementOrigine.getMontantRecu());
+		reglement.setMontantRecu(reglementOrigine.getMontantRecu() * (-1));
 		reglement.setMontantPayer(reglementOrigine.getMontantPayer() * (-1));
 		reglement.setMontantRendu(reglementOrigine.getMontantRendu());
 		reglement.setDescription(reglementOrigine.getDescription());
@@ -1009,8 +1067,11 @@ public class FactureService {
 		}
 		if (detail.isRemise()) {
 			df.setRemise(detail.isRemise());
-			df.setOriginalPrice(detail.getOriginalPrice() * (-1));
-			df.setPriceModification(detail.getPriceModification());
+			var remise = new Remise();
+			remise.setTaux(detail.getDiscount().getTaux());
+			remise.setOriginalPrice(detail.getDiscount().getOriginalPrice() * (-1));
+			remise.setPriceModification(detail.getDiscount().getPriceModification());
+			df.setDiscount(remiseRepos.save(remise));
 		}
 		df.setTaxe(detail.getTaxe());
 		df.setArticle(detail.getArticle());
@@ -1058,7 +1119,7 @@ public class FactureService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		// renvoie de la facture après la finalisation
 		return facture;
 	}

@@ -38,19 +38,29 @@ public class DetailFacture extends BaseEntity {
 //	private Double montantAib;
 	private Double montantTtc;
 	private boolean valid;
-	
+
 	// Gestion de remise ou modification du prix de l'article
 	private boolean remise;
+	// Entité Remise : en anglais remise = discount
+	@OneToOne
+	private Remise discount;
+	// Le taux de la remise
+	@Transient
+	private Integer taux;
 	// Prix originale de l'article
+	@Transient
 	private Double originalPrice;
 	// Description de la modification (ex. "Remise 50%")
+	@Transient
 	private String priceModification;
 
-	// champ représente le montant HT de la taxe spécifique (TS) telle que reçu du client REST, 
+	// champ représente le montant HT de la taxe spécifique (TS) telle que reçu du
+	// client REST,
 	private Double taxeSpecifique;
 	// Montant de la taxe spécifique TTC
 	private Double tsTtc;
-	// Mise en rélation avec l'entité TaxeSpécifique, utile pour l'impression et pour d'autres détails
+	// Mise en rélation avec l'entité TaxeSpécifique, utile pour l'impression et
+	// pour d'autres détails
 	@OneToOne
 	private TaxeSpecifique ts;
 
@@ -294,6 +304,34 @@ public class DetailFacture extends BaseEntity {
 	 */
 	public void setRemise(boolean remise) {
 		this.remise = remise;
+	}
+
+	/**
+	 * @return the discount
+	 */
+	public Remise getDiscount() {
+		return discount;
+	}
+
+	/**
+	 * @param discount the discount to set
+	 */
+	public void setDiscount(Remise discount) {
+		this.discount = discount;
+	}
+
+	/**
+	 * @return the taux
+	 */
+	public Integer getTaux() {
+		return taux;
+	}
+
+	/**
+	 * @param taux the taux to set
+	 */
+	public void setTaux(Integer taux) {
+		this.taux = taux;
 	}
 
 	/**

@@ -12,65 +12,91 @@ public class InvoiceDetailData {
 	private Double qte;
 	// Le montant T.T.C pour l'article
 	private String montant_ttc;
+	// Le taux de la remise
+	private String remise;
+
 	/**
 	 * @return the numero
 	 */
 	public int getNumero() {
 		return numero;
 	}
+
 	/**
 	 * @param numéro the numero to set
 	 */
 	public void setNumero(int numero) {
 		this.numero = numero;
 	}
+
 	/**
 	 * @return the name
 	 */
 	public String getName() {
 		return name;
 	}
+
 	/**
 	 * @param name the name to set
 	 */
 	public void setName(String name) {
 		this.name = name;
 	}
+
 	/**
 	 * @return the prix_u
 	 */
 	public Long getPrix_u() {
 		return prix_u;
 	}
+
 	/**
 	 * @param prix_u the prix_u to set
 	 */
 	public void setPrix_u(Long prix_u) {
 		this.prix_u = prix_u;
 	}
+
 	/**
 	 * @return the qte
 	 */
 	public Double getQte() {
 		return qte;
 	}
+
 	/**
 	 * @param qte the qte to set
 	 */
 	public void setQte(Double qte) {
 		this.qte = qte;
 	}
+
 	/**
 	 * @return the montant_ttc
 	 */
 	public String getMontant_ttc() {
 		return montant_ttc;
 	}
+
 	/**
 	 * @param montant_ttc the montant_ttc to set
 	 */
 	public void setMontant_ttc(String montant_ttc) {
 		this.montant_ttc = montant_ttc;
 	}
-	
+
+	/**
+	 * @return the remise
+	 */
+	public String getRemise() {
+		return remise;
+	}
+
+	/**
+	 * @param remise the remise to set
+	 */
+	public void setRemise(String remise) {
+		this.remise = remise;
+	}
+
 }

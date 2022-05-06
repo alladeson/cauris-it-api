@@ -73,6 +73,9 @@ public class Facture extends BaseEntity {
 	
 	// Pour la sauveagarde du nom de la facture
 	private String filename;
+	
+	// Pour vérifier la présence de remise
+	private boolean remise;
 
 	/**
 	 * @return the id
@@ -389,5 +392,19 @@ public class Facture extends BaseEntity {
 	 */
 	public void setFilename(String filename) {
 		this.filename = filename;
+	}
+
+	/**
+	 * @return the remise
+	 */
+	public boolean isRemise() {
+		return remise;
+	}
+
+	/**
+	 * @param remise the remise to set
+	 */
+	public void setRemise(boolean remise) {
+		this.remise = remise;
 	}
 }

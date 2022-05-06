@@ -23,6 +23,8 @@ public class InvoiceData {
 	private String invoice_total_toWord;
 	// Le nom de l'agent opérateur ayant établi la facture
 	private String invoice_operator;
+	// Le code MCef/DGI de la facture origniale : utile pour les factures d'avoir
+	private String invoice_origine_ref;
 
 	// Les informations de la société
 	private String ste_ifu;
@@ -121,6 +123,20 @@ public class InvoiceData {
 	 */
 	public void setInvoice_operator(String invoice_operator) {
 		this.invoice_operator = invoice_operator;
+	}
+
+	/**
+	 * @return the invoice_origine_ref
+	 */
+	public String getInvoice_origine_ref() {
+		return invoice_origine_ref;
+	}
+
+	/**
+	 * @param invoice_origine_ref the invoice_origine_ref to set
+	 */
+	public void setInvoice_origine_ref(String invoice_origine_ref) {
+		this.invoice_origine_ref = invoice_origine_ref;
 	}
 
 	/**

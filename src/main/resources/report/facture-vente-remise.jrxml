@@ -138,7 +138,7 @@
 		<field name="prix_u" class="java.lang.Long"/>
 		<field name="qte" class="java.lang.Double"/>
 		<field name="montant_ttc" class="java.lang.String"/>
-		<field name="Remise" class="java.lang.String"/>
+		<field name="remise" class="java.lang.String"/>
 	</subDataset>
 	<parameter name="detailFacture" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
 	<parameter name="client" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
@@ -378,7 +378,7 @@
 							<textField>
 								<reportElement x="0" y="0" width="50" height="30" uuid="532cc603-6c53-46d8-b596-9ba2a9d580e7"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{Remise}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{remise}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>

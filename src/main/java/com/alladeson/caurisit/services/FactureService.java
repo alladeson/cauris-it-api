@@ -398,8 +398,9 @@ public class FactureService {
 
 		// Mise à jour de l'option remise de la facture
 		var details = facture.getDetails();
+		facture.setRemise(false);
 		for (DetailFacture detail : details) {
-			if (detail.isRemise() && !facture.isRemise()) {
+			if (detail.isRemise()) {
 				facture.setRemise(true);
 				break;
 			}
@@ -444,11 +445,21 @@ public class FactureService {
 		if (optional.isEmpty())
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ligne de la facture non trouvée");
 		DetailFacture dtf = optional.get();
+		// Récupération de la facture
+		Facture facture = dtf.getFacture();
 		// Vérifier si le detailFacture n'est pas encore validé
 		if (dtf.isValid())
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ligne de la facture déjà validée");
-		// Récupération de la facture
-		Facture facture = dtf.getFacture();
+		// Vérification si la facture n'est pas encore valider
+		if (facture.isValid())
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Facture déjà validée");
+		// Suppression de toutes les clés étrangers orphélines du detail facture
+		// Suppression de la remise si existante
+		if(dtf.isRemise())
+			remiseRepos.delete(dtf.getDiscount());
+		// Suppression de la taxe spécifique
+		if(dtf.getTs() != null)
+			tsRepos.delete(dtf.getTs());
 		// Suppression du detailFacture
 		dfRepos.delete(dtf);
 		// Calcul des montants de la facture et renvoie de cette dernière
@@ -491,18 +502,24 @@ public class FactureService {
 		// Enregistrement
 		facture = repository.save(resultat);
 
-		// Tentatif d'impression de la facture
-		try {
-			var filename = this.printInvoiceAndStoreIt(facture);
-			facture.setFilename(filename);
-			facture = repository.save(facture);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JRException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(facture.isConfirm()) {
+			for (DetailFacture detail : facture.getDetails()) {
+				detail.setValid(true);
+				dfRepos.save(detail);
+			}
 		}
+		// Tentatif d'impression de la facture
+//		try {
+//			var filename = this.printInvoiceAndStoreIt(facture);
+//			facture.setFilename(filename);
+//			facture = repository.save(facture);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (JRException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
 		// Renvoie de la facture
 		return facture;
@@ -519,10 +536,30 @@ public class FactureService {
 		Taxe aib = taxeRepos.findById(aibId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aib non trouvée"));
 		facture.setAib(aib);
-		facture.setMontantAib((double) Math.round((facture.getMontantHt() * aib.getValeur()) / 100));
+		/**
+		 * Le montant de l'Aib est arrondi par defaut si sa partie decimale est <= 5 (je
+		 * veux dire le chiffre après la virgule), et par excès si la partie décimale
+		 * est > 5 Le code qui suit resoud cette approche que nous avons constacté lors
+		 * des tests sur les factures générées par le serveur de la DGI
+		 */
+		// Calcule du montant aib
+		Double montantAib = (facture.getMontantHt() * aib.getValeur()) / 100;
+		// Récupération de la partie décimale
+		Double decimal = montantAib - montantAib.longValue();
+		// Si La partie decimale est null ou inférieure ou égale à 0.5, prendre la
+		// partie
+		// entière du montant l'aib
+		if (decimal.equals(0d) || decimal <= 0.5)
+			facture.setMontantAib((double) (montantAib.longValue()));
+		// Sinon, prendre la partie entière du montant de l'aib + 1
+		else
+			facture.setMontantAib((double) ((montantAib.longValue()) + 1l));
+
+		// Mise à jour du montant ttc de la facture en y ajoutant le montantAib;
 		facture.setMontantTtc((double) (Math.round(facture.getMontantTtc()) + Math.round(facture.getMontantAib())));
-		facture = repository.save(facture);
-		return facture;
+
+		// Sauvegarde et renvoie de la facture
+		return repository.save(facture);
 	}
 
 	/**
@@ -856,7 +893,9 @@ public class FactureService {
 
 		// Setting Invoice Report Params
 		HashMap<String, Object> map = setInvoiceReportParams(facture, param);
-
+		// Ajout des données de l'entête
+//		map.put("entete", new JRBeanCollectionDataSource(Collections.singleton(invoice)));
+		
 		// Générer la facture
 		return reportService.invoiceReport(invoice, map, template,
 				INVOICE_REPORT_BASE_NAME + facture.getNumero() + ".pdf");
@@ -893,7 +932,9 @@ public class FactureService {
 
 		// Setting Invoice Report Params
 		HashMap<String, Object> map = setInvoiceReportParams(facture, param);
-
+		// Ajout des données de l'entête
+//		map.put("entete", new JRBeanCollectionDataSource(Collections.singleton(invoice)));
+		
 		// Générer la facture
 		return reportService.invoiceReportAndStoreIt(invoice, map, template,
 				INVOICE_REPORT_BASE_NAME + facture.getNumero() + ".pdf");

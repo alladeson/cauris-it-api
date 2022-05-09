@@ -455,10 +455,10 @@ public class FactureService {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Facture déjà validée");
 		// Suppression de toutes les clés étrangers orphélines du detail facture
 		// Suppression de la remise si existante
-		if(dtf.isRemise())
+		if (dtf.isRemise())
 			remiseRepos.delete(dtf.getDiscount());
 		// Suppression de la taxe spécifique
-		if(dtf.getTs() != null)
+		if (dtf.getTs() != null)
 			tsRepos.delete(dtf.getTs());
 		// Suppression du detailFacture
 		dfRepos.delete(dtf);
@@ -502,7 +502,8 @@ public class FactureService {
 		// Enregistrement
 		facture = repository.save(resultat);
 
-		if(facture.isConfirm()) {
+		// Validation des lignes de la facture
+		if (facture.isConfirm()) {
 			for (DetailFacture detail : facture.getDetails()) {
 				detail.setValid(true);
 				dfRepos.save(detail);
@@ -895,7 +896,7 @@ public class FactureService {
 		HashMap<String, Object> map = setInvoiceReportParams(facture, param);
 		// Ajout des données de l'entête
 //		map.put("entete", new JRBeanCollectionDataSource(Collections.singleton(invoice)));
-		
+
 		// Générer la facture
 		return reportService.invoiceReport(invoice, map, template,
 				INVOICE_REPORT_BASE_NAME + facture.getNumero() + ".pdf");
@@ -934,7 +935,7 @@ public class FactureService {
 		HashMap<String, Object> map = setInvoiceReportParams(facture, param);
 		// Ajout des données de l'entête
 //		map.put("entete", new JRBeanCollectionDataSource(Collections.singleton(invoice)));
-		
+
 		// Générer la facture
 		return reportService.invoiceReportAndStoreIt(invoice, map, template,
 				INVOICE_REPORT_BASE_NAME + facture.getNumero() + ".pdf");
@@ -1148,18 +1149,26 @@ public class FactureService {
 		// Enregistrement
 		facture = repository.save(resultat);
 
-		// Tentatif d'impression de la facture
-		try {
-			var filename = this.printInvoiceAndStoreIt(facture);
-			facture.setFilename(filename);
-			facture = repository.save(facture);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JRException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		// Validation des lignes de la facture
+		if (facture.isConfirm()) {
+			for (DetailFacture detail : facture.getDetails()) {
+				detail.setValid(true);
+				dfRepos.save(detail);
+			}
 		}
+
+		// Tentatif d'impression de la facture
+//		try {
+//			var filename = this.printInvoiceAndStoreIt(facture);
+//			facture.setFilename(filename);
+//			facture = repository.save(facture);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (JRException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
 		// renvoie de la facture après la finalisation
 		return facture;

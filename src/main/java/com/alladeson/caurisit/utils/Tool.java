@@ -214,7 +214,7 @@ public class Tool {
 		JRBeanCollectionDataSource beanCollectionDataSource = new JRBeanCollectionDataSource(collection);
 		JasperReport compileReport = JasperCompileManager.compileReport(this.getResourceAsStream(invoiceTemplate));
 		JasperPrint report = JasperFillManager.fillReport(compileReport, params, beanCollectionDataSource);
-		JasperExportManager.exportReportToPdfFile(report, appConfig.getUploadDir() + "/" +invoiceFileName);
+//		JasperExportManager.exportReportToPdfFile(report, appConfig.getUploadDir() + "/" +invoiceFileName);
 		byte[] reportPdf = JasperExportManager.exportReportToPdf(report);
 		HttpHeaders headers = new HttpHeaders();
 		headers.set(HttpHeaders.CONTENT_DISPOSITION, "inline;filename=" + invoiceFileName);

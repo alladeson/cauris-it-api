@@ -80,13 +80,15 @@ public class ReportService {
 			liste.add(invoiceDetail);
 			// Gestion de la taxe spécifique
 			if (detail.getTs() != null) {
+				// Récupération de la taxe spécifique
+				var ts = detail.getTs();
 				var invoiceDetailTs = new InvoiceDetailData();
 				invoiceDetailTs.setNumero(++i);
-				invoiceDetailTs.setName("TS (" + detail.getName() + ")");
-				invoiceDetailTs.setPrix_u(Math.round(detail.getTs().getTsUnitaireTtc()));
-				invoiceDetailTs.setQte(detail.getTs().getQuantite());
-				invoiceDetailTs.setMontant_ttc(Math.round(detail.getTs().getTsTotal()) + " ["
-						+ detail.getTs().getTaxe().getGroupe().name() + "]");
+				invoiceDetailTs.setName("TS (" + (ts.getName() != null ? ts.getName() : "Taxe spécifique") + ")");
+				invoiceDetailTs.setPrix_u(Math.round(ts.getTsUnitaireTtc()));
+				invoiceDetailTs.setQte(ts.getQuantite());
+				invoiceDetailTs.setMontant_ttc(Math.round(ts.getTsTotal()) + " ["
+						+ ts.getTaxe().getGroupe().name() + "]");
 				liste.add(invoiceDetailTs);
 			}
 			// Gestion de la remise

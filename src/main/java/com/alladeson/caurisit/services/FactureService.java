@@ -308,8 +308,11 @@ public class FactureService {
 			detail.setTaxeSpecifique(detailPayload.getTaxeSpecifique());
 			detail.setTsTtc(
 					(double) Math.round((detail.getTaxeSpecifique() * (100 + detail.getTaxe().getValeur())) / 100));
-			// System.out.println("ts ttc : " + detail.getTsTtc());
+			// Gestion de la taxe spécifique
 			var ts = new TaxeSpecifique();
+			// Récupération du nom de la taxe spécifique depuis l'article
+			ts.setName(detail.getArticle().getTsName());
+			// Mise à jour des autres champs
 			ts.setQuantite(detail.getQuantite());
 			ts.setTsTotalHt(detail.getTaxeSpecifique());
 			ts.setTsUnitaire(ts.getTsTotalHt() / ts.getQuantite());
@@ -320,6 +323,10 @@ public class FactureService {
 			ts.setTsUnitaireTtc(ts.getTsTotal() / ts.getQuantite());
 			ts = tsRepos.save(ts);
 			detail.setTs(ts);
+		}else {
+			detail.setTaxeSpecifique(null);
+			detail.setTs(null);
+			detail.setTsTtc(null);
 		}
 		return detail;
 	}
@@ -1139,9 +1146,8 @@ public class FactureService {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Facture vide");
 
 		var typeFacture = facture.getType();
-		if (typeFacture.getType() != TypeFactureEnum.FA) {
-			if (typeFacture.getType() != TypeFactureEnum.EA)
-				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Le type de la facture n'est pas valide");
+		if (typeFacture.getGroup() != TypeData.FA) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Le type de la facture n'est pas valide");
 		}
 		// Finalisation de la facture
 		var resultat = finalisationDgi(facture);

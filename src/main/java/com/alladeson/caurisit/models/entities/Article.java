@@ -31,6 +31,8 @@ public class Article extends BaseEntity {
 	private Double stockSecurite;
 	// Montant de la taxe spécifique (TS) par unité d'article
 	private Double taxeSpecifique;
+	// Le nom de la taxe spécifique
+	private String tsName;
 	
 	@ManyToOne
 	private CategorieArticle categorie;
@@ -120,6 +122,20 @@ public class Article extends BaseEntity {
 	 */
 	public void setTaxeSpecifique(Double taxeSpecifique) {
 		this.taxeSpecifique = taxeSpecifique;
+	}
+
+	/**
+	 * @return the tsName
+	 */
+	public String getTsName() {
+		return tsName;
+	}
+
+	/**
+	 * @param tsName the tsName to set
+	 */
+	public void setTsName(String tsName) {
+		this.tsName = tsName;
 	}
 
 	/**

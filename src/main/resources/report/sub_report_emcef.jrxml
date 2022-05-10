@@ -37,7 +37,7 @@
 			<rectangle>
 				<reportElement mode="Transparent" x="0" y="0" width="554" height="125" uuid="700e30a0-9d01-47d9-a225-de87a4834a95"/>
 				<graphicElement>
-					<pen lineColor="#BFE1FF"/>
+					<pen lineColor="#000000"/>
 				</graphicElement>
 			</rectangle>
 			<textField>

@@ -23,6 +23,8 @@ public class TaxeSpecifique extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
+	// Le nom de la taxe spécifique
+	private String name;
 	// La taxe spécifique HT par unité de l'article
 	private Double tsUnitaire;
 	// La taxe spécifique TTC par unité de l'article
@@ -39,6 +41,20 @@ public class TaxeSpecifique extends BaseEntity {
 	// Le taux appliqué
 	@ManyToOne
 	private Taxe taxe;
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	/**
 	 * @return the tsUnitaire

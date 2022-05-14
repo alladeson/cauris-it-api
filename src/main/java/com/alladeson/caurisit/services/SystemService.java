@@ -48,24 +48,24 @@ public class SystemService {
 			logger.info(">> APP INIT DATA - START");
 
 			//
-			if (!userService.existsByUsername("admin")) {
+			if (!userService.existsByUsername("super_admin")) {
 				watch.start("Init - Users");
 
 				/* User SA */
-				var roleAdmin = roleService.save(new Role(TypeRole.ADMIN.name()));
+				var roleSuperAdmin = roleService.save(new Role(TypeRole.SUPER_ADMIN.name()));
 				var account = new Account();
-				account.setUsername("Admin");
+				account.setUsername("super_admin");
 				account.setEmail(config.getEmailAdmin());
-				account.setPassword(passwordEncoder.encode("Admin"));
+				account.setPassword(passwordEncoder.encode("super@admin"));
 //                account.setEnabled(true);
 //                account.setPasswordEnabled(false);
 //                account.setSys(true);
-				account.setRoles(Collections.singleton(roleAdmin));
+				account.setRoles(Collections.singleton(roleSuperAdmin));
 				account = accountService.save(account);
 				var user = new User();
 				user.setFirstname("Superadmin");
 				user.setLastname("SA");
-				user.setRole(TypeRole.ADMIN);
+				user.setRole(TypeRole.SUPER_ADMIN);
 				user.setAccount(account);
 				userService.save(user);
 			}
@@ -129,29 +129,29 @@ public class SystemService {
 				paramService.createTaxe(taxe);
 			}
 			/* Chargment des types de facture */
-			if (paramService.getAllTypeFacture().isEmpty()) {
+			if (paramService.getAllTypeFactureVente().isEmpty()) {
 				// Facture de vente FV
 				var tf1 = new TypeFacture();
-				tf1.setGroup(TypeData.FV);
+				tf1.setGroupe(TypeData.FV);
 				tf1.setType(TypeFactureEnum.FV);
 				tf1.setDescription("Facture de vente");
 				tf1 = paramService.createTypeFacture(tf1);
 				// Facture d'avoir FA
 				var tf = new TypeFacture();
-				tf.setGroup(TypeData.FA);
+				tf.setGroupe(TypeData.FA);
 				tf.setType(TypeFactureEnum.FA);
 				tf.setDescription("Facture d'avoir");
 				tf.setOrigine(tf1);
 				paramService.createTypeFacture(tf);
 				// Facture de vente à l'exportation EV
 				var tf2 = new TypeFacture();
-				tf2.setGroup(TypeData.FV);
+				tf2.setGroupe(TypeData.FV);
 				tf2.setType(TypeFactureEnum.EV);
 				tf2.setDescription("Facture de vente à l'exportation");
 				tf2 = paramService.createTypeFacture(tf2);
 				// Facture d'avoir à l'exportation EA
 				tf = new TypeFacture();
-				tf.setGroup(TypeData.FA);
+				tf.setGroupe(TypeData.FA);
 				tf.setType(TypeFactureEnum.EA);
 				tf.setDescription("Facture d'avoir à l'exportation");
 				tf.setOrigine(tf2);

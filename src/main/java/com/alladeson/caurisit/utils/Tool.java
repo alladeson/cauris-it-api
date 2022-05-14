@@ -72,20 +72,20 @@ public class Tool {
 		return null;
 	}
 
-	public String formatDate(Date date, String format) {
+	public static String formatDate(Date date, String format) {
 		if (date == null)
 			return null;
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
 		return simpleDateFormat.format(date);
 	}
 
-	public String formatDate(LocalDate date, String format) {
+	public static String formatDate(LocalDate date, String format) {
 		if (date == null)
 			return null;
 		return date.format(DateTimeFormatter.ofPattern(format));
 	}
 
-	public String formatDate(LocalDateTime date, String format) {
+	public static String formatDate(LocalDateTime date, String format) {
 		if (date == null)
 			return null;
 		return date.format(DateTimeFormatter.ofPattern(format));

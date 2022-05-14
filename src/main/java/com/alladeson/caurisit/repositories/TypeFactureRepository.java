@@ -17,8 +17,8 @@ import com.alladeson.caurisit.models.entities.TypeFacture;
  */
 public interface TypeFactureRepository extends JpaRepository<TypeFacture, Long> {
 
-	List<TypeFacture> findAllByGroup(TypeData group);
+	List<TypeFacture> findAllByGroupe(TypeData group);
 
-	Optional<TypeFacture> findByIdAndGroup(Long typeId, TypeData group);
+	Optional<TypeFacture> findByIdAndGroupe(Long typeId, TypeData group);
 
 }

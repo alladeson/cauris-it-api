@@ -8,5 +8,5 @@ package com.alladeson.caurisit.security.entities;
  *
  */
 public enum TypeRole {
-	ADMIN, USER, SECRETAIRE, CAISSIER, COMMERCIALE
+	SUPER_ADMIN, ADMIN, USER, SECRETAIRE, CAISSIER, COMMERCIALE
 }

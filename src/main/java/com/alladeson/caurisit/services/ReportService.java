@@ -49,6 +49,8 @@ public class ReportService {
 		clientData.setIfu(client.getIfu());
 		clientData.setAddress(client.getAddress());
 		clientData.setContact(client.getContact());
+		clientData.setTelephone(client.getTelephone());
+		clientData.setEmail(client.getEmail());
 
 		return clientData;
 	}
@@ -84,7 +86,7 @@ public class ReportService {
 				var ts = detail.getTs();
 				var invoiceDetailTs = new InvoiceDetailData();
 				invoiceDetailTs.setNumero(++i);
-				invoiceDetailTs.setName("TS (" + (ts.getName() != null ? ts.getName() : "Taxe spécifique") + ")");
+				invoiceDetailTs.setName("TS (" + ((ts.getName() != null && !ts.getName().isBlank()) ? ts.getName() : "Taxe spécifique") + ")");
 				invoiceDetailTs.setPrix_u(Math.round(ts.getTsUnitaireTtc()));
 				invoiceDetailTs.setQte(ts.getQuantite());
 				invoiceDetailTs.setMontant_ttc(Math.round(ts.getTsTotal()) + " ["
@@ -128,7 +130,7 @@ public class ReportService {
 	 */
 	public List<InvoiceRecapData> setInvoiceRecapData(FactureResponseDgi recapdgi, Facture facture) {
 		// Récupération du typ de la facture, utile en cas de factures d'avoir
-		var fa = facture.getType().getGroup() == TypeData.FA;
+		var fa = facture.getType().getGroupe() == TypeData.FA;
 		// Instanciation de la liste InvoiceRecapData
 		List<InvoiceRecapData> recaps = new ArrayList<InvoiceRecapData>();
 		// Instancition et mise à jour de recaps
@@ -231,7 +233,7 @@ public class ReportService {
 		var invoice = new InvoiceData();
 		// Mise à jour des champs pour la facture
 		invoice.setInvoice_id(facture.getNumero());
-		invoice.setInvoice_date(facture.getDate());
+		invoice.setInvoice_date(Tool.formatDate(facture.getDate(), "dd/MM/yyyy HH:mm:ss"));
 		invoice.setInvoice_type(facture.getType().getDescription());
 		invoice.setInvoice_total(Math.round(facture.getMontantTtc()));
 		invoice.setInvoice_total_toWord(Tool.convert(Math.abs(invoice.getInvoice_total().longValue())));
@@ -269,6 +271,8 @@ public class ReportService {
 		contact.setVille(params.getVille());
 		contact.setContact(params.getContact());
 		contact.setEmcef(params.getNim());
+		contact.setTelephone(params.getTelephone());
+		contact.setEmail(params.getEmail());
 		// Renvoie du contact
 		return contact;
 	}

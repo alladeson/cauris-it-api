@@ -13,6 +13,8 @@ public class CompanyContact {
 	private String ville;
 	private String contact;
 	private String emcef;
+	private String telephone;
+	private String email;
 	/**
 	 * @return the address
 	 */
@@ -60,5 +62,29 @@ public class CompanyContact {
 	 */
 	public void setEmcef(String emcef) {
 		this.emcef = emcef;
+	}
+	/**
+	 * @return the telephone
+	 */
+	public String getTelephone() {
+		return telephone;
+	}
+	/**
+	 * @param telephone the telephone to set
+	 */
+	public void setTelephone(String telephone) {
+		this.telephone = telephone;
+	}
+	/**
+	 * @return the email
+	 */
+	public String getEmail() {
+		return email;
+	}
+	/**
+	 * @param email the email to set
+	 */
+	public void setEmail(String email) {
+		this.email = email;
 	}
 }

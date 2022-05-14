@@ -4,17 +4,13 @@
 package com.alladeson.caurisit.services;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 
 import com.alladeson.caurisit.repositories.*;
@@ -44,7 +40,8 @@ import com.alladeson.caurisit.models.entities.TypeFactureEnum;
 import com.alladeson.caurisit.models.entities.TypeSystem;
 import com.alladeson.caurisit.models.entities.User;
 import com.alladeson.caurisit.models.paylaods.FactureAutocomplete;
-import com.alladeson.caurisit.models.paylaods.FacturePayload;
+import com.alladeson.caurisit.models.paylaods.ReglementPayload;
+import com.alladeson.caurisit.models.paylaods.StatsPayload;
 import com.alladeson.caurisit.models.reports.ClientData;
 import com.alladeson.caurisit.models.reports.InvoiceData;
 import com.alladeson.caurisit.models.reports.InvoiceDetailData;
@@ -56,7 +53,7 @@ import bj.impots.dgi.auth.ApiKeyAuth;
 import bj.impots.dgi.emcf.*;
 
 /**
- * @author William
+ * @author William ALLADE
  *
  */
 @Service
@@ -135,21 +132,24 @@ public class FactureService {
 	 * @param clientId L'identifiant du client
 	 * @return {@link Facture}
 	 */
-	public Facture getFactureValidFalseByClient(Long clientId) {
-		if (clientId.equals((long) 0)) {
+	public Facture getFactureValidFalseByClient(Long clientId, Long typeId) {
+		if (clientId.equals(0l) || typeId.equals(0l)) {
 			return new Facture();
 		}
-		Optional<Client> clientOptional = clientRepos.findById(clientId);
-		if (clientOptional.isEmpty())
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Client non trouvé");
-
+		// Récupération du client
+		Client client = clientRepos.findById(clientId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Client non trouvé"));
+		// Récupération du type de la facture
+		TypeFacture tf = tfRepos.findById(typeId).orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Le type de la facture non trouvé"));
 		// Recupération de la facture du
-		Optional<Facture> optional = repository.findByClientIdAndValidFalse(clientId);
-		if (optional.isEmpty())
+		Facture facture = repository.findByClientAndTypeAndValidFalse(client, tf);
+		if (facture == null)
 			// throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Facture non
 			// trouvée");
 			return new Facture();
-		return optional.get();
+		// Renvoie de la facture
+		return facture;
 	}
 
 	/**
@@ -175,7 +175,11 @@ public class FactureService {
 	 * @return {@link List<Facture>}
 	 */
 	public List<Facture> getAll(String search) {
+		System.out.println(search);
 		// return repository.findByClientNameContaining(search);
+		if(search.equals("vide"))
+			return new ArrayList<Facture>();
+		// Sinon renvoie toutes les factures)
 		return repository.findAll();
 	}
 
@@ -189,7 +193,7 @@ public class FactureService {
 	 */
 	public List<FactureAutocomplete> getListFactureAutocomplete(Long typeId, String search) {
 		// Récupération du type de la facture d'avoir
-		TypeFacture tf = tfRepos.findByIdAndGroup(typeId, TypeData.FA).orElseThrow(
+		TypeFacture tf = tfRepos.findByIdAndGroupe(typeId, TypeData.FA).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Le type de la facture non trouvé"));
 
 		return repository.getFactureForAutocomplete(tf.getOrigine().getId(), typeId, search);
@@ -323,7 +327,7 @@ public class FactureService {
 			ts.setTsUnitaireTtc(ts.getTsTotal() / ts.getQuantite());
 			ts = tsRepos.save(ts);
 			detail.setTs(ts);
-		}else {
+		} else {
 			detail.setTaxeSpecifique(null);
 			detail.setTs(null);
 			detail.setTsTtc(null);
@@ -402,6 +406,12 @@ public class FactureService {
 		// Ajout du montant de la taxe spécifique TTC au montantTtc
 		if (facture.getTsTtc() != null)
 			facture.setMontantTtc(facture.getMontantTtc() + facture.getTsTtc());
+		// Ajout du montant aib au montantTtc de la facture
+		if (facture.getAib() != null && facture.getMontantTtc() != null) {
+			// Mise à jour du montant aib de la facture
+			facture = setFactureMontantAib(facture);
+			facture.setMontantTtc((double) (Math.round(facture.getMontantTtc()) + Math.round(facture.getMontantAib())));
+		}
 
 		// Mise à jour de l'option remise de la facture
 		var details = facture.getDetails();
@@ -462,15 +472,42 @@ public class FactureService {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Facture déjà validée");
 		// Suppression de toutes les clés étrangers orphélines du detail facture
 		// Suppression de la remise si existante
-		if (dtf.isRemise())
-			remiseRepos.delete(dtf.getDiscount());
-		// Suppression de la taxe spécifique
-		if (dtf.getTs() != null)
-			tsRepos.delete(dtf.getTs());
+		/*
+		 * Remise remise = null; if (dtf.isRemise()) { remise = dtf.getDiscount();
+		 * dtf.setDiscount(null); remiseRepos.delete(remise); } // Suppression de la
+		 * taxe spécifique TaxeSpecifique ts = null; if (dtf.getTs() != null) { ts =
+		 * dtf.getTs(); dtf.setTs(null); tsRepos.delete(ts); }
+		 */
 		// Suppression du detailFacture
 		dfRepos.delete(dtf);
-		// Calcul des montants de la facture et renvoie de cette dernière
-		return calculer(facture);
+		// Mise à jour des montants de la facture et renvoie de cette dernière
+		return this.resetFacture(facture.getId());
+	}
+
+	/**
+	 * Remettre à null les montant de la facture si cette dernière est vide, c'est à
+	 * dire ne contient aucune ligne
+	 * 
+	 * @param factureId L'identifiant de la facture
+	 * @return {@link Facture} La facture mise à jour
+	 */
+	private Facture resetFacture(Long factureId) {
+		// Récupération de la facture à valider
+		Facture facture = repository.findByIdAndValidFalse(factureId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Facture non trouvée"));
+		// Quand la facture n'est pas vide, mettre à jour les montants
+		if (!facture.getDetails().isEmpty())
+			return this.calculer(facture);
+		else { // Sinon, remettre à null tous les montant de la facture
+			facture.setAib(null);
+			facture.setMontantAib(null);
+			facture.setMontantHt(null);
+			facture.setMontantTtc(null);
+			facture.setMontantTva(null);
+			facture.setTsHt(null);
+			facture.setTsTtc(null);
+			return repository.save(facture);
+		}
 	}
 
 	/**
@@ -479,7 +516,7 @@ public class FactureService {
 	 * @param id L'identifiant de la facture
 	 * @return {@link Facture} La facture validée
 	 */
-	public Facture validerFacture(Long id, FacturePayload payload) {
+	public Facture validerFacture(Long id, ReglementPayload payload) {
 		// Récupération de la facture à valider
 		Optional<Facture> optional = repository.findByIdAndValidFalse(id);
 		if (optional.isEmpty())
@@ -493,14 +530,33 @@ public class FactureService {
 		var aibId = payload.getAibId();
 		if (aibId != null) {
 			facture = setFactureAib(facture, aibId);
+		} else { // Si l'aib est null, remettre à null une probable précédente aib
+			// Verification d'une précédente aib et la supprimer
+			if (facture.getAib() != null) {
+				facture.setAib(null);
+				facture.setMontantAib(null);
+				// Mise à jour des montants de la facture
+				facture = this.calculer(facture);
+			}
+
 		}
 
-		ReglementFacture reglement = setFactureReglement(payload);
+		// Gestion du règlement de la facture
+		ReglementFacture reglement = null;
+		// Suppression d'un probable précédent règlement de la facture
+		// Cela permet d'éviter d'avoir des règlements orphélins dans la base de données
+		if (facture.getReglement() != null) {
+			reglement = facture.getReglement();
+			facture.setReglement(null);
+			reglementRepos.delete(reglement);
+		}
+		// Nouveau règlement de la facture
+		reglement = setFactureReglement(payload);
 
 		// Mise à jour du reglement de la facture
 		facture.setReglement(reglement);
 
-		// Enregistrement et renvoie de la facture validée
+		// Pré-enregistrement de la facture
 		facture = repository.save(facture);
 
 		// Finalisation de la facture
@@ -543,7 +599,19 @@ public class FactureService {
 	private Facture setFactureAib(Facture facture, Long aibId) {
 		Taxe aib = taxeRepos.findById(aibId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aib non trouvée"));
+		// Mise à jour de l'aib
 		facture.setAib(aib);
+		// Mise à jour des montants et renvoie de la facture
+		return this.calculer(facture);
+	}
+
+	/**
+	 * Mettre à jour le montant aib de la facture
+	 * 
+	 * @param facture La facture à mettre à jour
+	 * @return {@link Facture} La facture mise à jour
+	 */
+	private Facture setFactureMontantAib(Facture facture) {
 		/**
 		 * Le montant de l'Aib est arrondi par defaut si sa partie decimale est <= 5 (je
 		 * veux dire le chiffre après la virgule), et par excès si la partie décimale
@@ -551,7 +619,7 @@ public class FactureService {
 		 * des tests sur les factures générées par le serveur de la DGI
 		 */
 		// Calcule du montant aib
-		Double montantAib = (facture.getMontantHt() * aib.getValeur()) / 100;
+		Double montantAib = (facture.getMontantHt() * facture.getAib().getValeur()) / 100;
 		// Récupération de la partie décimale
 		Double decimal = montantAib - montantAib.longValue();
 		// Si La partie decimale est null ou inférieure ou égale à 0.5, prendre la
@@ -562,12 +630,8 @@ public class FactureService {
 		// Sinon, prendre la partie entière du montant de l'aib + 1
 		else
 			facture.setMontantAib((double) ((montantAib.longValue()) + 1l));
-
-		// Mise à jour du montant ttc de la facture en y ajoutant le montantAib;
-		facture.setMontantTtc((double) (Math.round(facture.getMontantTtc()) + Math.round(facture.getMontantAib())));
-
-		// Sauvegarde et renvoie de la facture
-		return repository.save(facture);
+		// Renvoie de la facture
+		return facture;
 	}
 
 	/**
@@ -576,7 +640,7 @@ public class FactureService {
 	 * @param payload
 	 * @return
 	 */
-	private ReglementFacture setFactureReglement(FacturePayload payload) {
+	private ReglementFacture setFactureReglement(ReglementPayload payload) {
 		// Instanciation du reglement
 		ReglementFacture reglement = new ReglementFacture();
 		// Mise à jour des champs
@@ -759,6 +823,13 @@ public class FactureService {
 		} catch (ApiException e) {
 			System.err.println("Exception when calling SfeInvoiceApi");
 			e.printStackTrace();
+			if (e.getCode() == HttpStatus.UNAUTHORIZED.value())
+				throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+						"Une autorisation est réquise pour valider la facture. Veuillez contacter le fournisseur de votre SFE pour plus d'assistance. Merci !");
+			if (e.getCode() == 0)
+				throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+						"Vérifier la connexion internet de votre machine svp !");
+
 		}
 
 		// Retour de la facture
@@ -886,11 +957,11 @@ public class FactureService {
 		// Récupération du type de la facture
 		var type = facture.getType();
 		var template = "";
-		if (type.getGroup().equals(TypeData.FV)) {
+		if (type.getGroupe().equals(TypeData.FV)) {
 			template = INVOICE_REPORT_TEMPLATE_FV;
 			if (facture.isRemise())
 				template = INVOICE_REPORT_TEMPLATE_FV_REMISE;
-		} else if (type.getGroup().equals(TypeData.FA)) {
+		} else if (type.getGroupe().equals(TypeData.FA)) {
 			template = INVOICE_REPORT_TEMPLATE_FA;
 			if (facture.isRemise())
 				template = INVOICE_REPORT_TEMPLATE_FA_REMISE;
@@ -925,11 +996,11 @@ public class FactureService {
 		// Récupération du type de la facture
 		var type = facture.getType();
 		var template = "";
-		if (type.getGroup().equals(TypeData.FV)) {
+		if (type.getGroupe().equals(TypeData.FV)) {
 			template = INVOICE_REPORT_TEMPLATE_FV;
 			if (facture.isRemise())
 				template = INVOICE_REPORT_TEMPLATE_FV_REMISE;
-		} else if (type.getGroup().equals(TypeData.FA)) {
+		} else if (type.getGroupe().equals(TypeData.FA)) {
 			template = INVOICE_REPORT_TEMPLATE_FA;
 			if (facture.isRemise())
 				template = INVOICE_REPORT_TEMPLATE_FA_REMISE;
@@ -994,11 +1065,11 @@ public class FactureService {
 	 */
 	public Facture createFactureAvoir(Long typeId, Long factureId) {
 		// Récupération du type de la facture
-		TypeFacture tf = tfRepos.findByIdAndGroup(typeId, TypeData.FA).orElseThrow(
+		TypeFacture tf = tfRepos.findByIdAndGroupe(typeId, TypeData.FA).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Le type de la facture non trouvé"));
 		// Récupération de la facture d'origine
-		Facture factureOrigine = repository.findByIdAndConfirmTrue(factureId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Facture non trouvée"));
+		Facture factureOrigine = repository.findByIdAndTypeIdAndConfirmTrue(factureId, tf.getOrigine().getId())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Facture de vente non trouvée"));
 		// Tentative de récupération de la facture d'avoir associée à la facture de
 		// vente
 		if (repository.findByOrigineRef(factureOrigine.getReference()).isPresent())
@@ -1135,7 +1206,7 @@ public class FactureService {
 	 * @param id L'identifiant de la facture à valider
 	 * @return {@link Facture} La facture valider
 	 */
-	public Facture validerFactureAvoir(Long id/* , FacturePayload payload */) {
+	public Facture validerFactureAvoir(Long id) {
 		// Récupération de la facture à valider
 		Optional<Facture> optional = repository.findByIdAndValidFalse(id);
 		if (optional.isEmpty())
@@ -1146,7 +1217,7 @@ public class FactureService {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Facture vide");
 
 		var typeFacture = facture.getType();
-		if (typeFacture.getGroup() != TypeData.FA) {
+		if (typeFacture.getGroupe() != TypeData.FA) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Le type de la facture n'est pas valide");
 		}
 		// Finalisation de la facture
@@ -1178,6 +1249,80 @@ public class FactureService {
 
 		// renvoie de la facture après la finalisation
 		return facture;
+	}
+
+	/** Gestion du filtre pour la liste des facture **/
+
+	/**
+	 * Récupérer la liste des facture en fonction d'un type de facture
+	 * 
+	 * @param typeId L'identifiant du type de la facture
+	 * @return {@link List<Facture>}
+	 */
+	public List<Facture> getListByType(Long typeId) {
+		TypeFacture tf = tfRepos.findById(typeId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Type de facture non trouvé"));
+		return repository.findAllByType(tf);
+	}
+
+	/**
+	 * Récupérer la liste des factures en fonction de la date de création de ces
+	 * dernières
+	 * 
+	 * @param payload L'objet contenant les dates début et fin de la recherche
+	 * @return {@link List<Facture>}
+	 */
+	public List<Facture> getListByCreatedAt(StatsPayload payload) {
+		if (payload.getDebutAt() != null && payload.getFinAt() != null)
+			return repository.findAllByCreatedAtBetween(payload.getDebutAt(), payload.getFinAt());
+
+		throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Les dates ne sont pas correctement définies");
+	}
+
+	/**
+	 * Récupérer la liste des factures en fonction de la date de confirmation
+	 * E-MECeF/DGI de ces dernières
+	 * 
+	 * @param payload L'objet contenant les dates début et fin de la recherche
+	 * @return {@link List<Facture>}
+	 */
+	public List<Facture> getListByConfirmedDate(StatsPayload payload) {
+		if (payload.getDebut() != null && payload.getFin() != null)
+			return repository.findAllByDateNotNullAndDateBetween(payload.getDebut(), payload.getFin());
+
+		throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Les dates ne sont pas correctement définies");
+	}
+	
+	/**
+	 * Récupérer la liste des factures en fonction du type des factures et de la date de création de ces dernières
+	 * 
+	 * @param payload L'objet contenant les dates début et fin de la recherche
+	 * @return {@link List<Facture>}
+	 */
+	public List<Facture> getListByTypeAndCreatedAt(StatsPayload payload, Long typeId) {
+		TypeFacture tf = tfRepos.findById(typeId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Type de facture non trouvé"));
+		
+		if (payload.getDebutAt() != null && payload.getFinAt() != null)
+			return repository.findAllByTypeAndCreatedAtBetween(tf, payload.getDebutAt(), payload.getFinAt());
+
+		throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Les dates ne sont pas correctement définies");
+	}
+
+	/**
+	 * Récupérer la liste des factures en fonction du type des factures et de la date de confirmation E-MECeF/DGI de ces dernières
+	 * 
+	 * @param payload L'objet contenant les dates début et fin de la recherche
+	 * @return {@link List<Facture>}
+	 */
+	public List<Facture> getListByTypeAndConfirmedDate(StatsPayload payload, Long typeId) {
+		TypeFacture tf = tfRepos.findById(typeId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Type de facture non trouvé"));
+		
+		if (payload.getDebut() != null && payload.getFin() != null)
+			return repository.findAllByTypeAndDateNotNullAndDateBetween(tf, payload.getDebut(), payload.getFin());
+
+		throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Les dates ne sont pas correctement définies");
 	}
 
 }

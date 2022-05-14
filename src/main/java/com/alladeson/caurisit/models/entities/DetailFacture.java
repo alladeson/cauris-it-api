@@ -2,6 +2,7 @@ package com.alladeson.caurisit.models.entities;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -42,7 +43,7 @@ public class DetailFacture extends BaseEntity {
 	// Gestion de remise ou modification du prix de l'article
 	private boolean remise;
 	// Entité Remise : en anglais remise = discount
-	@OneToOne
+	@OneToOne(cascade = { CascadeType.REMOVE, CascadeType.PERSIST })
 	private Remise discount;
 	// Le taux de la remise
 	@Transient
@@ -61,7 +62,7 @@ public class DetailFacture extends BaseEntity {
 	private Double tsTtc;
 	// Mise en rélation avec l'entité TaxeSpécifique, utile pour l'impression et
 	// pour d'autres détails
-	@OneToOne
+	@OneToOne(cascade = { CascadeType.REMOVE, CascadeType.PERSIST })
 	private TaxeSpecifique ts;
 
 	@ManyToOne

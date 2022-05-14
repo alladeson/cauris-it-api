@@ -14,7 +14,7 @@ public class InvoiceData {
 	// Le numéro de la facture
 	private String invoice_id;
 	// La date de confirmation de la facture
-	private Date invoice_date;
+	private String invoice_date;
 	// Le type de la facture
 	private String invoice_type;
 	// Le montant total de la facture
@@ -58,14 +58,14 @@ public class InvoiceData {
 	/**
 	 * @return the invoice_date
 	 */
-	public Date getInvoice_date() {
+	public String getInvoice_date() {
 		return invoice_date;
 	}
 
 	/**
 	 * @param invoice_date the invoice_date to set
 	 */
-	public void setInvoice_date(Date invoice_date) {
+	public void setInvoice_date(String invoice_date) {
 		this.invoice_date = invoice_date;
 	}
 

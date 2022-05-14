@@ -63,10 +63,14 @@
 	<field name="ifu" class="java.lang.String"/>
 	<field name="address" class="java.lang.String"/>
 	<field name="contact" class="java.lang.String"/>
+	<field name="telephone" class="java.lang.String"/>
+	<field name="email" class="java.lang.String"/>
 	<detail>
-		<band height="128">
+		<band height="117">
 			<rectangle>
-				<reportElement x="0" y="1" width="300" height="127" backcolor="rgba(255, 255, 255, 0.0)" uuid="027529e9-6502-4325-86aa-467bdc3e0e03"/>
+				<reportElement x="0" y="1" width="300" height="116" backcolor="rgba(255, 255, 255, 0.0)" uuid="027529e9-6502-4325-86aa-467bdc3e0e03">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
 			</rectangle>
 			<staticText>
 				<reportElement mode="Opaque" x="0" y="1" width="300" height="25" forecolor="#FFFFFF" backcolor="#807878" uuid="57aed2b1-4f4e-40a3-a6ad-54dae8dd4c5a">
@@ -87,40 +91,51 @@
 				<text><![CDATA[IFU : ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="20" y="62" width="50" height="29" uuid="235bf8b6-1e1e-49c7-b59f-7a46c30b8209"/>
+				<reportElement x="20" y="64" width="50" height="18" uuid="235bf8b6-1e1e-49c7-b59f-7a46c30b8209"/>
 				<text><![CDATA[Adresse : ]]></text>
 			</staticText>
-			<staticText>
-				<reportElement x="20" y="91" width="50" height="29" uuid="665f25c2-8663-4951-b699-1ab863bdeb76"/>
-				<text><![CDATA[Contact : ]]></text>
-			</staticText>
 			<textField>
-				<reportElement x="70" y="31" width="220" height="16" uuid="3cc21d0c-33e6-43c8-973a-167865f85e4f"/>
+				<reportElement x="81" y="31" width="209" height="16" uuid="3cc21d0c-33e6-43c8-973a-167865f85e4f"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{name}  !=null ? $F{name} : ""]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="69" y="47" width="221" height="15" uuid="96691c42-99be-4a6b-b9c1-998458fe396a"/>
+				<reportElement x="81" y="47" width="209" height="15" uuid="96691c42-99be-4a6b-b9c1-998458fe396a"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ifu}  !=null ? $F{ifu} : ""]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="69" y="62" width="221" height="29" uuid="cd7f9004-1fa4-425c-9366-ea6f4634bf97"/>
+				<reportElement x="81" y="64" width="209" height="18" uuid="cd7f9004-1fa4-425c-9366-ea6f4634bf97"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{address}  !=null ? $F{address} : ""]]></textFieldExpression>
 			</textField>
+			<staticText>
+				<reportElement x="20" y="84" width="61" height="13" uuid="77e658f7-3cbc-4bf9-8ff7-cb2bed926297"/>
+				<text><![CDATA[Téléphone :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="20" y="100" width="50" height="13" uuid="d0d64f20-b493-4efb-9387-8af990fe215b"/>
+				<text><![CDATA[E-mail : ]]></text>
+			</staticText>
 			<textField>
-				<reportElement x="69" y="91" width="221" height="29" uuid="4d1ef580-3573-4859-990a-7d6418b38e8f"/>
+				<reportElement x="81" y="84" width="209" height="13" uuid="84420e4e-3648-4eb2-b586-d62ad7303eb0"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{contact}  !=null ? $F{contact} : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{telephone} != null ? $F{telephone} : ""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="81" y="100" width="209" height="13" uuid="463c0fb3-74cc-408c-94e0-b0394521a1f9"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{email} != null ? $F{email} : ""]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

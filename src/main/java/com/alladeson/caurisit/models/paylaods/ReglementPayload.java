@@ -11,7 +11,7 @@ import com.alladeson.caurisit.models.entities.TypePaiementEnum;
  * @author allad
  *
  */
-public class FacturePayload {
+public class ReglementPayload {
 
 	// aib de la facture
 	private Long aibId;

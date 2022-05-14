@@ -3,8 +3,10 @@
  */
 package com.alladeson.caurisit.repositories;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -80,4 +82,16 @@ public interface FactureRepository extends JpaRepository<Facture, Long> {
 	 * @return
 	 */
 	Facture findByClientAndTypeAndValidFalse(Client client, TypeFacture type);
+
+	Optional<Facture> findByIdAndTypeIdAndConfirmTrue(Long factureId, Long typeId);
+
+	List<Facture> findAllByType(TypeFacture type);
+
+	List<Facture> findAllByCreatedAtBetween(Instant debutAt, Instant finAt);
+
+	List<Facture> findAllByDateNotNullAndDateBetween(Date debut, Date fin);
+
+	List<Facture> findAllByTypeAndCreatedAtBetween(TypeFacture type, Instant debutAt, Instant finAt);
+
+	List<Facture> findAllByTypeAndDateNotNullAndDateBetween(TypeFacture type, Date debut, Date fin);
 }

@@ -17,6 +17,8 @@ public class ClientData {
 	private String address;
 	// Le contact du client : combinaison du telephone et de l'email
 	private String contact;
+	private String telephone;
+	private String email;
 	/**
 	 * @return the name
 	 */
@@ -64,6 +66,30 @@ public class ClientData {
 	 */
 	public void setContact(String contact) {
 		this.contact = contact;
+	}
+	/**
+	 * @return the telephone
+	 */
+	public String getTelephone() {
+		return telephone;
+	}
+	/**
+	 * @param telephone the telephone to set
+	 */
+	public void setTelephone(String telephone) {
+		this.telephone = telephone;
+	}
+	/**
+	 * @return the email
+	 */
+	public String getEmail() {
+		return email;
+	}
+	/**
+	 * @param email the email to set
+	 */
+	public void setEmail(String email) {
+		this.email = email;
 	}
 	
 }

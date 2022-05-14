@@ -16,10 +16,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.alladeson.caurisit.models.entities.FrontendLayoutSettings;
 import com.alladeson.caurisit.models.entities.Parametre;
 import com.alladeson.caurisit.models.entities.Taxe;
 import com.alladeson.caurisit.models.entities.TypeFacture;
 import com.alladeson.caurisit.models.entities.TypePaiement;
+import com.alladeson.caurisit.models.entities.User;
 import com.alladeson.caurisit.services.ParametreService;
 
 import bj.impots.dgi.emcf.InfoResponseDto;
@@ -49,8 +51,6 @@ public class ParametreController {
 	 */
 	@PostMapping("parametre/params")
 	public Parametre createParametre(@RequestBody Parametre parametre) {
-		// Mise à jour du token du param
-		parametre.setToken(parametre.getTokenTmp());
 		return paramService.createParametre(parametre);
 	}
 
@@ -202,9 +202,18 @@ public class ParametreController {
 	 * @return
 	 * @see com.alladeson.caurisit.services.ParametreService#getAllTypeFacture()
 	 */
-	@GetMapping("parametre/type-facture/vente")
+	@GetMapping("parametre/type-facture")
 	public List<TypeFacture> getAllTypeFacture() {
 		return paramService.getAllTypeFacture();
+	}
+
+	/**
+	 * @return
+	 * @see com.alladeson.caurisit.services.ParametreService#getAllTypeFactureVente()
+	 */
+	@GetMapping("parametre/type-facture/vente")
+	public List<TypeFacture> getAllTypeFactureVente() {
+		return paramService.getAllTypeFactureVente();
 	}
 
 	/**
@@ -290,4 +299,55 @@ public class ParametreController {
 	public boolean deleteTypePaiement(@PathVariable(value = "id") Long typePaiementId) {
 		return paramService.deleteTypePaiement(typePaiementId);
 	}
+
+	/**
+	 * @param layout
+	 * @return
+	 * @see com.alladeson.caurisit.services.ParametreService#createLayout(com.alladeson.caurisit.models.entities.FrontendLayoutSettings)
+	 */
+	@PostMapping("parametre/layout-settings")
+	public User createLayout(@RequestBody FrontendLayoutSettings layout) {
+		return paramService.createLayout(layout);
+	}
+
+	/**
+	 * @param layoutId
+	 * @return
+	 * @see com.alladeson.caurisit.services.ParametreService#getLayout(java.lang.Long)
+	 */
+	@GetMapping("parametre/layout-settings/{id}")
+	public FrontendLayoutSettings getLayout(@PathVariable(value = "id") Long layoutId) {
+		return paramService.getLayout(layoutId);
+	}
+
+	/**
+	 * @return
+	 * @see com.alladeson.caurisit.services.ParametreService#getAllLayout()
+	 */
+	@GetMapping("parametre/layout-settings")
+	public List<FrontendLayoutSettings> getAllLayout() {
+		return paramService.getAllLayout();
+	}
+
+	/**
+	 * @param layout
+	 * @param layoutId
+	 * @return
+	 * @see com.alladeson.caurisit.services.ParametreService#updateLayout(com.alladeson.caurisit.models.entities.FrontendLayoutSettings, java.lang.Long)
+	 */
+	@PutMapping("parametre/layout-settings/{id}")
+	public FrontendLayoutSettings updateLayout(@RequestBody FrontendLayoutSettings layout, @PathVariable(value = "id") Long layoutId) {
+		return paramService.updateLayout(layout, layoutId);
+	}
+
+	/**
+	 * @param layoutId
+	 * @return
+	 * @see com.alladeson.caurisit.services.ParametreService#deleteLayout(java.lang.Long)
+	 */
+	@DeleteMapping("parametre/layout-settings/{id}")
+	public boolean deleteLayout(@PathVariable(value = "id") Long layoutId) {
+		return paramService.deleteLayout(layoutId);
+	}
+	
 }

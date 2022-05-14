@@ -276,7 +276,6 @@ public class Parametre extends BaseEntity {
 	/**
 	 * @return the tokenTmp
 	 */
-	@JsonIgnore
 	public String getTokenTmp() {
 		return tokenTmp;
 	}

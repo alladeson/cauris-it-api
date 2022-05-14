@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import com.alladeson.caurisit.models.entities.DetailFacture;
 import com.alladeson.caurisit.models.entities.Facture;
 import com.alladeson.caurisit.models.paylaods.FactureAutocomplete;
-import com.alladeson.caurisit.models.paylaods.FacturePayload;
+import com.alladeson.caurisit.models.paylaods.ReglementPayload;
+import com.alladeson.caurisit.models.paylaods.StatsPayload;
 import com.alladeson.caurisit.services.FactureService;
 
 import net.sf.jasperreports.engine.JRException;
@@ -48,9 +49,10 @@ public class FactureController {
 	 * @param clientId
 	 * @return
 	 */
-	@GetMapping("/factures/client/{id}")
-	public Facture getFactureValidFalseByClient(@PathVariable(value = "id") Long clientId) {
-		return service.getFactureValidFalseByClient(clientId);
+	@GetMapping("/factures/client/{id}/type/{tId}")
+	public Facture getFactureValidFalseByClient(@PathVariable(value = "id") Long clientId,
+			@PathVariable(value = "tId") Long typeId) {
+		return service.getFactureValidFalseByClient(clientId, typeId);
 	}
 
 	/**
@@ -109,7 +111,7 @@ public class FactureController {
 	 * @return
 	 */
 	@PutMapping("/factures/{id}/valider")
-	public Facture validerFacture(@PathVariable(value = "id") Long id, @RequestBody FacturePayload payload) {
+	public Facture validerFacture(@PathVariable(value = "id") Long id, @RequestBody ReglementPayload payload) {
 		return service.validerFacture(id, payload);
 	}
 
@@ -192,4 +194,63 @@ public class FactureController {
 	public Facture validerFactureAvoir(@PathVariable(value = "id") Long id) {
 		return service.validerFactureAvoir(id);
 	}
+
+	/** Gestion du filtre pour la liste des facture **/
+
+	/**
+	 * @param typeId
+	 * @return
+	 * @see com.alladeson.caurisit.services.FactureService#getListByType(java.lang.Long)
+	 */
+	@GetMapping("/factures/type/{typeId}")
+	public List<Facture> getListByType(@PathVariable(value = "typeId") Long typeId) {
+		return service.getListByType(typeId);
+	}
+
+	/**
+	 * @param payload
+	 * @return
+	 * @see com.alladeson.caurisit.services.FactureService#getListByCreatedAt(com.alladeson.caurisit.models.paylaods.StatsPayload)
+	 */
+	@GetMapping("/factures/list/created-at")
+	public List<Facture> getListByCreatedAt(@RequestBody StatsPayload payload) {
+		return service.getListByCreatedAt(payload);
+	}
+
+	/**
+	 * @param payload
+	 * @return
+	 * @see com.alladeson.caurisit.services.FactureService#getListByConfirmedDate(com.alladeson.caurisit.models.paylaods.StatsPayload)
+	 */
+	@GetMapping("/factures/list/confirmed-at")
+	public List<Facture> getListByConfirmedDate(@RequestBody StatsPayload payload) {
+		return service.getListByConfirmedDate(payload);
+	}
+
+	/**
+	 * @param payload
+	 * @param typeId
+	 * @return
+	 * @see com.alladeson.caurisit.services.FactureService#getListByTypeAndCreatedAt(com.alladeson.caurisit.models.paylaods.StatsPayload,
+	 *      java.lang.Long)
+	 */
+	@GetMapping("/factures/type/{typeId}/created-at")
+	public List<Facture> getListByTypeAndCreatedAt(@RequestBody StatsPayload payload,
+			@PathVariable(value = "typeId") Long typeId) {
+		return service.getListByTypeAndCreatedAt(payload, typeId);
+	}
+
+	/**
+	 * @param payload
+	 * @param typeId
+	 * @return
+	 * @see com.alladeson.caurisit.services.FactureService#getListByTypeAndConfirmedDate(com.alladeson.caurisit.models.paylaods.StatsPayload,
+	 *      java.lang.Long)
+	 */
+	@GetMapping("/factures/type/{typeId}/confirmed-at")
+	public List<Facture> getListByTypeAndConfirmedDate(@RequestBody StatsPayload payload,
+			@PathVariable(value = "typeId") Long typeId) {
+		return service.getListByTypeAndConfirmedDate(payload, typeId);
+	}
+
 }

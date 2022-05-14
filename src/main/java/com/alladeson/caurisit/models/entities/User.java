@@ -44,6 +44,10 @@ public class User extends BaseEntity {
     // Gestion du role de l'utilisateur, utile pour la récupérer depuis le client
     private TypeRole role;
     
+   // Paramètre du frontend de l'application Cauris-iT
+    @OneToOne(cascade = { CascadeType.REMOVE, CascadeType.PERSIST })
+    private FrontendLayoutSettings layout;
+    
     /**
      * @return the id
      */
@@ -217,6 +221,20 @@ public class User extends BaseEntity {
 	 */
 	public String getTelephone() {
 		return this.account.getPhone();
+	}
+
+	/**
+	 * @return the layout
+	 */
+	public FrontendLayoutSettings getLayout() {
+		return layout;
+	}
+
+	/**
+	 * @param layout the layout to set
+	 */
+	public void setLayout(FrontendLayoutSettings layout) {
+		this.layout = layout;
 	}
 
 	/**

@@ -297,24 +297,24 @@
 				<textFieldExpression><![CDATA[$F{ste_rccm}  != null ? $F{ste_rccm} : ""]]></textFieldExpression>
 			</textField>
 			<textField pattern="EEEEE dd MMMMM yyyy">
-				<reportElement x="380" y="43" width="179" height="15" uuid="0ad78948-7af8-40dd-b7ea-bb8625e3ea9d"/>
+				<reportElement x="370" y="43" width="189" height="15" uuid="0ad78948-7af8-40dd-b7ea-bb8625e3ea9d"/>
 				<textElement textAlignment="Left"/>
 				<textFieldExpression><![CDATA["Date :  " + $F{invoice_date}]]></textFieldExpression>
 			</textField>
 			<textField pattern="EEEEE dd MMMMM yyyy">
-				<reportElement x="380" y="27" width="179" height="16" uuid="49969c74-7dc5-4ce5-84cf-be18cbf9b2e2"/>
+				<reportElement x="370" y="27" width="189" height="16" uuid="49969c74-7dc5-4ce5-84cf-be18cbf9b2e2"/>
 				<textElement textAlignment="Left"/>
 				<textFieldExpression><![CDATA["Facture #  " + $F{invoice_id}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="380" y="10" width="179" height="17" uuid="73351ae1-51db-40c1-80ff-524ba2710164"/>
+				<reportElement x="370" y="10" width="189" height="17" uuid="73351ae1-51db-40c1-80ff-524ba2710164"/>
 				<textElement textAlignment="Left">
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{invoice_type}]]></textFieldExpression>
 			</textField>
 			<textField pattern="EEEEE dd MMMMM yyyy">
-				<reportElement x="380" y="58" width="180" height="14" uuid="3da1a145-af87-4766-9feb-298dff559bb3"/>
+				<reportElement x="370" y="58" width="190" height="14" uuid="3da1a145-af87-4766-9feb-298dff559bb3"/>
 				<textElement textAlignment="Left"/>
 				<textFieldExpression><![CDATA["Vendeur :  " + $F{invoice_operator}]]></textFieldExpression>
 			</textField>

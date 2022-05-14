@@ -290,23 +290,23 @@
 				</reportElement>
 			</line>
 			<textField pattern="EEEEE dd MMMMM yyyy">
-				<reportElement x="381" y="43" width="178" height="15" uuid="bb10dbe1-0a4f-4722-9953-c163b63cf979"/>
+				<reportElement x="370" y="43" width="189" height="15" uuid="bb10dbe1-0a4f-4722-9953-c163b63cf979"/>
 				<textFieldExpression><![CDATA["Date :  " + $F{invoice_date}]]></textFieldExpression>
 			</textField>
 			<textField pattern="EEEEE dd MMMMM yyyy">
-				<reportElement x="381" y="27" width="178" height="16" uuid="3836ce65-eca3-4cad-a6de-b1818def0a2b"/>
+				<reportElement x="370" y="27" width="189" height="16" uuid="3836ce65-eca3-4cad-a6de-b1818def0a2b"/>
 				<textElement textAlignment="Left"/>
 				<textFieldExpression><![CDATA["Facture #  " + $F{invoice_id}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="381" y="10" width="178" height="17" uuid="ef38f642-e7b0-43d5-a8de-8e09fccb2531"/>
+				<reportElement x="370" y="10" width="189" height="17" uuid="ef38f642-e7b0-43d5-a8de-8e09fccb2531"/>
 				<textElement textAlignment="Left">
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{invoice_type}]]></textFieldExpression>
 			</textField>
 			<textField pattern="EEEEE dd MMMMM yyyy">
-				<reportElement x="381" y="58" width="179" height="14" uuid="2b006469-34da-488c-904a-843b1dc23a1b"/>
+				<reportElement x="370" y="58" width="190" height="14" uuid="2b006469-34da-488c-904a-843b1dc23a1b"/>
 				<textFieldExpression><![CDATA["Vendeur :  " + $F{invoice_operator}]]></textFieldExpression>
 			</textField>
 			<textField>

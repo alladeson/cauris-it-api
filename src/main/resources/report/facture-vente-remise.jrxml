@@ -255,7 +255,7 @@
 				</reportElement>
 			</line>
 			<textField>
-				<reportElement x="95" y="0" width="210" height="25" uuid="f9a89072-3677-4007-903e-25ab80d782b7">
+				<reportElement x="95" y="0" width="220" height="25" uuid="f9a89072-3677-4007-903e-25ab80d782b7">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -296,24 +296,24 @@
 				<textFieldExpression><![CDATA[$F{ste_rccm}  != null ? $F{ste_rccm} : ""]]></textFieldExpression>
 			</textField>
 			<textField pattern="EEEEE dd MMMMM yyyy">
-				<reportElement x="380" y="43" width="179" height="15" uuid="3475eddc-d1dc-4c01-bcab-7a769c978126"/>
+				<reportElement x="370" y="43" width="189" height="15" uuid="3475eddc-d1dc-4c01-bcab-7a769c978126"/>
 				<textElement textAlignment="Left"/>
 				<textFieldExpression><![CDATA["Date :  " + $F{invoice_date}]]></textFieldExpression>
 			</textField>
 			<textField pattern="EEEEE dd MMMMM yyyy">
-				<reportElement x="380" y="27" width="179" height="16" uuid="04da8326-adc1-4b33-9651-8b84d106c921"/>
+				<reportElement x="370" y="27" width="189" height="16" uuid="04da8326-adc1-4b33-9651-8b84d106c921"/>
 				<textElement textAlignment="Left"/>
 				<textFieldExpression><![CDATA["Facture #  " + $F{invoice_id}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="380" y="10" width="179" height="17" uuid="c295395e-b539-448c-8090-5b3cb572c2bb"/>
+				<reportElement x="370" y="10" width="189" height="17" uuid="c295395e-b539-448c-8090-5b3cb572c2bb"/>
 				<textElement textAlignment="Left">
 					<font isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{invoice_type}]]></textFieldExpression>
 			</textField>
 			<textField pattern="EEEEE dd MMMMM yyyy">
-				<reportElement x="380" y="58" width="180" height="14" uuid="1cbb6adc-abdf-4ed6-be57-b1c2582d35e7"/>
+				<reportElement x="370" y="58" width="190" height="14" uuid="1cbb6adc-abdf-4ed6-be57-b1c2582d35e7"/>
 				<textElement textAlignment="Left"/>
 				<textFieldExpression><![CDATA["Vendeur :  " + $F{invoice_operator}]]></textFieldExpression>
 			</textField>

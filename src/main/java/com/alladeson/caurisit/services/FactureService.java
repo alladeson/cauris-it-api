@@ -177,7 +177,7 @@ public class FactureService {
 	public List<Facture> getAll(String search) {
 		System.out.println(search);
 		// return repository.findByClientNameContaining(search);
-		if(search.equals("vide"))
+		if (search.equals("vide"))
 			return new ArrayList<Facture>();
 		// Sinon renvoie toutes les factures)
 		return repository.findAll();
@@ -308,14 +308,20 @@ public class FactureService {
 	 * @return {@link DetailFacture}
 	 */
 	private DetailFacture setTaxeSpecifique(DetailFacture detailPayload, DetailFacture detail) {
+		// Récupération d'une probable ancienne taxe spécifique
+		var ts = detail.getTs();
+		// Si la taxe spécifique est fourni alors la récupérer pour l'enregistrer
 		if (detailPayload.getTaxeSpecifique() != null) {
+			// Mise à jour des champs de TS
 			detail.setTaxeSpecifique(detailPayload.getTaxeSpecifique());
 			detail.setTsTtc(
 					(double) Math.round((detail.getTaxeSpecifique() * (100 + detail.getTaxe().getValeur())) / 100));
 			// Gestion de la taxe spécifique
-			var ts = new TaxeSpecifique();
+			// Si l'ancienne TS est null, instancier une nouvelle
+			if (ts == null)
+				ts = new TaxeSpecifique();
 			// Récupération du nom de la taxe spécifique depuis l'article
-			ts.setName(detail.getArticle().getTsName());
+			ts.setName(detailPayload.getTsName());
 			// Mise à jour des autres champs
 			ts.setQuantite(detail.getQuantite());
 			ts.setTsTotalHt(detail.getTaxeSpecifique());
@@ -331,6 +337,9 @@ public class FactureService {
 			detail.setTaxeSpecifique(null);
 			detail.setTs(null);
 			detail.setTsTtc(null);
+			// Si l'ancienne ts n'est pas null, alors la supprimer
+			if (ts != null)
+				tsRepos.delete(ts);
 		}
 		return detail;
 	}
@@ -361,19 +370,20 @@ public class FactureService {
 		// Gestion des remise
 		detail.setRemise(detailPayload.isRemise());
 		// Récupération d'une probable ancien remise
-		var ancienneRemise = detail.getDiscount();
+		var remise = detail.getDiscount();
 		if (detail.isRemise()) {
-			var remise = new Remise();
+			// Si l'ancienne remise est nulle, on instancie une nouvelle
+			if (remise == null)
+				remise = new Remise();
 			remise.setTaux(detailPayload.getTaux());
 			remise.setOriginalPrice(detailPayload.getOriginalPrice());
 			remise.setPriceModification(detailPayload.getPriceModification());
 			detail.setDiscount(remiseRepos.save(remise));
 		} else {
 			detail.setDiscount(null);
-		}
-		// Suppression de la probable ancienne remise
-		if (ancienneRemise != null) {
-			remiseRepos.delete(ancienneRemise);
+			// Suppression de la probable ancienne remise si elle n'est pas null
+			if (remise != null)
+				remiseRepos.delete(remise);
 		}
 
 		// Mise à jour de la taxe spécifique
@@ -1292,9 +1302,10 @@ public class FactureService {
 
 		throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Les dates ne sont pas correctement définies");
 	}
-	
+
 	/**
-	 * Récupérer la liste des factures en fonction du type des factures et de la date de création de ces dernières
+	 * Récupérer la liste des factures en fonction du type des factures et de la
+	 * date de création de ces dernières
 	 * 
 	 * @param payload L'objet contenant les dates début et fin de la recherche
 	 * @return {@link List<Facture>}
@@ -1302,7 +1313,7 @@ public class FactureService {
 	public List<Facture> getListByTypeAndCreatedAt(StatsPayload payload, Long typeId) {
 		TypeFacture tf = tfRepos.findById(typeId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Type de facture non trouvé"));
-		
+
 		if (payload.getDebutAt() != null && payload.getFinAt() != null)
 			return repository.findAllByTypeAndCreatedAtBetween(tf, payload.getDebutAt(), payload.getFinAt());
 
@@ -1310,7 +1321,8 @@ public class FactureService {
 	}
 
 	/**
-	 * Récupérer la liste des factures en fonction du type des factures et de la date de confirmation E-MECeF/DGI de ces dernières
+	 * Récupérer la liste des factures en fonction du type des factures et de la
+	 * date de confirmation E-MECeF/DGI de ces dernières
 	 * 
 	 * @param payload L'objet contenant les dates début et fin de la recherche
 	 * @return {@link List<Facture>}
@@ -1318,7 +1330,7 @@ public class FactureService {
 	public List<Facture> getListByTypeAndConfirmedDate(StatsPayload payload, Long typeId) {
 		TypeFacture tf = tfRepos.findById(typeId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Type de facture non trouvé"));
-		
+
 		if (payload.getDebut() != null && payload.getFin() != null)
 			return repository.findAllByTypeAndDateNotNullAndDateBetween(tf, payload.getDebut(), payload.getFin());
 

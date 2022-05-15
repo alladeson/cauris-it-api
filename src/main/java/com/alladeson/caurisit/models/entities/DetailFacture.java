@@ -60,6 +60,8 @@ public class DetailFacture extends BaseEntity {
 	private Double taxeSpecifique;
 	// Montant de la taxe spécifique TTC
 	private Double tsTtc;
+	// Pour le nom de la taxe spécifique, utile pour la personnalisation lors de l'émission de la facture de vente
+	private String tsName;
 	// Mise en rélation avec l'entité TaxeSpécifique, utile pour l'impression et
 	// pour d'autres détails
 	@OneToOne(cascade = { CascadeType.REMOVE, CascadeType.PERSIST })
@@ -389,6 +391,20 @@ public class DetailFacture extends BaseEntity {
 	 */
 	public void setTsTtc(Double tsTtc) {
 		this.tsTtc = tsTtc;
+	}
+
+	/**
+	 * @return the tsName
+	 */
+	public String getTsName() {
+		return tsName;
+	}
+
+	/**
+	 * @param tsName the tsName to set
+	 */
+	public void setTsName(String tsName) {
+		this.tsName = tsName;
 	}
 
 	/**

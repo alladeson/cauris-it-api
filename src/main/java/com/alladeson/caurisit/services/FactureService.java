@@ -1181,6 +1181,7 @@ public class FactureService {
 			var tsOriginale = detail.getTs();
 			// Instanciation et mise à jour du ts pour la ligne de la facture d'avoir
 			var ts = new TaxeSpecifique();
+			ts.setName(tsOriginale.getName());
 			ts.setQuantite(tsOriginale.getQuantite());
 			ts.setTaxe(tsOriginale.getTaxe());
 			if (tsOriginale.getTsUnitaire() != null)

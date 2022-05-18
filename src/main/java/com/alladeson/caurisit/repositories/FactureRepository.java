@@ -17,8 +17,10 @@ import org.springframework.data.repository.query.Param;
 
 import com.alladeson.caurisit.models.entities.Client;
 import com.alladeson.caurisit.models.entities.Facture;
+import com.alladeson.caurisit.models.entities.TaxeGroups;
 import com.alladeson.caurisit.models.entities.TypeFacture;
 import com.alladeson.caurisit.models.paylaods.FactureAutocomplete;
+import com.beust.jcommander.Parameter;
 
 /**
  * @author William
@@ -50,6 +52,12 @@ public interface FactureRepository extends JpaRepository<Facture, Long> {
 
 	@Query("SELECT SUM(df.tsTtc) FROM DetailFacture df WHERE df.facture=:facture")
 	Double calctsTtc(@Param("facture") Facture facture);
+	
+	@Query("SELECT (COALESCE(SUM(df.montantHt), 0) + COALESCE(SUM(df.taxeSpecifique), 0)) FROM DetailFacture df WHERE df.facture=:facture AND df.taxe.groupe NOT IN :groupe")
+	Double calcMontantHtForAib(@Param("facture") Facture facture, @Param("groupe") Collection<TaxeGroups> groupe);
+
+	@Query("SELECT COALESCE(SUM(df.taxeSpecifique), 0) FROM DetailFacture df WHERE (df.facture=:facture AND df.taxe.groupe IN :groupe2)")
+	Double calcMontantTsHtForAib(@Param("facture") Facture facture, @Param("groupe2") Collection<TaxeGroups> groupe2);
 
 	Optional<Facture> findByIdAndConfirmTrue(Long factureId);
 

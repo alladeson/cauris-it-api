@@ -26,6 +26,8 @@ public class Facture extends BaseEntity {
 	// Date de validation de la facture
 	private Date date;
 	private Double montantHt;
+	// Le montant HT pour le calcule de l'aib car l'Aib ne s'application pas à tous le groupe de taxe. Ex: C-Exportaion
+	private Double montantHtAib;
 	private Double montantTva;
 	private Double montantAib;
 	private Double montantTtc;
@@ -132,6 +134,20 @@ public class Facture extends BaseEntity {
 	 */
 	public void setMontantHt(Double montantHt) {
 		this.montantHt = montantHt;
+	}
+
+	/**
+	 * @return the montantHtAib
+	 */
+	public Double getMontantHtAib() {
+		return montantHtAib;
+	}
+
+	/**
+	 * @param montantHtAib the montantHtAib to set
+	 */
+	public void setMontantHtAib(Double montantHtAib) {
+		this.montantHtAib = montantHtAib;
 	}
 
 	/**

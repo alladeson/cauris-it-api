@@ -26,6 +26,8 @@ public class Taxe extends BaseEntity {
 	private TypeData type;
 	private TaxeGroups groupe;
 	private String libelle;
+	private String description;
+	private String abreviation;
 	private Integer valeur;
 
 	/**
@@ -85,6 +87,34 @@ public class Taxe extends BaseEntity {
 	}
 
 	/**
+	 * @return the description
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * @param description the description to set
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	/**
+	 * @return the abreviation
+	 */
+	public String getAbreviation() {
+		return abreviation;
+	}
+
+	/**
+	 * @param abreviation the abreviation to set
+	 */
+	public void setAbreviation(String abreviation) {
+		this.abreviation = abreviation;
+	}
+
+	/**
 	 * @return the valeur
 	 */
 	public Integer getValeur() {
@@ -102,7 +132,7 @@ public class Taxe extends BaseEntity {
 	 * @return the string of object
 	 */
 	public String getString() {
-		return this.groupe + " (" + this.valeur + "%) - " + this.libelle;
+		return this.libelle +  " " + this.valeur + "%";
 	}
 
 	/**

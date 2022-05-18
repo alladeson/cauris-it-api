@@ -75,42 +75,54 @@ public class SystemService {
 				var taxe = new Taxe();
 				taxe.setType(TypeData.IMPOT);
 				taxe.setGroupe(TaxeGroups.A);
-				taxe.setLibelle("Exonéré");
+				taxe.setLibelle("A-Exonéré");
+				taxe.setDescription("Exonéré");
+				taxe.setAbreviation("A-EX");
 				taxe.setValeur(0);
 				paramService.createTaxe(taxe);
 				// Groupe B
 				taxe = new Taxe();
 				taxe.setType(TypeData.IMPOT);
 				taxe.setGroupe(TaxeGroups.B);
-				taxe.setLibelle("Taxable");
+				taxe.setLibelle("B-Taxable");
+				taxe.setDescription("Taxable");
+				taxe.setAbreviation("B-TAX");
 				taxe.setValeur(18);
 				paramService.createTaxe(taxe);
 				// Groupe C
 				taxe = new Taxe();
 				taxe.setType(TypeData.IMPOT);
 				taxe.setGroupe(TaxeGroups.C);
-				taxe.setLibelle("Exportation de produits taxables");
+				taxe.setLibelle("C-Exportation");
+				taxe.setDescription("Exportation de produits taxables");
+				taxe.setAbreviation("C-EXP");
 				taxe.setValeur(0);
 				paramService.createTaxe(taxe);
 				// Groupe D
 				taxe = new Taxe();
 				taxe.setType(TypeData.IMPOT);
 				taxe.setGroupe(TaxeGroups.D);
-				taxe.setLibelle("TVA régime d'exception");
+				taxe.setLibelle("D-Exception");
+				taxe.setDescription("TVA régime d'exception");
+				taxe.setAbreviation("D-EXCEP");
 				taxe.setValeur(18);
 				paramService.createTaxe(taxe);
 				// Groupe E
 				taxe = new Taxe();
 				taxe.setType(TypeData.IMPOT);
 				taxe.setGroupe(TaxeGroups.E);
-				taxe.setLibelle("Régime fiscal TPS");
+				taxe.setLibelle("E-Régime TPS");
+				taxe.setDescription("Régime fiscal TPS");
+				taxe.setAbreviation("E-TPS");
 				taxe.setValeur(0);
 				paramService.createTaxe(taxe);
 				// Groupe F
 				taxe = new Taxe();
 				taxe.setType(TypeData.IMPOT);
 				taxe.setGroupe(TaxeGroups.F);
-				taxe.setLibelle("Réservé");
+				taxe.setLibelle("F-Réservé");
+				taxe.setDescription("Réservé");
+				taxe.setAbreviation("F-RES");
 				taxe.setValeur(0);
 				paramService.createTaxe(taxe);
 				// Groupe aibA

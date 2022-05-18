@@ -33,6 +33,7 @@ import com.alladeson.caurisit.models.entities.Parametre;
 import com.alladeson.caurisit.models.entities.ReglementFacture;
 import com.alladeson.caurisit.models.entities.Remise;
 import com.alladeson.caurisit.models.entities.Taxe;
+import com.alladeson.caurisit.models.entities.TaxeGroups;
 import com.alladeson.caurisit.models.entities.TaxeSpecifique;
 import com.alladeson.caurisit.models.entities.TypeData;
 import com.alladeson.caurisit.models.entities.TypeFacture;
@@ -386,8 +387,10 @@ public class FactureService {
 				remiseRepos.delete(remise);
 		}
 
-		// Mise à jour de la taxe spécifique
-		detail = setTaxeSpecifique(detailPayload, detail);
+		// Mise à jour de la taxe spécifique si la taxe n'est pas du groupe C :
+		// Exportation de produits taxable
+		if (taxe.getGroupe() != TaxeGroups.C)
+			detail = setTaxeSpecifique(detailPayload, detail);
 
 		// Renvoie du detailFacture
 		return detail;
@@ -402,6 +405,18 @@ public class FactureService {
 	private Facture calculer(Facture facture) {
 		// Mise à jour du montantHT
 		facture.setMontantHt(repository.calcMontantHt(facture));
+		// Mise à jour du montantHT
+		var taxeGroupe1 = new ArrayList<TaxeGroups>();
+		taxeGroupe1.add(TaxeGroups.C);
+		taxeGroupe1.add(TaxeGroups.D);
+		taxeGroupe1.add(TaxeGroups.E);
+		taxeGroupe1.add(TaxeGroups.F);
+		var taxeGroupe2 = new ArrayList<TaxeGroups>();
+		taxeGroupe2.add(TaxeGroups.D);
+		taxeGroupe2.add(TaxeGroups.E);
+		taxeGroupe2.add(TaxeGroups.F);
+		facture.setMontantHtAib(repository.calcMontantHtForAib(facture, taxeGroupe1)
+				+ repository.calcMontantTsHtForAib(facture, taxeGroupe2));
 		// Mise à jour du montantTva
 		facture.setMontantTva(repository.calcMontantTva(facture));
 		// Mise à jour du montant tsHt
@@ -417,7 +432,7 @@ public class FactureService {
 		if (facture.getTsTtc() != null)
 			facture.setMontantTtc(facture.getMontantTtc() + facture.getTsTtc());
 		// Ajout du montant aib au montantTtc de la facture
-		if (facture.getAib() != null && facture.getMontantTtc() != null) {
+		if (facture.getAib() != null && facture.getMontantTtc() != null && facture.getMontantHtAib() != null) {
 			// Mise à jour du montant aib de la facture
 			facture = setFactureMontantAib(facture);
 			facture.setMontantTtc((double) (Math.round(facture.getMontantTtc()) + Math.round(facture.getMontantAib())));
@@ -623,20 +638,29 @@ public class FactureService {
 	 */
 	private Facture setFactureMontantAib(Facture facture) {
 		/**
-		 * Le montant de l'Aib est arrondi par defaut si sa partie decimale est <= 5 (je
+		 * Le montant de l'Aib est arrondi par defaut si sa partie decimale est < 5 (je
 		 * veux dire le chiffre après la virgule), et par excès si la partie décimale
-		 * est > 5 Le code qui suit resoud cette approche que nous avons constacté lors
-		 * des tests sur les factures générées par le serveur de la DGI
+		 * est > 5
+		 *  Si la partie décimale est égle à 0.5, ambiguïté dans le calcul, il
+		 * faudrait attendre la reponse du serveur de la DGI pour prendre une décisison.
+		 * 
+		 * Le code qui suit resoud cette approche que nous avons constacté lors des
+		 * tests sur les factures générées par le serveur de la DGI
 		 */
+		// Récupération du montant ht pour l'aib
 		// Calcule du montant aib
-		Double montantAib = (facture.getMontantHt() * facture.getAib().getValeur()) / 100;
+		Double montantAib = (facture.getMontantHtAib() * facture.getAib().getValeur()) / 100;
 		// Récupération de la partie décimale
 		Double decimal = montantAib - montantAib.longValue();
 		// Si La partie decimale est null ou inférieure ou égale à 0.5, prendre la
 		// partie
 		// entière du montant l'aib
-		if (decimal.equals(0d) || decimal <= 0.5)
+		if (decimal.equals(0d))
 			facture.setMontantAib((double) (montantAib.longValue()));
+		// Sinon si le decimal est égale à 0.5, ambiguïté dans le calcul, il faudrait
+		// attendre la reponse du serveur de la DGI pour prendre une décisison
+		else if (decimal.equals(0.5d))
+			facture.setMontantAib(montantAib);
 		// Sinon, prendre la partie entière du montant de l'aib + 1
 		else
 			facture.setMontantAib((double) ((montantAib.longValue()) + 1l));
@@ -875,6 +899,16 @@ public class FactureService {
 
 		// Enregistre de la response du serveur
 		frRepos.save(factRespo);
+		// Gestion de conformité du montant total avec le serveur de la DGI
+		Double totalDGI = (double) invoiceResponseDto.getTotal();
+		Double totalFacture = facture.getMontantTtc();
+		if (facture.getType().getGroupe() != TypeData.FA && !totalFacture.equals(totalDGI)) {
+			facture.setMontantTtc(totalDGI);
+			var reglement = facture.getReglement();
+			reglement.setMontantPayer(totalDGI.intValue());
+			reglement.setMontantRendu(reglement.getMontantRecu() - reglement.getMontantPayer());
+			reglementRepos.save(reglement);
+		}
 		// Retour de la facture
 		return facture;
 	}

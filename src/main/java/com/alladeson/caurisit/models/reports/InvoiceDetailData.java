@@ -6,6 +6,8 @@ public class InvoiceDetailData {
 	private int numero;
 	// La désignation de l'article
 	private String name;
+	// La taxe (en abréviation) de l'article
+	private String taxe;
 	// Le prix unitaire ttc de l'article
 	private Long prix_u;
 	// La quantité de l'article
@@ -41,6 +43,20 @@ public class InvoiceDetailData {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * @return the taxe
+	 */
+	public String getTaxe() {
+		return taxe;
+	}
+
+	/**
+	 * @param taxe the taxe to set
+	 */
+	public void setTaxe(String taxe) {
+		this.taxe = taxe;
 	}
 
 	/**

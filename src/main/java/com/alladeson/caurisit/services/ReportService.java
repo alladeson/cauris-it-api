@@ -75,6 +75,7 @@ public class ReportService {
 //			System.out.println("Id de ligne de la facture : " + detail.getId());
 			invoiceDetail.setNumero(i);
 			invoiceDetail.setName(detail.getName());
+			invoiceDetail.setTaxe(detail.getTaxe().getAbreviation());
 			invoiceDetail.setPrix_u(detail.getPrixUnitaire().longValue());
 			invoiceDetail.setQte(detail.getQuantite());
 			invoiceDetail.setMontant_ttc(
@@ -87,6 +88,7 @@ public class ReportService {
 				var invoiceDetailTs = new InvoiceDetailData();
 				invoiceDetailTs.setNumero(++i);
 				invoiceDetailTs.setName("TS (" + ((ts.getName() != null && !ts.getName().isBlank()) ? ts.getName() : "Taxe spécifique") + ")");
+				invoiceDetailTs.setTaxe(ts.getTaxe().getAbreviation());
 				invoiceDetailTs.setPrix_u(Math.round(ts.getTsUnitaireTtc()));
 				invoiceDetailTs.setQte(ts.getQuantite());
 				invoiceDetailTs.setMontant_ttc(Math.round(ts.getTsTotal()) + " ["
@@ -95,7 +97,9 @@ public class ReportService {
 			}
 			// Gestion de la remise
 			if(detail.isRemise()) {
-				invoiceDetail.setRemise(detail.getDiscount().getTaux() + "%");
+				var discount = detail.getDiscount();
+				invoiceDetail.setRemise(discount.getTaux() + "%");
+				invoiceDetail.setPrix_u(discount.getOriginalPrice().longValue());
 			}
 			i++;
 		}
@@ -114,7 +118,7 @@ public class ReportService {
 		// Intanciation de InvoicePayement
 		InvoicePayement payement = new InvoicePayement();
 		// Mise à jour des champs
-		payement.setType_payement(reglement.getTypePaiement().getType().name());
+		payement.setType_payement(reglement.getTypePaiement().getDescription());
 		payement.setMontant(reglement.getMontantRecu().longValue());
 		payement.setPayer(reglement.getMontantPayer().longValue());
 		payement.setRendu(reglement.getMontantRendu().longValue());

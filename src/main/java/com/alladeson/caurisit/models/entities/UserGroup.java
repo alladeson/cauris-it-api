@@ -3,8 +3,8 @@
  */
 package com.alladeson.caurisit.models.entities;
 
+import com.alladeson.caurisit.security.entities.TypeRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-//import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,26 +13,33 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 
 /**
- * @author TechDigita
+ * @author William ALLADE
  *
  */
-//@Entity
-public class UserGroup {
+@Table(uniqueConstraints = { 
+		@UniqueConstraint(name = "UniqueName", columnNames = { "name" })
+		})
+@Entity
+public class UserGroup extends BaseEntity {
 
-	public static final String SA = "SA";
-
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5936237106297268500L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	@NotBlank
-	@Column(unique = true)
+	@Column(nullable = false)
 	private String name;
 	private String description;
 	@JsonIgnore
 	@OneToMany(mappedBy = "group")
 	private List<User> users;
-//	@OneToMany(mappedBy = "group")
-//	private List<Access> access;
+	@JsonIgnore
+	@OneToMany(mappedBy = "group", orphanRemoval = true, cascade = CascadeType.PERSIST)
+	private List<Access> access;
+	// Le Rôle tient lieu du profil utilisateur, c'est le type de l'utilisateur
+	private TypeRole role;
 
 	/**
 	 * @return the id
@@ -74,7 +81,7 @@ public class UserGroup {
 	 * @return the users
 	 */
 	public List<User> getUsers() {
-		if(this.users == null)
+		if (this.users == null)
 			return new ArrayList<User>();
 		return users;
 	}
@@ -84,5 +91,35 @@ public class UserGroup {
 	 */
 	public void setUsers(List<User> users) {
 		this.users = users;
-	}	
+	}
+
+	/**
+	 * @return the access
+	 */
+	public List<Access> getAccess() {
+		if (this.access == null)
+			this.access = new ArrayList<Access>();
+		return access;
+	}
+
+	/**
+	 * @param access the access to set
+	 */
+	public void setAccess(List<Access> access) {
+		this.access = access;
+	}
+
+	/**
+	 * @return the role
+	 */
+	public TypeRole getRole() {
+		return role;
+	}
+
+	/**
+	 * @param role the role to set
+	 */
+	public void setRole(TypeRole role) {
+		this.role = role;
+	}
 }

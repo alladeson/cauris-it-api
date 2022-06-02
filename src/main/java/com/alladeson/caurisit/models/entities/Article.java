@@ -3,17 +3,21 @@
  */
 package com.alladeson.caurisit.models.entities;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 //import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /**
  * @author allad
  *
  */
+@Table(uniqueConstraints = { @UniqueConstraint(name = "UniqueDesignation", columnNames = { "designation" }) })
 @Entity
 public class Article extends BaseEntity {
 
@@ -25,6 +29,7 @@ public class Article extends BaseEntity {
 	@Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+	@Column(nullable = false)
 	private String designation;
 	private Double prix;
 	private Double stock;

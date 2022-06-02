@@ -3,16 +3,26 @@
  */
 package com.alladeson.caurisit.models.entities;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 //import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /**
  * @author William
  *
  */
+@Table(uniqueConstraints = { 
+		@UniqueConstraint(name = "UniqueIfu", columnNames = { "ifu" }),
+		@UniqueConstraint(name = "UniqueName", columnNames = { "name" }),
+		@UniqueConstraint(name = "UniqueRcm", columnNames = { "rcm" }),
+		@UniqueConstraint(name = "UniquePhone", columnNames = { "telephone" }),
+		@UniqueConstraint(name = "UniqueEmail", columnNames = { "email" })
+		})
 @Entity
 public class Client extends BaseEntity {
 
@@ -26,6 +36,7 @@ public class Client extends BaseEntity {
 	private Long id;
 
 	private String ifu;
+	@Column(nullable = false)
 	private String name;
 	private String telephone;
 	private String email;
@@ -189,10 +200,10 @@ public class Client extends BaseEntity {
 	 */
 	public String getContact() {
 		String contact = "";
-		if (!this.telephone.isBlank())
+		if (this.telephone != null)
 			contact += this.telephone;
-		if (!this.email.isBlank()) {
-			if (!this.telephone.isBlank())
+		if (this.email != null) {
+			if (this.telephone != null)
 				contact += "," + this.email;
 			else
 				contact += this.email;

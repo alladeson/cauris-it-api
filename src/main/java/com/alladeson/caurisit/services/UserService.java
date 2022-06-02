@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.alladeson.caurisit.config.AppConfig;
 import com.alladeson.caurisit.models.entities.*;
 import com.alladeson.caurisit.models.paylaods.SignupRequest;
-import com.alladeson.caurisit.repositories.FrontendLayoutSettingsRepository;
+import com.alladeson.caurisit.repositories.UserGroupRepository;
 import com.alladeson.caurisit.repositories.UserRepository;
 import com.alladeson.caurisit.security.core.AccountService;
 import com.alladeson.caurisit.security.core.PasswordPayload;
@@ -12,9 +12,11 @@ import com.alladeson.caurisit.security.core.PasswordResetPayload;
 import com.alladeson.caurisit.security.core.RoleService;
 import com.alladeson.caurisit.security.entities.Account;
 import com.alladeson.caurisit.security.entities.Role;
+import com.alladeson.caurisit.security.entities.TypeRole;
 import com.alladeson.caurisit.utils.Tool;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.*;
 
 @Service
@@ -34,24 +37,32 @@ public class UserService {
 	@Autowired
 	private UserRepository repository;
 	@Autowired
+	private UserGroupRepository groupeRepos;
+	@Autowired
 	private PasswordEncoder passwordEncoder;
 	@Autowired
 	private AccountService accountService;
 	@Autowired
 	private RoleService roleService;
 	@Autowired
-	private FileService fileService;
+	private AccessService accessService;
 	@Autowired
-	private AppConfig config;
+	private AuditService auditService;
 	@Autowired
 	private Tool tool;
 	@Autowired
-	private FrontendLayoutSettingsRepository layoutRepos;
+	private FileService fileService;
+	@Autowired
+	private AppConfig config;
 
 	public List<User> getAll() {
+//		return repository.findByGroupProfileIdNot(UserProfiles.SA);
 		return repository.findAll();
 	}
 
+	public List<User> getAllForAdmin() {
+		return repository.findAllByRoleNot(TypeRole.SUPER_ADMIN);
+	}
 	public User find(Long id) {
 		return repository.findById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé"));
@@ -65,7 +76,14 @@ public class UserService {
 		return this.getAuthenticated();
 	}
 
-	public User create(User user) throws JsonProcessingException {
+	public User create(User user, Long groupeId) throws JsonProcessingException {
+		// Check permission
+		if (!accessService.canWritable(Feature.accessCtrlUser))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+		
+		UserGroup groupe = groupeRepos.findById(groupeId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Groupe d'utilisateur non trouvé"));
+
 		// vérifie la disponibilité de l'identifiant
 		if (accountService.existsByUsername(user.getUsername()))
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Identifiant non disponible");
@@ -79,7 +97,9 @@ public class UserService {
 		var u = new User();
 		u.setDefaultPassword(user.getDefaultPassword());
 		u.setPassword(passwordEncoder.encode(u.getDefaultPassword()));
-		u = this.save(user, u);
+		u = this.save(user, u, groupe);
+		
+		auditService.traceChange(Operation.USER_CREATE, null, u);
 
 //        if (StringUtils.hasText(u.getEmail())) {
 //            // envoie un mail d'activation du compte
@@ -87,18 +107,60 @@ public class UserService {
 //        }
 		return u;
 	}
+	
+	/**
+	 * @param article
+	 * @return
+	 */
+	private User saveUser(User user, boolean delete) {
+		try {
+			if (delete)
+				repository.delete(user);
+			else
+				user = repository.save(user);
+		} catch (Exception e) {
+			// Contrainte d'unicité
+			if (e.getCause() instanceof ConstraintViolationException) {
+				// Récupération du vrai cause de l'exception
+				SQLIntegrityConstraintViolationException exception = (SQLIntegrityConstraintViolationException) (e
+						.getCause()).getCause();
+				exception.printStackTrace();
+				if (delete && exception.getMessage().contains("foreign key constraint"))
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+							"Cet d'utilisateur est déjà associé à d'autres données");
+//				else if (exception.getMessage().contains("UniqueName"))
+//					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Un autre utilisateur porte déjà le mêm nom");
+//				else if (exception.getMessage().contains("ne peut être vide"))
+//					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Le nom du group utilisateur ne peut être vide");
+				else
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN, exception.getMessage());
 
-	public User update(Long id, User user) throws JsonProcessingException {
+			} else
+				throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
+		}
+		return user;
+	}
+
+	public User update(Long id, User user, Long groupeId) throws JsonProcessingException {
 		logger.info(">> update");
 		logger.info("---> id: {} - user: {}", id, user);
+
+		// Check permission
+		if (!accessService.canWritable(Feature.accessCtrlUser))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
 
 		// récupère l'utilisateur
 		var user1 = repository.findById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé"));
+		
+		UserGroup groupe = groupeRepos.findById(groupeId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Groupe d'utilisateur non trouvé"));
 
 		// vérifie la disponibilité de l'identifiant s'il a été modifié
 		if (!user.getUsername().equals(user1.getUsername()) && accountService.existsByUsername(user.getUsername()))
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Identifiant non disponible");
+		
+		String valAvant = tool.toJson(user1);
 
 		// génère un mot de passe par défaut s'il n'est pas fourni
 		if (StringUtils.hasText(user.getDefaultPassword())) {
@@ -106,7 +168,11 @@ public class UserService {
 			user1.setPassword(passwordEncoder.encode(user1.getDefaultPassword()));
 		}
 
-		user1 = save(user, user1);
+		user1 = save(user, user1, groupe);
+		
+		String valApres = tool.toJson(user1);
+		
+		auditService.traceChange(Operation.USER_UPDATE, valAvant, valApres);
 
 		return user1;
 	}
@@ -115,19 +181,20 @@ public class UserService {
 		return repository.save(user);
 	}
 
-	private User save(User user, User user1) {
+	private User save(User user, User user1, UserGroup groupe) {
 		user1.setUsername(user.getUsername());
 		user1.setEmail(user.getEmail());
 		user1.setFirstname(user.getFirstname());
 		user1.setLastname(user.getLastname());
 		user1.setPhone(user.getPhone());
-		user1.setRole(user.getRole());
+		user1.setRole(groupe.getRole());
 		user1.setEmail(user.getEmail());
+		user1.setGroup(groupe);
 
 		var account = user1.getAccount();
 		if (account.getRoles().isEmpty()) {
-			var role = roleService.findByName(user.getRole().name())
-					.orElseGet(() -> roleService.save(new Role(user.getRole().name())));
+			var role = roleService.findByName(groupe.getRole().name())
+					.orElseGet(() -> roleService.save(new Role(groupe.getRole().name())));
 			account.setRoles(Collections.singleton(role));
 //            account.setEnabled(true);
 			// account.setEnabled(false);
@@ -135,15 +202,23 @@ public class UserService {
 		}
 		account = accountService.save(account);
 		user1.setAccount(account);
-		return repository.save(user1);
+		return saveUser(user1, false);
 	}
 
 	public boolean delete(Long id) throws JsonProcessingException {
+
+		// Check permission
+		if (!accessService.canDeletable(Feature.accessCtrlUser))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		// récupère l'utilisateur
 		var user = repository.findById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé"));
 
-		repository.delete(user);
+		auditService.traceChange(Operation.USER_DELETE, user, null);
+		
+//		repository.delete(user);
+		user = saveUser(user, true);
 		accountService.delete(user.getAccount());
 
 		return true;
@@ -170,17 +245,24 @@ public class UserService {
 	}
 
 	public User login() throws JsonProcessingException {
-		var u = this.getAuthenticated();
-		return u;
-	}
+        var u = this.getAuthenticated();
 
-	public User logout() throws JsonProcessingException {
-		var u = this.getAuthenticated();
+        auditService.traceChange(Operation.USER_LOGIN, u, null);
+        return u;
+    }
 
-		return u;
-	}
+    public User logout() throws JsonProcessingException {
+        var u = this.getAuthenticated();
 
-	public User register(SignupRequest signup) {
+        auditService.traceChange(Operation.USER_LOGOUT, u, null);
+        return u;
+    }
+
+	public User register(SignupRequest signup, Long groupeId) {
+		
+		UserGroup groupe = groupeRepos.findById(groupeId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Groupe d'utilisateur non trouvé"));
+		
 		// vérifie la disponibilité de l'identifiant
 		if (accountService.existsByUsername(signup.getUsername()))
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Identifiant non disponible");
@@ -195,7 +277,7 @@ public class UserService {
 		compte.setPassword(passwordEncoder.encode(signup.getPassword()));
 		compte.setEmail(signup.getEmail());
 		compte.setPhone(signup.getPhone());
-		u = save(signup, u);
+		u = save(signup, u, groupe);
 
 		// envoie un mail d'activation du compte
 		this.sendMail(u, config.getMailSignupRequestTitle(), "signup-request");
@@ -214,7 +296,7 @@ public class UserService {
 //    public User activateAccount(String accountId) {
 //        // var account = accountService.confirm(accountId);
 //        var account = accountService.getById(accountId);
-//        if (account.isEnabled()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+//        if (account.isEnabled()) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
 //        var user = repository.findByAccountId(account.getId()).orElseThrow(
 //                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé")
 //        );
@@ -244,7 +326,7 @@ public class UserService {
 //        );
 //        // var account = accountService.confirm(accountId);
 //        var account = user1.getAccount();
-//        //if (account.isEnabled()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+//        //if (account.isEnabled()) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
 //        var user = repository.findByAccountId(account.getId()).orElseThrow(
 //                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé")
 //        );
@@ -294,7 +376,8 @@ public class UserService {
 			this.sendMail(user, config.getMailSignupSuccessTitle(), "signup-success");
 
 			String valApres = tool.toJson(account);
-//            auditService.traceChange(Operation.USER_ACTIVATE, valAvant, valApres);
+			
+            auditService.traceChange(Operation.USER_ACTIVATE, valAvant, valApres);
 
 			return user;
 		} finally {
@@ -321,11 +404,12 @@ public class UserService {
 
 			user.setDefaultPassword(reset.getDefaultPassword());
 			user.setPassword(passwordEncoder.encode(user.getDefaultPassword()));
-//            account.setPasswordEnabled(false);
+			// account.setPasswordEnabled(false);
 			accountService.save(account);
-
+			
 			String valApres = tool.toJson(user);
-//            auditService.traceChange(Operation.USER_DEACTIVATE, valAvant, valApres);
+			
+            auditService.traceChange(Operation.USER_DEACTIVATE, valAvant, valApres);
 
 			return user;
 		} finally {
@@ -336,6 +420,8 @@ public class UserService {
 	public User changePassword(PasswordPayload password) {
 		var user = this.getAuthenticated();
 		var account = user.getAccount();
+		
+		String valAvant = tool.toJson(account);
 
 		if (!passwordEncoder.matches(password.getOld(), account.getPassword())) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ancien mot de passe incorrect.");
@@ -345,7 +431,12 @@ public class UserService {
 		}
 
 		account.setPassword(passwordEncoder.encode(password.getNew()));
-		accountService.save(account);
+		account = accountService.save(account);
+		
+		String valApres = tool.toJson(account);
+		
+        auditService.traceChange(Operation.USER_PASSWORD_CHANGE, valAvant, valApres);
+        
 		return user;
 	}
 

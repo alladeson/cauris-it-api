@@ -16,6 +16,9 @@ import java.util.Collection;
  * @author TechDigita
  *
  */
+//@Table(uniqueConstraints = { 
+//		@UniqueConstraint(name = "UniqueName", columnNames = { "name" })
+//		})
 @Entity
 public class User extends BaseEntity {
 
@@ -36,8 +39,8 @@ public class User extends BaseEntity {
     @JsonIgnore
     @OneToOne
     private Account account;
-//    @ManyToOne
-//    private UserGroup group;
+    @ManyToOne
+    private UserGroup group;
 //    @ManyToOne
 //    private Structure structure;
     
@@ -162,20 +165,20 @@ public class User extends BaseEntity {
         return firstname + " " + lastname;
     }
 
-//    /**
-//     * @return the group
-//     */
-//    public UserGroup getGroup() {
-//        if (group == null) group = new UserGroup();
-//        return group;
-//    }
-//
-//    /**
-//     * @param group the group to set
-//     */
-//    public void setGroup(UserGroup group) {
-//        this.group = group;
-//    }
+    /**
+     * @return the group
+     */
+    public UserGroup getGroup() {
+        if (group == null) group = new UserGroup();
+        return group;
+    }
+
+    /**
+     * @param group the group to set
+     */
+    public void setGroup(UserGroup group) {
+        this.group = group;
+    }
 //
 //    /**
 //     * @return the structure
@@ -243,6 +246,22 @@ public class User extends BaseEntity {
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
+	
+	/**
+	 * 
+	 * @return true if super_admin, else false
+	 */
+	public boolean isSA() {
+        return this.role == TypeRole.SUPER_ADMIN;
+    }
+
+	/**
+	 * 
+	 * @return true if admin, else false
+	 */
+    public boolean isAdmin() {
+        return this.role == TypeRole.ADMIN;
+    }
     
     
 

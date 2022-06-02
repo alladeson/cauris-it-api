@@ -14,6 +14,10 @@ import java.util.List;
 import java.util.Optional;
 
 import com.alladeson.caurisit.repositories.*;
+import com.alladeson.caurisit.security.core.AccountService;
+import com.alladeson.caurisit.security.entities.Account;
+import com.alladeson.caurisit.utils.Tool;
+
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
@@ -29,6 +33,8 @@ import com.alladeson.caurisit.models.entities.DetailFacture;
 import com.alladeson.caurisit.models.entities.Facture;
 import com.alladeson.caurisit.models.entities.FactureFinalisationDgi;
 import com.alladeson.caurisit.models.entities.FactureResponseDgi;
+import com.alladeson.caurisit.models.entities.Feature;
+import com.alladeson.caurisit.models.entities.Operation;
 import com.alladeson.caurisit.models.entities.Parametre;
 import com.alladeson.caurisit.models.entities.ReglementFacture;
 import com.alladeson.caurisit.models.entities.Remise;
@@ -90,7 +96,17 @@ public class FactureService {
 	private ReportService reportService;
 
 	@Autowired
-	private UserService userService;
+	private UserRepository userRepository;
+
+	@Autowired
+	private AccountService accountService;
+
+	@Autowired
+	private AccessService accessService;
+	@Autowired
+	private AuditService auditService;
+	@Autowired
+	private Tool tool;
 
 	private static final String INVOICE_REPORT_BASE_NAME = "facture-";
 	private static final String INVOICE_REPORT_TEMPLATE_FV = "report/facture-vente.jrxml";
@@ -99,12 +115,27 @@ public class FactureService {
 	private static final String INVOICE_REPORT_TEMPLATE_FA_REMISE = "report/facture-avoir-remise.jrxml";
 
 	/**
+	 * Récupération de l'utilisateur connecté
+	 * 
+	 * @return {@link User}
+	 */
+	private User getAuthenticated() {
+		Account account = accountService.getAuthenticated();
+		return userRepository.findByAccount(account)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé"));
+	}
+
+	/**
 	 * Récupère une facture dont l'identifiant est renseigné
 	 * 
 	 * @param id L'identifiant de la facture
 	 * @return {@link Facture}
 	 */
 	public Facture get(Long id) {
+		// Check permission
+		if (!accessService.canReadable(Feature.facturationListe))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		if (id.equals((long) 0)) {
 			return new Facture();
 		}
@@ -121,6 +152,10 @@ public class FactureService {
 	 * @return {@link Facture}
 	 */
 	public Facture getFactureByReference(String reference) {
+		// Check permission
+		if (!accessService.canReadable(Feature.facturationListe))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		Optional<Facture> optional = repository.findByReferenceAndConfirmTrue(reference);
 		if (optional.isEmpty())
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Facture non trouvée");
@@ -134,6 +169,10 @@ public class FactureService {
 	 * @return {@link Facture}
 	 */
 	public Facture getFactureValidFalseByClient(Long clientId, Long typeId) {
+		// Check permission
+		if (!accessService.canReadable(Feature.facturationListe))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		if (clientId.equals(0l) || typeId.equals(0l)) {
 			return new Facture();
 		}
@@ -160,6 +199,10 @@ public class FactureService {
 	 * @return {@link List<Facture>}
 	 */
 	public List<Facture> getFactureValidTrueByClient(Long clientId) {
+		// Check permission
+		if (!accessService.canReadable(Feature.facturationListe))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		Optional<Client> clientOptional = clientRepos.findById(clientId);
 		if (clientOptional.isEmpty())
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Client non trouvé");
@@ -176,7 +219,11 @@ public class FactureService {
 	 * @return {@link List<Facture>}
 	 */
 	public List<Facture> getAll(String search) {
-		System.out.println(search);
+		// Check permission
+		if (!accessService.canReadable(Feature.facturationListe))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
+		// System.out.println(search);
 		// return repository.findByClientNameContaining(search);
 		if (search.equals("vide"))
 			return new ArrayList<Facture>();
@@ -193,6 +240,10 @@ public class FactureService {
 	 * @return {@link List<FactureAutocomplete>}
 	 */
 	public List<FactureAutocomplete> getListFactureAutocomplete(Long typeId, String search) {
+		// Check permission
+		if (!accessService.canReadable(Feature.facturationListe))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		// Récupération du type de la facture d'avoir
 		TypeFacture tf = tfRepos.findByIdAndGroupe(typeId, TypeData.FA).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Le type de la facture non trouvé"));
@@ -208,6 +259,10 @@ public class FactureService {
 	 * @return {@link DetailFacture}
 	 */
 	public DetailFacture getDetailFacture(Long factureId, Long detailId) {
+		// Check permission
+		if (!accessService.canReadable(Feature.facturationListe))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		if (detailId.equals((long) 0) || factureId.equals((long) 0)) {
 			return new DetailFacture();
 		}
@@ -226,6 +281,10 @@ public class FactureService {
 	 * @return
 	 */
 	public DetailFacture getDetailFactureByArticle(Long factureId, Long articleId) {
+		// Check permission
+		if (!accessService.canReadable(Feature.facturationListe))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		if (factureId.equals((long) 0) || factureId.equals((long) 0)) {
 			return new DetailFacture();
 		}
@@ -249,6 +308,10 @@ public class FactureService {
 	 * @return {@link Facture}
 	 */
 	public Facture ajouterDetailFacture(Long clientId, Long articleId, DetailFacture detailPayload) {
+		// Check permission
+		if (!accessService.canWritable(Feature.facturationFV))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		// Récupération du client
 		Client client = clientRepos.findById(clientId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Client non trouvé"));
@@ -262,18 +325,24 @@ public class FactureService {
 			tf = tfRepos.findById(detailPayload.getTfId()).orElseThrow(
 					() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Le type de facture non trouvé"));
 		} else {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Le type de facture non défini");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le type de facture non défini");
 		}
+
+		// Gestion audit : valeurAvant
+		String valAvant = null;
 
 		// Récupération de la facture non validée du client en fonction du type de
 		// facture et du client
 		Facture facture = repository.findByClientAndTypeAndValidFalse(client, tf);
 		//
 		if (facture == null) {
+			valAvant = null;
 			facture = new Facture();
 			facture.setClient(client);
 			facture.setType(tf);
 			facture = repository.save(facture);
+		} else {
+			valAvant = tool.toJson(facture);
 		}
 
 		// Instanciation d'un detailFacture
@@ -300,7 +369,14 @@ public class FactureService {
 		detail = dfRepos.save(detail);
 		// Calcule et mise à jour des montants de la facture
 		// Renvoie de la facture
-		return calculer(facture);
+		facture = calculer(facture);
+		// Gestion audit : valeurApres
+		String valApres = tool.toJson(facture);
+		// Enregisterment de l'audit
+		auditService.traceChange(valAvant == null ? Operation.FACTURATION_CREATE : Operation.FACTURATION_UPDATE,
+				valAvant, valApres);
+		// Renvoie de la facture
+		return facture;
 	}
 
 	/**
@@ -354,7 +430,7 @@ public class FactureService {
 	private DetailFacture setDetailFacture(DetailFacture detailPayload, Article article, DetailFacture detail) {
 		// Récupération et mise à jour de la taxe
 		if (detailPayload.getTaxeId() == null)
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Taxe non précisée");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Taxe non précisée");
 		Taxe taxe = taxeRepos.findById(detailPayload.getTaxeId())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Taxe non trouvée"));
 		detail.setTaxe(taxe);
@@ -461,17 +537,32 @@ public class FactureService {
 	 * @return {@link Facture} La facture du DetailFacture
 	 */
 	public Facture validerDetailFacture(Long factureId, Long detailId) {
+		// Check permission
+		if (!accessService.canWritable(Feature.facturationListe))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		// Récupération du DetailFacture à valider
 		Optional<DetailFacture> optional = dfRepos.findByFactureIdAndId(factureId, detailId);
 		if (optional.isEmpty())
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Lingne de la facture non trouvée");
 		DetailFacture df = optional.get();
+		// Gestion audit : valeurAvant
+		String valAvant = tool.toJson(df);
+
 		// Validation du detailFacture
 		df.setValid(true);
 		// Mise à jour du personnel qui met à jour (qui valide le detailFacture)
 		// df.setUpdatedBy(getAuthPersonnel());
 		// Enregistrement et renvoie de la facture
 		df = dfRepos.save(df);
+
+		// Gestion audit : valeurApres
+		String valApres = tool.toJson(df);
+
+		// Enregistrement de l'audit
+		auditService.traceChange(Operation.FACTURATION_DETAIL_VALIDATE, valAvant, valApres);
+
+		// Renvoie de la facture
 		return df.getFacture();
 	}
 
@@ -482,19 +573,28 @@ public class FactureService {
 	 * @return {@link Facture}
 	 */
 	public Facture deleteDetailFacture(Long factureId, Long detailId) {
+		// Check permission
+		if (!accessService.canDeletable(Feature.facturationListe))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		// Récupération du detailFacture à supprimer
 		Optional<DetailFacture> optional = dfRepos.findByFactureIdAndId(factureId, detailId);
 		if (optional.isEmpty())
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ligne de la facture non trouvée");
 		DetailFacture dtf = optional.get();
+		// Gestion audit : valeurAvant
+		String valAvant = tool.toJson(dtf);
 		// Récupération de la facture
 		Facture facture = dtf.getFacture();
+		//Vérification du type de la facture
+		if(facture.getType().getGroupe().equals(TypeData.FA))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vous ne pouvez supprimer les lignes d'une facture d'avoir");
 		// Vérifier si le detailFacture n'est pas encore validé
 		if (dtf.isValid())
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ligne de la facture déjà validée");
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Ligne de la facture déjà validée");
 		// Vérification si la facture n'est pas encore valider
 		if (facture.isValid())
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Facture déjà validée");
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Facture déjà validée");
 		// Suppression de toutes les clés étrangers orphélines du detail facture
 		// Suppression de la remise si existante
 		/*
@@ -505,6 +605,10 @@ public class FactureService {
 		 */
 		// Suppression du detailFacture
 		dfRepos.delete(dtf);
+
+		// Enregistrement de l'audit
+		auditService.traceChange(Operation.FACTURATION_DETAIL_DELETE, valAvant, null);
+
 		// Mise à jour des montants de la facture et renvoie de cette dernière
 		return this.resetFacture(facture.getId());
 	}
@@ -542,6 +646,10 @@ public class FactureService {
 	 * @return {@link Facture} La facture validée
 	 */
 	public Facture validerFacture(Long id, ReglementPayload payload) {
+		// Check permission
+		if (!accessService.canWritable(Feature.facturationFV))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		// Récupération de la facture à valider
 		Optional<Facture> optional = repository.findByIdAndValidFalse(id);
 		if (optional.isEmpty())
@@ -549,7 +657,10 @@ public class FactureService {
 		Facture facture = optional.get();
 		// Vérification si la facture n'est pas vide
 		if (facture.getDetails().isEmpty())
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Facture vide");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Facture vide");
+
+		// Gestion audit : valeurAvant
+		String valAvant = tool.toJson(facture);
 
 		// Gestion de l'aib
 		var aibId = payload.getAibId();
@@ -610,6 +721,15 @@ public class FactureService {
 //			e.printStackTrace();
 //		}
 
+		// Si la facture est validé, enregistrer les traces de changement
+		if (facture.isConfirm()) {
+			// Gestion audit : valeurApres
+			String valApres = tool.toJson(facture);
+
+			// Enregistrement de l'audit
+			auditService.traceChange(Operation.FACTURATION_VALIDATE, valAvant, valApres);
+		}
+
 		// Renvoie de la facture
 		return facture;
 	}
@@ -640,8 +760,7 @@ public class FactureService {
 		/**
 		 * Le montant de l'Aib est arrondi par defaut si sa partie decimale est < 5 (je
 		 * veux dire le chiffre après la virgule), et par excès si la partie décimale
-		 * est > 5
-		 *  Si la partie décimale est égle à 0.5, ambiguïté dans le calcul, il
+		 * est > 5 Si la partie décimale est égle à 0.5, ambiguïté dans le calcul, il
 		 * faudrait attendre la reponse du serveur de la DGI pour prendre une décisison.
 		 * 
 		 * Le code qui suit resoud cette approche que nous avons constacté lors des
@@ -701,6 +820,10 @@ public class FactureService {
 	 * @return {@link Facture} La facture validée
 	 */
 	public boolean deleteFacture(Long id) {
+		// Check permission
+		if (!accessService.canDeletable(Feature.facturationListe))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		// Récupération de la facture à valider
 		Optional<Facture> optional = repository.findById(id);
 		if (optional.isEmpty())
@@ -708,21 +831,25 @@ public class FactureService {
 		Facture facture = optional.get();
 		// Vérification si la facture n'est pas encore valider
 		if (facture.isValid())
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Facture déjà validée");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Facture déjà validée");
+		// Gestion audit : valeurAvant
+		String valAvant = tool.toJson(facture);
 		// Suppression de la facture
 		repository.delete(facture);
+		// Enregistrement de la trace de changement
+		auditService.traceChange(Operation.FACTURATION_DELETE, valAvant, null);
 		// Si tout s'est bien passé, on renvoie true
 		return true;
 	}
 
-	public Facture finalisationDgi(Facture facture) {
+	private Facture finalisationDgi(Facture facture) {
 		// Initialisation des données
 		// Récupération du parametre system
 		Parametre param = paramRepos.findOneParams().orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Votre système n'est pas encore paramètré."));
+				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre système n'est pas encore paramètré."));
 
 		// Rcupération de l'utilisateur connecté
-		User operateur = userService.getAuthenticated();
+		User operateur = this.getAuthenticated();
 		// Récupération du client de la facture
 		Client client = facture.getClient();
 		// Récupération du reglement de la facutre
@@ -870,7 +997,7 @@ public class FactureService {
 		return facture;
 	}
 
-	public Facture setFactureResponseDgi(InvoiceResponseDto invoiceResponseDto, Facture facture) {
+	private Facture setFactureResponseDgi(InvoiceResponseDto invoiceResponseDto, Facture facture) {
 		// Instanciation de la FactureResponseDgi
 		FactureResponseDgi factRespo = new FactureResponseDgi();
 		// Mise à jour de la facture de factRespo
@@ -903,17 +1030,24 @@ public class FactureService {
 		Double totalDGI = (double) invoiceResponseDto.getTotal();
 		Double totalFacture = facture.getMontantTtc();
 		if (facture.getType().getGroupe() != TypeData.FA && !totalFacture.equals(totalDGI)) {
+			System.out.println("Montant mis à jour");
+			// Mise à jour du montant total de la facture
 			facture.setMontantTtc(totalDGI);
+			// Mise à jour du montant aib
+			facture.setMontantAib((double) invoiceResponseDto.getAib());
+			// Mise à jour des données de reglement de la facture
 			var reglement = facture.getReglement();
-			reglement.setMontantPayer(totalDGI.intValue());
+			reglement.setMontantPayer(invoiceResponseDto.getTotal());
 			reglement.setMontantRendu(reglement.getMontantRecu() - reglement.getMontantPayer());
-			reglementRepos.save(reglement);
+			reglement = reglementRepos.save(reglement);
+			// Mise à jour du règlement de la facture
+			facture.setReglement(reglement);
 		}
 		// Retour de la facture
 		return facture;
 	}
 
-	public Facture setFinalisation(SecurityElementsDto securityElementsDto, Facture facture) {
+	private Facture setFinalisation(SecurityElementsDto securityElementsDto, Facture facture) {
 		// Instanciation de la FactureFinalisationDgi
 		FactureFinalisationDgi ffdgi = new FactureFinalisationDgi();
 
@@ -934,7 +1068,7 @@ public class FactureService {
 			facture.setValid(true);
 			facture.setReference(ffdgi.getCodeMECeFDGI().replace("-", ""));
 			// Mise à jour de l'operateur de la facture
-			facture.setOperateur(userService.getAuthenticated());
+			facture.setOperateur(this.getAuthenticated());
 
 			// Mise à jour du numero de la facture
 			// Récupération du compteur
@@ -953,6 +1087,10 @@ public class FactureService {
 				String dt = ffdgi.getDateTime();
 				cal.setTime(SDFormat.parse(dt));
 				facture.setDate(cal.getTime());
+				// Récupération et Mise à jour de la date de FactureResponseDgi pour cette facture
+				var factRespo = frRepos.findByFactureId(facture.getId());
+				factRespo.setDate(cal.getTime());
+				frRepos.save(factRespo);
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -996,7 +1134,7 @@ public class FactureService {
 	private ResponseEntity<byte[]> getInvoicePrint(Facture facture) throws IOException, JRException {
 		// Récupération des données du parametres
 		Parametre param = paramRepos.findOneParams().orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Votre système n'est pas encore paramètré."));
+				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre système n'est pas encore paramètré."));
 
 		// Récupération du type de la facture
 		var type = facture.getType();
@@ -1035,7 +1173,7 @@ public class FactureService {
 	private String printInvoiceAndStoreIt(Facture facture) throws IOException, JRException {
 		// Récupération des données du parametres
 		Parametre param = paramRepos.findOneParams().orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Votre système n'est pas encore paramètré."));
+				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre système n'est pas encore paramètré."));
 
 		// Récupération du type de la facture
 		var type = facture.getType();
@@ -1108,6 +1246,10 @@ public class FactureService {
 	 * @return {@link Facture} La facture d'avoir créé
 	 */
 	public Facture createFactureAvoir(Long typeId, Long factureId) {
+		// Check permission
+		if (!accessService.canWritable(Feature.facturationFA))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		// Récupération du type de la facture
 		TypeFacture tf = tfRepos.findByIdAndGroupe(typeId, TypeData.FA).orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Le type de la facture non trouvé"));
@@ -1117,8 +1259,11 @@ public class FactureService {
 		// Tentative de récupération de la facture d'avoir associée à la facture de
 		// vente
 		if (repository.findByOrigineRef(factureOrigine.getReference()).isPresent())
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					"Une facture d'avoir existe déjà pour cette facture de vente");
+
+		// Gestion audit : valeurAvant
+		String valAvant = null;
 
 		// Création et mise à jour de la facture d'avoir
 		Facture facture = setFactureAvoir(tf, factureOrigine);
@@ -1138,7 +1283,16 @@ public class FactureService {
 		// Mise à jour de la remise
 		facture.setRemise(factureOrigine.isRemise());
 		// Sauvegarde et renvoie de la nouvelle facture
-		return repository.save(facture);
+		facture = repository.save(facture);
+
+		// Gestion audit : valeurApres
+		String valApres = tool.toJson(facture);
+
+		// Enregistrement de la trace de changement
+		auditService.traceChange(Operation.FACTURATION_FA_CREATE, valAvant, valApres);
+
+		// Renvoie de la facture
+		return facture;
 	}
 
 	/**
@@ -1169,7 +1323,7 @@ public class FactureService {
 		// Le client d'origine de la facture
 		facture.setClient(factureOrigine.getClient());
 		// L'opérateur actuelle de la facture
-		facture.setOperateur(userService.getAuthenticated());
+		facture.setOperateur(this.getAuthenticated());
 
 		// Gestion du règlement
 		// Récupération de l'ancien règlement de la facture
@@ -1252,6 +1406,10 @@ public class FactureService {
 	 * @return {@link Facture} La facture valider
 	 */
 	public Facture validerFactureAvoir(Long id) {
+		// Check permission
+		if (!accessService.canWritable(Feature.facturationFA))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		// Récupération de la facture à valider
 		Optional<Facture> optional = repository.findByIdAndValidFalse(id);
 		if (optional.isEmpty())
@@ -1259,12 +1417,16 @@ public class FactureService {
 		Facture facture = optional.get();
 		// Vérification si la facture n'est pas vide
 		if (facture.getDetails().isEmpty())
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Facture vide");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Facture vide");
 
 		var typeFacture = facture.getType();
 		if (typeFacture.getGroupe() != TypeData.FA) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Le type de la facture n'est pas valide");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le type de la facture n'est pas valide");
 		}
+
+		// Gestion audit : valeurAvant
+		String valAvant = tool.toJson(facture);
+
 		// Finalisation de la facture
 		var resultat = finalisationDgi(facture);
 
@@ -1292,6 +1454,15 @@ public class FactureService {
 //			e.printStackTrace();
 //		}
 
+		// Si la facture est validé, enregistrer les traces de changement
+		if (facture.isConfirm()) {
+			// Gestion audit : valeurApres
+			String valApres = tool.toJson(facture);
+
+			// Enregistrement de l'audit
+			auditService.traceChange(Operation.FACTURATION_FA_VALIDATE, valAvant, valApres);
+		}
+
 		// renvoie de la facture après la finalisation
 		return facture;
 	}
@@ -1305,6 +1476,10 @@ public class FactureService {
 	 * @return {@link List<Facture>}
 	 */
 	public List<Facture> getListByType(Long typeId) {
+		// Check permission
+		if (!accessService.canReadable(Feature.facturationListe))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		TypeFacture tf = tfRepos.findById(typeId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Type de facture non trouvé"));
 		return repository.findAllByType(tf);
@@ -1318,10 +1493,14 @@ public class FactureService {
 	 * @return {@link List<Facture>}
 	 */
 	public List<Facture> getListByCreatedAt(StatsPayload payload) {
+		// Check permission
+		if (!accessService.canReadable(Feature.facturationListe))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		if (payload.getDebutAt() != null && payload.getFinAt() != null)
 			return repository.findAllByCreatedAtBetween(payload.getDebutAt(), payload.getFinAt());
 
-		throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Les dates ne sont pas correctement définies");
+		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Les dates ne sont pas correctement définies");
 	}
 
 	/**
@@ -1332,10 +1511,14 @@ public class FactureService {
 	 * @return {@link List<Facture>}
 	 */
 	public List<Facture> getListByConfirmedDate(StatsPayload payload) {
+		// Check permission
+		if (!accessService.canReadable(Feature.facturationListe))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		if (payload.getDebut() != null && payload.getFin() != null)
 			return repository.findAllByDateNotNullAndDateBetween(payload.getDebut(), payload.getFin());
 
-		throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Les dates ne sont pas correctement définies");
+		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Les dates ne sont pas correctement définies");
 	}
 
 	/**
@@ -1346,13 +1529,17 @@ public class FactureService {
 	 * @return {@link List<Facture>}
 	 */
 	public List<Facture> getListByTypeAndCreatedAt(StatsPayload payload, Long typeId) {
+		// Check permission
+		if (!accessService.canReadable(Feature.facturationListe))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		TypeFacture tf = tfRepos.findById(typeId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Type de facture non trouvé"));
 
 		if (payload.getDebutAt() != null && payload.getFinAt() != null)
 			return repository.findAllByTypeAndCreatedAtBetween(tf, payload.getDebutAt(), payload.getFinAt());
 
-		throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Les dates ne sont pas correctement définies");
+		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Les dates ne sont pas correctement définies");
 	}
 
 	/**
@@ -1363,13 +1550,17 @@ public class FactureService {
 	 * @return {@link List<Facture>}
 	 */
 	public List<Facture> getListByTypeAndConfirmedDate(StatsPayload payload, Long typeId) {
+		// Check permission
+		if (!accessService.canReadable(Feature.facturationListe))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
 		TypeFacture tf = tfRepos.findById(typeId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Type de facture non trouvé"));
 
 		if (payload.getDebut() != null && payload.getFin() != null)
 			return repository.findAllByTypeAndDateNotNullAndDateBetween(tf, payload.getDebut(), payload.getFin());
 
-		throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Les dates ne sont pas correctement définies");
+		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Les dates ne sont pas correctement définies");
 	}
 
 }

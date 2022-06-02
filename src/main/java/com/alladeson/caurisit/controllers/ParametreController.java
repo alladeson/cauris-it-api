@@ -140,6 +140,15 @@ public class ParametreController {
 
 	/**
 	 * @return
+	 * @see com.alladeson.caurisit.services.ParametreService#getAllTaxeImpot()
+	 */
+	@GetMapping("parametre/taxe-impots")
+	public List<Taxe> getAllTaxeImpot() {
+		return paramService.getAllTaxeImpot();
+	}
+	
+	/**
+	 * @return
 	 * @see com.alladeson.caurisit.services.ParametreService#getAllTaxe()
 	 */
 	@GetMapping("parametre/taxe")

@@ -8,7 +8,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -16,6 +18,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author William
  *
  */
+@Table(uniqueConstraints = { 
+		@UniqueConstraint(name = "UniqueIfu", columnNames = { "ifu" }),
+		@UniqueConstraint(name = "UniqueName", columnNames = { "name" }),
+		@UniqueConstraint(name = "UniqueRcm", columnNames = { "rcm" }),
+		@UniqueConstraint(name = "UniquePhone", columnNames = { "telephone" }),
+		@UniqueConstraint(name = "UniqueEmail", columnNames = { "email" }),
+		@UniqueConstraint(name = "UniqueNim", columnNames = { "nim" }),
+		@UniqueConstraint(name = "UniqueToken", columnNames = { "token" })
+})
 @Entity
 public class Parametre extends BaseEntity {
 
@@ -28,7 +39,9 @@ public class Parametre extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
+	@Column(nullable = false)
 	private String ifu;
+	@Column(nullable = false)
 	private String name;
 	private String telephone;
 	private String email;
@@ -40,11 +53,12 @@ public class Parametre extends BaseEntity {
 	// Le logo de la société
 	private String logo;
 	// Le numero de la machine e-mcef
+	@Column(nullable = false)
 	private String nim;
 
 	// le jeton (token) de l'e-mecef
 	@JsonIgnore
-	@Column(length = 1000, nullable = false, unique = true)
+	@Column(length = 1000, nullable = false)
 	private String token;
 
 	// Le type de system : Production ou Test
@@ -268,8 +282,13 @@ public class Parametre extends BaseEntity {
 		String contact = "";
 		if (this.telephone != null)
 			contact += this.telephone;
-		if (this.email != null)
-			contact += "," + this.email;
+		if (this.email != null) {
+			if (this.telephone != null)
+				contact += "," + this.email;
+			else
+				contact += this.email;
+
+		}
 		return contact;
 	}
 

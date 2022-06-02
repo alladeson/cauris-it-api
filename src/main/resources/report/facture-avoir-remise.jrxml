@@ -271,7 +271,7 @@
 				<imageExpression><![CDATA[$F{ste_logo}]]></imageExpression>
 			</image>
 			<subreport>
-				<reportElement x="235" y="86" width="345" height="54" uuid="c52dcb36-f57c-4b31-a432-5d9004b0aba4"/>
+				<reportElement x="240" y="86" width="340" height="54" uuid="c52dcb36-f57c-4b31-a432-5d9004b0aba4"/>
 				<dataSourceExpression><![CDATA[$P{client}]]></dataSourceExpression>
 				<subreportExpression><![CDATA["report/sub_report_client.jasper"]]></subreportExpression>
 			</subreport>
@@ -415,7 +415,8 @@
 							<textField>
 								<reportElement x="0" y="0" width="90" height="30" uuid="a77f7ad6-a0f4-4a8e-b0b5-c9f73c29acb3"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{prix_u}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[new DecimalFormat("#,###.##", 
+  new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{prix_u}))]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -499,7 +500,7 @@
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font isBold="true"/>
 								</textElement>
-								<text><![CDATA[Groupe]]></text>
+								<text><![CDATA[Groupe de Taxe]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 4_TD" height="30">
@@ -525,7 +526,8 @@
 							<textField>
 								<reportElement x="0" y="0" width="90" height="30" uuid="acbdd437-9277-4082-88ba-efee9d65a6dc"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{total}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[new DecimalFormat("#,###.##", 
+  new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{total}))]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -537,14 +539,15 @@
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font isBold="true"/>
 								</textElement>
-								<text><![CDATA[Imposable]]></text>
+								<text><![CDATA[Montant HT]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 4_TD" height="30">
 							<textField>
 								<reportElement x="0" y="0" width="80" height="30" uuid="b64f0cbe-e6ff-4fac-9fe0-34d396887037"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{imposable}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[new DecimalFormat("#,###.##", 
+  new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{imposable}))]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -556,14 +559,15 @@
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font isBold="true"/>
 								</textElement>
-								<text><![CDATA[Impôt]]></text>
+								<text><![CDATA[Montant TVA]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 4_TD" height="30">
 							<textField>
 								<reportElement x="0" y="0" width="70" height="30" uuid="863e1b43-666e-4ec6-9280-a02c13a775ea"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{impot}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[new DecimalFormat("#,###.##", 
+  new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{impot}))]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -584,11 +588,11 @@
   new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{invoice_total})) + "</b> FCFA"]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="10" y="11" width="230" height="20" uuid="385e66f3-f05f-4279-a8e3-8c2bd83ee219"/>
+				<reportElement x="10" y="11" width="230" height="20" uuid="3dc7218e-4fa3-4db4-aea4-7d7bca479569"/>
 				<textElement verticalAlignment="Middle">
 					<font isItalic="true"/>
 				</textElement>
-				<text><![CDATA[-- VENTILATION DES IMPÔTS --]]></text>
+				<text><![CDATA[-- RÉPARTITION DES MONTANTS --]]></text>
 			</staticText>
 		</band>
 	</detail>
@@ -625,7 +629,7 @@
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font isBold="true"/>
 								</textElement>
-								<text><![CDATA[Type de payement]]></text>
+								<text><![CDATA[Mode de payement]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 5_TD" height="30">
@@ -644,14 +648,15 @@
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font isBold="true"/>
 								</textElement>
-								<text><![CDATA[Montant]]></text>
+								<text><![CDATA[Montant Reçu]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 5_TD" height="30">
 							<textField>
 								<reportElement x="0" y="0" width="130" height="30" uuid="34474c5c-3197-4cd0-a391-248965df52cd"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{montant}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[new DecimalFormat("#,###.##", 
+  new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{montant}))]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -663,14 +668,15 @@
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font isBold="true"/>
 								</textElement>
-								<text><![CDATA[Payé]]></text>
+								<text><![CDATA[Montant Payé]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 5_TD" height="30">
 							<textField>
 								<reportElement x="0" y="0" width="130" height="30" uuid="b7e5e554-f2d1-4353-8c53-89be8d2e7b15"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{payer}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[new DecimalFormat("#,###.##", 
+  new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{payer}))]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -682,14 +688,15 @@
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font isBold="true"/>
 								</textElement>
-								<text><![CDATA[Rendu]]></text>
+								<text><![CDATA[Montant Rendu]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 5_TD" height="30">
 							<textField>
 								<reportElement x="0" y="0" width="120" height="30" uuid="ee3f8fe4-da0b-4fde-9474-8e3325e136b5"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{rendu}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[new DecimalFormat("#,###.##", 
+  new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{rendu}))]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>

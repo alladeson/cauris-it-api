@@ -29,11 +29,11 @@ public class ReglementFacture extends BaseEntity {
 	@ManyToOne
 	private TypePaiement typePaiement;
 	// Montant Reçu
-	private Integer montantRecu;
+	private Long montantRecu;
 	// Montant payé
-	private Integer montantPayer;
+	private Long montantPayer;
 	// Montant Rendu
-	private Integer montantRendu;
+	private Long montantRendu;
 	// Description supplémentaire
 	private String description;
 	/**
@@ -63,37 +63,37 @@ public class ReglementFacture extends BaseEntity {
 	/**
 	 * @return the montantRecu
 	 */
-	public Integer getMontantRecu() {
+	public Long getMontantRecu() {
 		return montantRecu;
 	}
 	/**
 	 * @param montantRecu the montantRecu to set
 	 */
-	public void setMontantRecu(Integer montantRecu) {
+	public void setMontantRecu(Long montantRecu) {
 		this.montantRecu = montantRecu;
 	}
 	/**
 	 * @return the montantPayer
 	 */
-	public Integer getMontantPayer() {
+	public Long getMontantPayer() {
 		return montantPayer;
 	}
 	/**
 	 * @param montantPayer the montantPayer to set
 	 */
-	public void setMontantPayer(Integer montantPayer) {
+	public void setMontantPayer(Long montantPayer) {
 		this.montantPayer = montantPayer;
 	}
 	/**
 	 * @return the montantRendu
 	 */
-	public Integer getMontantRendu() {
+	public Long getMontantRendu() {
 		return montantRendu;
 	}
 	/**
 	 * @param montantRendu the montantRendu to set
 	 */
-	public void setMontantRendu(Integer montantRendu) {
+	public void setMontantRendu(Long montantRendu) {
 		this.montantRendu = montantRendu;
 	}
 	/**

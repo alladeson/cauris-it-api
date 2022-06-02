@@ -14,7 +14,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 //import com.alladeson.caurisit.services.UserService;
 
-//import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @MappedSuperclass
 public class BaseEntity implements Serializable {
@@ -33,11 +33,11 @@ public class BaseEntity implements Serializable {
 	@UpdateTimestamp
 	private Instant updatedAt;
 
-//	@JsonIgnore
+	@JsonIgnore
 	@ManyToOne
 	private User createdBy;
 
-//	@JsonIgnore
+	@JsonIgnore
 	@ManyToOne
 	private User updatedBy;
 

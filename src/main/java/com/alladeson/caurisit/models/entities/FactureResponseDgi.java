@@ -3,6 +3,8 @@
  */
 package com.alladeson.caurisit.models.entities;
 
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -23,6 +25,8 @@ public class FactureResponseDgi extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
+	// Date de validation de la facture
+	private Date date;
 	// Les champs de la reponse
 	// Identification de la transaction. Cette valeur est utilisée en demande de
 	// finalisation.
@@ -81,6 +85,20 @@ public class FactureResponseDgi extends BaseEntity {
 	 */
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	/**
+	 * @return the date
+	 */
+	public Date getDate() {
+		return date;
+	}
+
+	/**
+	 * @param date the date to set
+	 */
+	public void setDate(Date date) {
+		this.date = date;
 	}
 
 	/**

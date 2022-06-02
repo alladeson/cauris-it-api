@@ -8,6 +8,8 @@ import com.alladeson.caurisit.models.entities.FactureResponseDgi;
 import com.alladeson.caurisit.models.entities.Parametre;
 import com.alladeson.caurisit.models.entities.ReglementFacture;
 import com.alladeson.caurisit.models.entities.TypeData;
+import com.alladeson.caurisit.models.reports.BilanPeriodiqueData;
+import com.alladeson.caurisit.repositories.FactureRepository.BilanRecapMontant;
 import com.alladeson.caurisit.models.reports.ClientData;
 import com.alladeson.caurisit.models.reports.CompanyContact;
 import com.alladeson.caurisit.models.reports.InvoiceData;
@@ -21,10 +23,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class ReportService {
@@ -78,8 +83,8 @@ public class ReportService {
 			invoiceDetail.setTaxe(detail.getTaxe().getAbreviation());
 			invoiceDetail.setPrix_u(detail.getPrixUnitaire().longValue());
 			invoiceDetail.setQte(detail.getQuantite());
-			invoiceDetail.setMontant_ttc(
-					Math.round(detail.getMontantTtc()) + " [" + detail.getTaxe().getGroupe().name() + "]");
+			// Formatage du montant ttc
+			invoiceDetail.setMontant_ttc(formatNumber(detail.getMontantTtc()) + " [" + detail.getTaxe().getGroupe().name() + "]");
 			liste.add(invoiceDetail);
 			// Gestion de la taxe spécifique
 			if (detail.getTs() != null) {
@@ -91,7 +96,7 @@ public class ReportService {
 				invoiceDetailTs.setTaxe(ts.getTaxe().getAbreviation());
 				invoiceDetailTs.setPrix_u(Math.round(ts.getTsUnitaireTtc()));
 				invoiceDetailTs.setQte(ts.getQuantite());
-				invoiceDetailTs.setMontant_ttc(Math.round(ts.getTsTotal()) + " ["
+				invoiceDetailTs.setMontant_ttc(formatNumber(ts.getTsTotal()) + " ["
 						+ ts.getTaxe().getGroupe().name() + "]");
 				liste.add(invoiceDetailTs);
 			}
@@ -105,6 +110,16 @@ public class ReportService {
 		}
 
 		return liste;
+	}
+
+	/**
+	 * @param number
+	 * @return
+	 */
+	private String formatNumber(Double number) {
+		var symbole = new DecimalFormatSymbols(Locale.ITALIAN);
+		var montantTtc = new DecimalFormat("#,###.##", symbole).format(Double.valueOf(Math.round(number)));
+		return montantTtc;
 	}
 
 	/**
@@ -310,5 +325,155 @@ public class ReportService {
 	public String invoiceReportAndStoreIt(InvoiceData invoice, HashMap<String, Object> params, String invoiceTemplate, String invoiceFileName)
 			throws IOException, JRException {
 		return tool.generateInvoiceAndStoreIt(Collections.singleton(invoice), params, invoiceTemplate, invoiceFileName);
+	}
+	
+	/*** Bilan Périodique ***/
+	
+	/**
+	 * Mise en place des données du bilan périodique pour l'impression
+	 * 
+	 * @param params
+	 * @return {@link BilanPeriodiqueData}
+	 */
+	public BilanPeriodiqueData setBilanPeriodiqueData(Parametre params) {
+		// Instanciation de InvoiceData
+		var bilan = new BilanPeriodiqueData();		
+		// Mise à jour des champs pour la société
+		bilan.setSte_name(params.getName());
+		bilan.setSte_ifu(params.getIfu());
+		bilan.setSte_address(params.getAddress());
+		bilan.setSte_contact(params.getContact());
+		bilan.setSte_email(params.getEmail());
+		bilan.setSte_pays(params.getPays());
+		bilan.setSte_rccm(params.getRcm());
+		bilan.setSte_telephone(params.getTelephone());
+		bilan.setSte_raisonSociale(params.getRaisonSociale());
+		bilan.setSte_ville(params.getVille());
+		// Mise à jour du logo de la société
+		bilan.setSte_logo(appConfig.getUploadDir() + "/" + params.getLogo());
+		// Mise à jour du numéro nim de la machine e-mcef
+		bilan.setEmcef_nim(params.getNim());
+		return bilan;
+	}
+	
+	/**
+	 * Définition de la liste des recaps de la facture
+	 * 
+	 * @param recapdgi
+	 * @param facture
+	 * @return
+	 */
+	public List<InvoiceRecapData> setBilanPeriodiqueRecapData(BilanRecapMontant recapdgi, boolean fa) {
+		// Instanciation de la liste InvoiceRecapData
+		List<InvoiceRecapData> recaps = new ArrayList<InvoiceRecapData>();
+		// Instancition et mise à jour de recaps
+		// Pour le groupe exonéré A (0%)
+		if (recapdgi.getTaa() != 0) {
+			InvoiceRecapData recap = new InvoiceRecapData();
+			recap.setTaxe_group("A - Exonéré");
+			recap.setTotal(fa ? (recapdgi.getTaa() * (-1)) : recapdgi.getTaa());
+			recap.setImposable(0l);
+			recap.setImpot(0l);
+			// Ajout à la liste des recaps
+			recaps.add(recap);
+		}
+		// Pour le groupe de taxation B (18%)
+		if (recapdgi.getTab() != 0) {
+			InvoiceRecapData recap = new InvoiceRecapData();
+			recap.setTaxe_group("B - Taxable (18%)");
+			recap.setTotal(fa ? (recapdgi.getTab() * (-1)) : recapdgi.getTab());
+			recap.setImposable(fa ? (recapdgi.getHab() * (-1)) : recapdgi.getHab());
+			recap.setImpot(fa ? (recapdgi.getVab() * (-1)) : recapdgi.getVab());
+			// Ajout à la liste des recaps
+			recaps.add(recap);
+		}
+		// Pour le groupe C (Exportation de produits taxables) 0%
+		if (recapdgi.getTac() != 0) {
+			InvoiceRecapData recap = new InvoiceRecapData();
+			recap.setTaxe_group("C - Exportation");
+			recap.setTotal(fa ? (recapdgi.getTac() * (-1)) : recapdgi.getTac());
+			recap.setImposable(0l);
+			recap.setImpot(0l);
+			// Ajout à la liste des recaps
+			recaps.add(recap);
+		}
+		// Pour le groupe de taxation D (18%)
+		if (recapdgi.getTad() != 0) {
+			InvoiceRecapData recap = new InvoiceRecapData();
+			recap.setTaxe_group("D - Exception (18%)");
+			recap.setTotal(fa ? (recapdgi.getTad() * (-1)) : recapdgi.getTad());
+			recap.setImposable(fa ? (recapdgi.getHad() * (-1)) : recapdgi.getHad());
+			recap.setImpot(fa ? (recapdgi.getVad() * (-1)) : recapdgi.getVad());
+			// Ajout à la liste des recaps
+			recaps.add(recap);
+		}
+		// Pour le groupe E (Régime fiscal TPS) 0%
+		if (recapdgi.getTae() != 0) {
+			InvoiceRecapData recap = new InvoiceRecapData();
+			recap.setTaxe_group("E - TPS");
+			recap.setTotal(fa ? (recapdgi.getTae() * (-1)) : recapdgi.getTae());
+			recap.setImposable(0l);
+			recap.setImpot(0l);
+			// Ajout à la liste des recaps
+			recaps.add(recap);
+		}
+		// Pour le groupe F (Réservé) 0%
+		if (recapdgi.getTaf() != 0) {
+			InvoiceRecapData recap = new InvoiceRecapData();
+			recap.setTaxe_group("F - Réservé");
+			recap.setTotal(fa ? (recapdgi.getTaf() * (-1)) : recapdgi.getTaf());
+			recap.setImposable(0l);
+			recap.setImpot(0l);
+			// Ajout à la liste des recaps
+			recaps.add(recap);
+		}
+		// Pour la taxe spécifique
+		if (recapdgi.getTs() != 0) {
+			InvoiceRecapData recap = new InvoiceRecapData();
+			recap.setTaxe_group("TS");
+			recap.setTotal(fa ? (recapdgi.getTs() * (-1)) : recapdgi.getTs());
+			recap.setImposable(0l);
+			recap.setImpot(0l);
+			// Ajout à la liste des recaps
+			recaps.add(recap);
+		}
+
+		// Pour le groupe Aib
+		if (recapdgi.getAib() != 0) {
+			InvoiceRecapData recap = new InvoiceRecapData();
+			recap.setTaxe_group("AIB");
+			recap.setTotal(fa ? (recapdgi.getAib() * (-1)) : recapdgi.getAib());
+			recap.setImposable(0l);
+			recap.setImpot(0l);
+			// Ajout à la liste des recaps
+			recaps.add(recap);
+		}
+
+		if(recaps.size() == 0) {
+			InvoiceRecapData recap = new InvoiceRecapData();
+			recap.setTaxe_group("-");
+			recap.setTotal(0l);
+			recap.setImposable(0l);
+			recap.setImpot(0l);
+			// Ajout à la liste des recaps
+			recaps.add(recap);
+		}
+		return recaps;
+	}
+	
+	/**
+	 * Générer le bilan périodique
+	 * 
+	 * @param bilanData
+	 * @param params
+	 * @param bilanTemplate
+	 * @param bilanFileName
+	 * @return
+	 * @throws IOException
+	 * @throws JRException
+	 */
+	public ResponseEntity<byte[]> bilanPeriodiqueReport(BilanPeriodiqueData bilanData, HashMap<String, Object> params, String bilanTemplate, String bilanFileName)
+			throws IOException, JRException {
+		return tool.generateInvoice(Collections.singleton(bilanData), params, bilanTemplate, bilanFileName);
 	}
 }

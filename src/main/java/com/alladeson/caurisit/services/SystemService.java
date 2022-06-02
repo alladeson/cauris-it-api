@@ -2,6 +2,7 @@ package com.alladeson.caurisit.services;
 
 import com.alladeson.caurisit.config.AppConfig;
 import com.alladeson.caurisit.models.entities.*;
+import com.alladeson.caurisit.repositories.FeatureRepository;
 //import com.alladeson.caurisit.repositories.SysParameterRepository;
 import com.alladeson.caurisit.security.core.AccountService;
 import com.alladeson.caurisit.security.core.RoleService;
@@ -36,6 +37,13 @@ public class SystemService {
 	private UserService userService;
 	@Autowired
 	private ParametreService paramService;
+
+	@Autowired
+	private AccessService accessService;
+	
+	@Autowired
+	private FeatureRepository featureRepos;
+
 	@Autowired
 	private AppConfig config;
 
@@ -47,10 +55,15 @@ public class SystemService {
 		try {
 			logger.info(">> APP INIT DATA - START");
 
+			// User-groups
+			UserGroup sa = null, adm = null;
+			if (accessService.countGroupe() == 0) {
+				sa = accessService.saveGroupe("Super Admin", "Super Administrateur", TypeRole.SUPER_ADMIN);
+			}
+
 			//
 			if (!userService.existsByUsername("super_admin")) {
 				watch.start("Init - Users");
-
 				/* User SA */
 				var roleSuperAdmin = roleService.save(new Role(TypeRole.SUPER_ADMIN.name()));
 				var account = new Account();
@@ -67,6 +80,7 @@ public class SystemService {
 				user.setLastname("SA");
 				user.setRole(TypeRole.SUPER_ADMIN);
 				user.setAccount(account);
+				user.setGroup(sa);
 				userService.save(user);
 			}
 			/* Chargement des groupe de taxe */
@@ -79,7 +93,7 @@ public class SystemService {
 				taxe.setDescription("Exonéré");
 				taxe.setAbreviation("A-EX");
 				taxe.setValeur(0);
-				paramService.createTaxe(taxe);
+				paramService.saveTaxe(taxe);
 				// Groupe B
 				taxe = new Taxe();
 				taxe.setType(TypeData.IMPOT);
@@ -88,7 +102,7 @@ public class SystemService {
 				taxe.setDescription("Taxable");
 				taxe.setAbreviation("B-TAX");
 				taxe.setValeur(18);
-				paramService.createTaxe(taxe);
+				paramService.saveTaxe(taxe);
 				// Groupe C
 				taxe = new Taxe();
 				taxe.setType(TypeData.IMPOT);
@@ -97,7 +111,7 @@ public class SystemService {
 				taxe.setDescription("Exportation de produits taxables");
 				taxe.setAbreviation("C-EXP");
 				taxe.setValeur(0);
-				paramService.createTaxe(taxe);
+				paramService.saveTaxe(taxe);
 				// Groupe D
 				taxe = new Taxe();
 				taxe.setType(TypeData.IMPOT);
@@ -106,7 +120,7 @@ public class SystemService {
 				taxe.setDescription("TVA régime d'exception");
 				taxe.setAbreviation("D-EXCEP");
 				taxe.setValeur(18);
-				paramService.createTaxe(taxe);
+				paramService.saveTaxe(taxe);
 				// Groupe E
 				taxe = new Taxe();
 				taxe.setType(TypeData.IMPOT);
@@ -115,7 +129,7 @@ public class SystemService {
 				taxe.setDescription("Régime fiscal TPS");
 				taxe.setAbreviation("E-TPS");
 				taxe.setValeur(0);
-				paramService.createTaxe(taxe);
+				paramService.saveTaxe(taxe);
 				// Groupe F
 				taxe = new Taxe();
 				taxe.setType(TypeData.IMPOT);
@@ -124,21 +138,21 @@ public class SystemService {
 				taxe.setDescription("Réservé");
 				taxe.setAbreviation("F-RES");
 				taxe.setValeur(0);
-				paramService.createTaxe(taxe);
+				paramService.saveTaxe(taxe);
 				// Groupe aibA
 				taxe = new Taxe();
 				taxe.setType(TypeData.AIB);
 				taxe.setGroupe(TaxeGroups.AibA);
 				taxe.setLibelle("Aib 1%");
 				taxe.setValeur(1);
-				paramService.createTaxe(taxe);
+				paramService.saveTaxe(taxe);
 				// Groupe aibB
 				taxe = new Taxe();
 				taxe.setType(TypeData.AIB);
 				taxe.setGroupe(TaxeGroups.AibB);
 				taxe.setLibelle("Aib 5%");
 				taxe.setValeur(5);
-				paramService.createTaxe(taxe);
+				paramService.saveTaxe(taxe);
 			}
 			/* Chargment des types de facture */
 			if (paramService.getAllTypeFactureVente().isEmpty()) {
@@ -147,27 +161,27 @@ public class SystemService {
 				tf1.setGroupe(TypeData.FV);
 				tf1.setType(TypeFactureEnum.FV);
 				tf1.setDescription("Facture de vente");
-				tf1 = paramService.createTypeFacture(tf1);
+				tf1 = paramService.saveTypeFacture(tf1);
 				// Facture d'avoir FA
 				var tf = new TypeFacture();
 				tf.setGroupe(TypeData.FA);
 				tf.setType(TypeFactureEnum.FA);
 				tf.setDescription("Facture d'avoir");
 				tf.setOrigine(tf1);
-				paramService.createTypeFacture(tf);
+				paramService.saveTypeFacture(tf);
 				// Facture de vente à l'exportation EV
 				var tf2 = new TypeFacture();
 				tf2.setGroupe(TypeData.FV);
 				tf2.setType(TypeFactureEnum.EV);
 				tf2.setDescription("Facture de vente à l'exportation");
-				tf2 = paramService.createTypeFacture(tf2);
+				tf2 = paramService.saveTypeFacture(tf2);
 				// Facture d'avoir à l'exportation EA
 				tf = new TypeFacture();
 				tf.setGroupe(TypeData.FA);
 				tf.setType(TypeFactureEnum.EA);
 				tf.setDescription("Facture d'avoir à l'exportation");
 				tf.setOrigine(tf2);
-				paramService.createTypeFacture(tf);
+				paramService.saveTypeFacture(tf);
 			}
 			/* Chargement des types de paiement */
 			if (paramService.getAllTypePaiement().isEmpty()) {
@@ -175,39 +189,77 @@ public class SystemService {
 				var tp = new TypePaiement();
 				tp.setType(TypePaiementEnum.ESPECES);
 				tp.setDescription("ESPECES");
-				paramService.createTypePaiement(tp);
+				paramService.saveTypePaiement(tp);
 				// CHEQUES
 				tp = new TypePaiement();
 				tp.setType(TypePaiementEnum.CHEQUES);
 				tp.setDescription("CHEQUES");
-				paramService.createTypePaiement(tp);
+				paramService.saveTypePaiement(tp);
 				// MOBILE MONEY
 				tp = new TypePaiement();
 				tp.setType(TypePaiementEnum.MOBILEMONEY);
 				tp.setDescription("MOBILE MONEY");
-				paramService.createTypePaiement(tp);
+				paramService.saveTypePaiement(tp);
 				// CARTE BANCAIRE
 				tp = new TypePaiement();
 				tp.setType(TypePaiementEnum.CARTEBANCAIRE);
 				tp.setDescription("CARTE BANCAIRE");
-				paramService.createTypePaiement(tp);
+				paramService.saveTypePaiement(tp);
 				// VIREMENT
 				tp = new TypePaiement();
 				tp.setType(TypePaiementEnum.VIREMENT);
 				tp.setDescription("VIREMENT");
-				paramService.createTypePaiement(tp);
+				paramService.saveTypePaiement(tp);
 				// CREDIT
 				tp = new TypePaiement();
 				tp.setType(TypePaiementEnum.CREDIT);
 				tp.setDescription("CREDIT");
-				paramService.createTypePaiement(tp);
+				paramService.saveTypePaiement(tp);
 				// AUTRE
 				tp = new TypePaiement();
 				tp.setType(TypePaiementEnum.AUTRE);
 				tp.setDescription("AUTRE");
-				paramService.createTypePaiement(tp);
+				paramService.saveTypePaiement(tp);
 			}
 
+			/* Les fonctionnalités de l'application */
+			if (accessService.countFeature() == 0) {
+				// Gestion de stock
+				accessService.saveFeature(Feature.gestStock, "Gestion de Stock", true, false, false);
+				accessService.saveFeature(Feature.gestStockCategorie, "Catégorie Articles", true, true, true);
+				accessService.saveFeature(Feature.gestStockArticle, "Articles", true, true, true);
+				// Emission des factures
+				accessService.saveFeature(Feature.facturation, "Facture", true, false, false);
+				accessService.saveFeature(Feature.facturationFV, "Facture de Vente", true, true, true);
+				accessService.saveFeature(Feature.facturationFA, "Facture d'avoir", true, true, true);
+				accessService.saveFeature(Feature.facturationListe, "Liste des facture", true, true, true);
+				accessService.saveFeature(Feature.facturationClient, "Clients", true, true, true);
+				// Les données de base et paramètre du système
+				accessService.saveFeature(Feature.parametre, "Paramètres", true, false, false);
+				accessService.saveFeature(Feature.parametreTaxe, "Taxe", true, true, true);
+				accessService.saveFeature(Feature.parametreTypeFacture, "Type de facture", true, true, true);
+				accessService.saveFeature(Feature.parametreTypePaiement, "Type de paiement", true, true, true);
+				accessService.saveFeature(Feature.parametreSysteme, "Paramètre du système", true, true, true);
+				accessService.saveFeature(Feature.parametreDonneSysteme, "Données du système", true, true, true);
+				// Le contrôle d'accès
+				accessService.saveFeature(Feature.accessCtrl, "Accès & Audit", true, false, false);
+				accessService.saveFeature(Feature.accessCtrlUser, "Utilisateurs", true, true, true);
+				accessService.saveFeature(Feature.accessCtrlUserGroup, "Groupes Utilisateurs", true, true, true);
+				accessService.saveFeature(Feature.accessCtrlFeatures, "Les fonctionnalités", true, true, true);
+				accessService.saveFeature(Feature.accessCtrlAccess, "Le contrôle d'accès", true, true, true);
+				accessService.saveFeature(Feature.audit, "Audit", true, true, true);
+				// Les statistiques
+				accessService.saveFeature(Feature.stats, "Statistiques", true, false, false);
+				accessService.saveFeature(Feature.statsBilanPeriodique, "Bilan Périodique", true, true, true);
+				
+				
+				// Permissions
+                var features = featureRepos.findAll();
+                // - Super_Admin
+                for (Feature f : features) {
+                    accessService.saveAccess(sa, f, true);
+                }
+			}
 		} finally {
 			logger.info(watch.prettyPrint());
 			logger.info(">> APP INIT DATA - END");

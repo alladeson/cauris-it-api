@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -98,7 +99,7 @@ public class StatsController {
 	 * @see com.alladeson.caurisit.services.StatsService#genererBilanPeriodique(com.alladeson.caurisit.models.paylaods.StatsPayload)
 	 */
 	@GetMapping("/stats/bilan-periodique/report")
-	public ReportResponse genererBilanPeriodique(@RequestBody StatsPayload payload) throws IOException, JRException {
+	public ResponseEntity<byte[]> genererBilanPeriodique(@RequestBody StatsPayload payload) throws IOException, JRException {
 		return statsService.genererBilanPeriodique(payload);
 	}
 

@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -200,7 +201,7 @@ public class StatsService {
 	 * @throws IOException
 	 * @throws JRException
 	 */
-	public ReportResponse genererBilanPeriodique(StatsPayload payload) throws IOException, JRException {
+	public ResponseEntity<byte[]> genererBilanPeriodique(StatsPayload payload) throws IOException, JRException {
 
 		// Check permission
 		if (!accessService.canReadable(Feature.statsBilanPeriodique))
@@ -258,11 +259,11 @@ public class StatsService {
 
 		// Générer la facture
 		String reportName = "bilan_du_" + ((dateDebut.replace(" ", "_")).replace(":", "")).replace("/", "") + "_au_" + ((dateFin.replace(" ", "_")).replace(":", "")).replace("/", "") + ".pdf";
-		reportService.bilanPeriodiqueReport(bilanData, map, BILAN_PERIODIQUE_REPORT_TEMPLATE, reportName);
+		return reportService.bilanPeriodiqueReport(bilanData, map, BILAN_PERIODIQUE_REPORT_TEMPLATE, reportName);
 		// Formatage de données de retour
-		ReportResponse rr = new ReportResponse();
-		rr.setFileName(reportName);
-		return rr;
+//		ReportResponse rr = new ReportResponse();
+//		rr.setFileName(reportName);
+//		return rr;
 	}
 	
 	

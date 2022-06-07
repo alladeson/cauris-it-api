@@ -3,6 +3,8 @@
  */
 package com.alladeson.caurisit.controllers;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alladeson.caurisit.models.entities.Access;
 import com.alladeson.caurisit.models.entities.Feature;
+import com.alladeson.caurisit.models.entities.SerialKey;
 import com.alladeson.caurisit.models.entities.UserGroup;
 import com.alladeson.caurisit.services.AccessService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -275,5 +278,70 @@ public class AccessController {
 	public boolean deleteAccess(Long id) throws JsonProcessingException {
 		return accessService.deleteAccess(id);
 	}
+	
+	/**** Gestion des clés d'activation *****/
 
+	/**
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 * @throws UnsupportedEncodingException
+	 * @see com.alladeson.caurisit.services.AccessService#createSerialKey()
+	 */
+	@PostMapping("access/serial-key")
+	public SerialKey createSerialKey() throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		return accessService.createSerialKey();
+	}
+
+	/**
+	 * @param serialKeyId
+	 * @return
+	 * @see com.alladeson.caurisit.services.AccessService#getSerialKey(java.lang.Long)
+	 */
+	@GetMapping("access/serial-key/{keyId}")
+	public SerialKey getSerialKey(@PathVariable(value = "keyId") Long serialKeyId) {
+		return accessService.getSerialKey(serialKeyId);
+	}
+
+	/**
+	 * @return
+	 * @see com.alladeson.caurisit.services.AccessService#getAllSerialKey()
+	 */
+	@GetMapping("access/serial-key")
+	public List<SerialKey> getAllSerialKey() {
+		return accessService.getAllSerialKey();
+	}
+
+	/**
+	 * @param serialKey
+	 * @param serialKeyId
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 * @throws UnsupportedEncodingException
+	 * @see com.alladeson.caurisit.services.AccessService#updateSerialKey(com.alladeson.caurisit.models.entities.SerialKey, java.lang.Long)
+	 */
+	@PutMapping("access/serial-key/{keyId}")
+	public SerialKey updateSerialKey(@PathVariable(value = "keyId") Long serialKeyId)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		return accessService.updateSerialKey(serialKeyId);
+	}
+
+	/**
+	 * @param serialKeyId
+	 * @return
+	 * @see com.alladeson.caurisit.services.AccessService#deleteSerialKey(java.lang.Long)
+	 */
+	@DeleteMapping("access/serial-key/{keyId}")
+	public boolean deleteSerialKey(@PathVariable(value = "keyId") Long serialKeyId) {
+		return accessService.deleteSerialKey(serialKeyId);
+	}
+
+	/**
+	 * @param key
+	 * @return
+	 * @see com.alladeson.caurisit.services.AccessService#activateSerialKey(java.lang.String)
+	 */
+	@PostMapping("access/serial-key/key/{serailKey}")
+	public boolean activateSerialKey(@PathVariable(value = "serailKey") String key) {
+		return accessService.activateSerialKey(key);
+	}
 }

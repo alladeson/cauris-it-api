@@ -247,6 +247,7 @@ public class SystemService {
 				accessService.saveFeature(Feature.accessCtrlUserGroup, "Groupes Utilisateurs", true, true, true);
 				accessService.saveFeature(Feature.accessCtrlFeatures, "Les fonctionnalités", true, true, true);
 				accessService.saveFeature(Feature.accessCtrlAccess, "Le contrôle d'accès", true, true, true);
+				accessService.saveFeature(Feature.accessSerialKey, "La clé d'activation", true, true, true);
 				accessService.saveFeature(Feature.audit, "Audit", true, true, true);
 				// Les statistiques
 				accessService.saveFeature(Feature.stats, "Statistiques", true, false, false);

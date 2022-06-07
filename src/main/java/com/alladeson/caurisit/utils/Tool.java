@@ -205,10 +205,10 @@ public class Tool {
 		JRBeanCollectionDataSource beanCollectionDataSource = new JRBeanCollectionDataSource(collection);
 		JasperReport compileReport = JasperCompileManager.compileReport(this.getResourceAsStream(invoiceTemplate));
 		JasperPrint report = JasperFillManager.fillReport(compileReport, params, beanCollectionDataSource);
-		JasperExportManager.exportReportToPdfFile(report, appConfig.getUploadDir() + "/" +invoiceFileName);
-		return invoiceFileName;	
+		JasperExportManager.exportReportToPdfFile(report, appConfig.getUploadDir() + "/" + invoiceFileName);
+		return invoiceFileName;
 	}
-	
+
 	public ResponseEntity<byte[]> generateInvoice(Collection<?> collection, HashMap<String, Object> params,
 			String invoiceTemplate, String invoiceFileName) throws JRException, IOException {
 		JRBeanCollectionDataSource beanCollectionDataSource = new JRBeanCollectionDataSource(collection);
@@ -376,6 +376,7 @@ public class Tool {
 
 	/**
 	 * La fonction de conversion des nombres
+	 * 
 	 * @param number
 	 * @return
 	 */
@@ -439,7 +440,21 @@ public class Tool {
 
 		return resultat;
 	}
-	
+
 	/* Fin conversion des nombres */
+
+	// package com.java2s;
+	// License from project: Open Source License
+	public String bytesToHex(byte[] bytes) {
+		StringBuilder sb = new StringBuilder();
+		for (byte hashByte : bytes) {
+			int intVal = 0xff & hashByte;
+			if (intVal < 0x10) {
+				sb.append('0');
+			}
+			sb.append(Integer.toHexString(intVal));
+		}
+		return sb.toString();
+	}
 
 }

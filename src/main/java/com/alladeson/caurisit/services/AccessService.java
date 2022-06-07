@@ -3,10 +3,14 @@
  */
 package com.alladeson.caurisit.services;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +22,12 @@ import com.alladeson.caurisit.models.entities.Access;
 import com.alladeson.caurisit.models.entities.Article;
 import com.alladeson.caurisit.models.entities.Feature;
 import com.alladeson.caurisit.models.entities.Operation;
+import com.alladeson.caurisit.models.entities.SerialKey;
 import com.alladeson.caurisit.models.entities.User;
 import com.alladeson.caurisit.models.entities.UserGroup;
 import com.alladeson.caurisit.repositories.AccessRepository;
 import com.alladeson.caurisit.repositories.FeatureRepository;
+import com.alladeson.caurisit.repositories.SerialKeyRepository;
 import com.alladeson.caurisit.repositories.UserGroupRepository;
 import com.alladeson.caurisit.repositories.UserRepository;
 import com.alladeson.caurisit.security.core.AccountService;
@@ -44,6 +50,8 @@ public class AccessService {
 	private UserGroupRepository groupeRepos;
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private SerialKeyRepository serialKeyRepos;
 	@Autowired
 	private Tool tool;
 	@Autowired
@@ -79,6 +87,7 @@ public class AccessService {
 		codes.add(Feature.accessCtrlFeatures);
 		codes.add(Feature.accessCtrlUser);
 		codes.add(Feature.accessCtrlUserGroup);
+		codes.add(Feature.accessSerialKey);
 		codes.add(Feature.audit);
 		return featureRepos.findAllByCodeNotIn(codes);
 	}
@@ -241,7 +250,7 @@ public class AccessService {
 
 		return ug;
 	}
-	
+
 	/**
 	 * @param article
 	 * @return
@@ -263,9 +272,11 @@ public class AccessService {
 					throw new ResponseStatusException(HttpStatus.FORBIDDEN,
 							"Ce groupe d'utilisateur est déjà associé à d'autres données, un utilisateur par exemple");
 				else if (exception.getMessage().contains("UniqueName"))
-					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Un autre groupe utilisateur porte déjà le mêm nom");
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+							"Un autre groupe utilisateur porte déjà le mêm nom");
 				else if (exception.getMessage().contains("ne peut être vide"))
-					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Le nom du group utilisateur ne peut être vide");
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+							"Le nom du group utilisateur ne peut être vide");
 				else
 					throw new ResponseStatusException(HttpStatus.FORBIDDEN, exception.getMessage());
 
@@ -565,7 +576,7 @@ public class AccessService {
 		// Check permission
 		if (!this.canDeletable(Feature.accessCtrlAccess))
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
-		
+
 		Optional<Access> optional = accessRepos.findById(id);
 		if (optional.isEmpty())
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Access non trouvé");
@@ -577,6 +588,175 @@ public class AccessService {
 		auditService.traceChange(operation, valAvant, valApres);
 
 		accessRepos.delete(acs);
+		return true;
+	}
+
+	/**** Gestion de la clé d'activation *****/
+	/**
+	 * 
+	 * @param serialKey
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 */
+	public SerialKey createSerialKey() throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		// Check permission
+		if (!this.canWritable(Feature.accessSerialKey))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
+		// Gestion audit : valeurAvant
+		String valAvant = null;
+		// Generate serial unique key
+		String key = this.generateSerialKey();
+		// Instanciation de SerialKey
+		SerialKey serialKey = new SerialKey();
+		serialKey.setSerialKey(key);
+		serialKey = saveSerialKey(serialKey, false);
+
+		// Gestion audit : valeurApres
+		String valApres = tool.toJson(serialKey);
+		// Enregistrement des trace de changement
+		auditService.traceChange(Operation.SERIALKEY_CREATE, valAvant, valApres);
+		// Renvoie de la catégorie de l'article
+		return serialKey;
+	}
+
+	private String generateSerialKey() throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		MessageDigest salt = MessageDigest.getInstance("SHA-256");
+		salt.update(UUID.randomUUID().toString().getBytes("UTF-8"));
+		String digest = tool.bytesToHex(salt.digest());
+		return digest;
+	}
+
+	/**
+	 * @param serialKey
+	 * @return
+	 */
+	private SerialKey saveSerialKey(SerialKey serialKey, boolean delete) {
+
+		try {
+			if (delete)
+				serialKeyRepos.delete(serialKey);
+			else
+				serialKey = serialKeyRepos.save(serialKey);
+		} catch (Exception e) {
+			// Contrainte d'unicité
+			if (e.getCause() instanceof ConstraintViolationException) {
+				// Récupération du vrai cause de l'exception
+				SQLIntegrityConstraintViolationException exception = (SQLIntegrityConstraintViolationException) (e
+						.getCause()).getCause();
+				exception.printStackTrace();
+				if (delete && exception.getMessage().contains("foreign key constraint"))
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+							"Cette clé d'activation est déjà associée à d'autres données");
+				else if (exception.getMessage().contains("UniqueSerialKey"))
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Une clé doublon existe déjà");
+				else if (exception.getMessage().contains("ne peut être vide"))
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Le clé d'activation ne peut être vide");
+				else
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN, exception.getMessage());
+
+			} else
+				throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
+		}
+		return serialKey;
+	}
+
+	public SerialKey getSerialKey(Long serialKeyId) {
+		// Check permission
+		if (!this.canReadable(Feature.accessSerialKey))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
+		return serialKeyRepos.findById(serialKeyId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Clé d'activation non trouvée"));
+	}
+
+	public List<SerialKey> getAllSerialKey() {
+		// Check permission
+		if (!this.canReadable(Feature.accessSerialKey))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+		//
+		return serialKeyRepos.findAll();
+	}
+
+	public SerialKey updateSerialKey(Long serialKeyId) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		// Check permission
+		if (!this.canWritable(Feature.accessSerialKey))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
+		SerialKey serialKey1 = serialKeyRepos.findById(serialKeyId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Clé d'activation non trouvée"));
+
+		if (serialKey1.isStatus())
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette clé d'activation est déjà utilisée");
+
+		// Gestion audit : valeurAvant
+		String valAvant = tool.toJson(serialKey1);
+		// Generate serial unique key
+		String key = this.generateSerialKey();
+
+		serialKey1.setSerialKey(key);
+		serialKey1.setUpdatedAt(null);
+
+		serialKey1 = saveSerialKey(serialKey1, false);
+
+		// Gestion audit : valeurApres
+		String valApres = tool.toJson(serialKey1);
+		// Enregistrement des trace de changement
+		auditService.traceChange(Operation.SERIALKEY_UPDATE, valAvant, valApres);
+
+		// Renvoie de la catégorie
+		return serialKey1;
+	}
+
+	public boolean deleteSerialKey(Long serialKeyId) {
+		// Check permission
+		if (!this.canDeletable(Feature.accessSerialKey))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
+		SerialKey serialKey = serialKeyRepos.findById(serialKeyId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Clé d'activation non trouvée"));
+
+		if (serialKey.isStatus())
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette clé d'activation est déjà utilisée");
+
+		// Gestion audit : valeurAvant
+		String valAvant = tool.toJson(serialKey);
+
+		// Suppression de la catégorie
+		serialKey = saveSerialKey(serialKey, true);
+
+		// Enregistrement des trace de changement
+		auditService.traceChange(Operation.SERIALKEY_DELETE, valAvant, null);
+		//
+		return true;
+	}
+
+	public boolean activateSerialKey(String key) {
+		// Check permission
+		if (!this.canWritable(Feature.accessSerialKey))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
+		SerialKey serialKey = serialKeyRepos.findBySerialKey(key)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Clé d'activation non trouvée"));
+
+		if (serialKey.isStatus())
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cette clé d'activation n'est plus valable");
+
+		// Gestion audit : valeurAvant
+		String valAvant = tool.toJson(serialKey);
+
+		// Activation de la clé
+		serialKey.setStatus(true);
+
+		// Suppression de la catégorie
+		serialKey = saveSerialKey(serialKey, false);
+
+		// Gestion audit : valeurApres
+		String valApres = tool.toJson(serialKey);
+		// Enregistrement des trace de changement
+		auditService.traceChange(Operation.SERIALKEY_ACTIVATE, valAvant, valApres);
+		//
 		return true;
 	}
 }

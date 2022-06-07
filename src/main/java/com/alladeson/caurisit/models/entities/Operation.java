@@ -56,7 +56,12 @@ public enum Operation {
     // Les opérations liées aux fonctionnalités
     FEATURE_CREATE(Feature.accessCtrlFeatures + 1, "Création d'une fonctionnalité"),
     FEATURE_UPDATE(Feature.accessCtrlFeatures + 2, "Mis à jour d'une fonctionnalité"),
-    FEATURE_DELETE(-(Feature.accessCtrlFeatures + 1), "Suppression d'une fonctionnalité");
+    FEATURE_DELETE(-(Feature.accessCtrlFeatures + 1), "Suppression d'une fonctionnalité"),
+	// Les opérations liées aux clés unique d'activation de l'application
+	SERIALKEY_CREATE(Feature.accessSerialKey + 1, "Génération d'une clé de sécurité"),
+	SERIALKEY_UPDATE(Feature.accessSerialKey + 2, "Mis à jour d'une clé de sécurité"),
+	SERIALKEY_ACTIVATE(Feature.accessSerialKey + 3, "Activation d'une clé de sécurité"),
+	SERIALKEY_DELETE(-(Feature.accessSerialKey + 1), "Suppression d'une clé de sécurité");
     
 
     private final int value;

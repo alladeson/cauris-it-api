@@ -51,6 +51,7 @@ public class Feature extends BaseEntity {
 	public static final int accessCtrlUserGroup = 42000;
 	public static final int accessCtrlFeatures = 43000;
 	public static final int accessCtrlAccess = 44000;
+	public static final int accessSerialKey= 45000;
 	// Les audits
 	public static final int audit = 50000;
 	// Les statistiques

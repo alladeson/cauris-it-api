@@ -3,6 +3,8 @@
  */
 package com.alladeson.caurisit.models.entities;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -25,7 +27,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 		@UniqueConstraint(name = "UniquePhone", columnNames = { "telephone" }),
 		@UniqueConstraint(name = "UniqueEmail", columnNames = { "email" }),
 		@UniqueConstraint(name = "UniqueNim", columnNames = { "nim" }),
-		@UniqueConstraint(name = "UniqueToken", columnNames = { "token" })
+		@UniqueConstraint(name = "UniqueToken", columnNames = { "token" }),
+		@UniqueConstraint(name = "UniqueSerialKey", columnNames = { "serialKey" })
 })
 @Entity
 public class Parametre extends BaseEntity {
@@ -63,11 +66,18 @@ public class Parametre extends BaseEntity {
 
 	// Le type de system : Production ou Test
 	private TypeSystem typeSystem;
+	// La date d'expiration de l'emcef
+	@Column(nullable = false)
+	private Date expiration;
 
 	// Pour gérer le token, ce champs n'est pas enrgistrer dans la base
 	// Il sert de tampon au token
 	@Transient
 	private String tokenTmp;
+	
+	// Pour l'enregistrement de la clé d'activation
+	@Column(nullable = false)
+	private String serialKey;
 
 	/**
 	 * @return the id
@@ -267,6 +277,20 @@ public class Parametre extends BaseEntity {
 	}
 
 	/**
+	 * @return the expiration
+	 */
+	public Date getExpiration() {
+		return expiration;
+	}
+
+	/**
+	 * @param expiration the expiration to set
+	 */
+	public void setExpiration(Date expiration) {
+		this.expiration = expiration;
+	}
+
+	/**
 	 * @return the serialversionuid
 	 */
 	public static long getSerialversionuid() {
@@ -304,5 +328,19 @@ public class Parametre extends BaseEntity {
 	 */
 	public void setTokenTmp(String tokenTmp) {
 		this.tokenTmp = tokenTmp;
+	}
+
+	/**
+	 * @return the serialKey
+	 */
+	public String getSerialKey() {
+		return serialKey;
+	}
+
+	/**
+	 * @param serialKey the serialKey to set
+	 */
+	public void setSerialKey(String serialKey) {
+		this.serialKey = serialKey;
 	}
 }

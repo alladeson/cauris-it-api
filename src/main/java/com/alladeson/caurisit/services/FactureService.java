@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -1080,16 +1081,12 @@ public class FactureService {
 
 			// Mise à jour de la date de finalisation de la facture
 			try {
-				SimpleDateFormat SDFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-				Calendar cal = Calendar.getInstance();
-				// Use of .parse() method to parse
 				// Date From String
-				String dt = ffdgi.getDateTime();
-				cal.setTime(SDFormat.parse(dt));
-				facture.setDate(cal.getTime());
+				Date date = tool.stringToDate(ffdgi.getDateTime(), "dd/MM/yyyy HH:mm:ss");
+				facture.setDate(date);
 				// Récupération et Mise à jour de la date de FactureResponseDgi pour cette facture
 				var factRespo = frRepos.findByFactureId(facture.getId());
-				factRespo.setDate(cal.getTime());
+				factRespo.setDate(date);
 				frRepos.save(factRespo);
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block

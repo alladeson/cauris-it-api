@@ -7,16 +7,20 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import javax.net.ssl.SSLException;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
@@ -27,16 +31,21 @@ import com.alladeson.caurisit.models.entities.Feature;
 import com.alladeson.caurisit.models.entities.Operation;
 import com.alladeson.caurisit.models.entities.User;
 import com.alladeson.caurisit.models.entities.UserGroup;
+import com.alladeson.caurisit.models.paylaods.JwtAuthResponsePayload;
 import com.alladeson.caurisit.repositories.AccessRepository;
 import com.alladeson.caurisit.repositories.FeatureRepository;
 import com.alladeson.caurisit.repositories.UserGroupRepository;
 import com.alladeson.caurisit.repositories.UserRepository;
-import com.alladeson.caurisit.security.auth.jwt.JwtAuthenticationResponse;
 import com.alladeson.caurisit.security.core.AccountService;
 import com.alladeson.caurisit.security.entities.Account;
 import com.alladeson.caurisit.security.entities.TypeRole;
 import com.alladeson.caurisit.utils.Tool;
 import com.fasterxml.jackson.core.JsonProcessingException;
+
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import reactor.netty.http.client.HttpClient;
 
 /**
  * @author allad
@@ -59,7 +68,7 @@ public class AccessService {
 
 	@Autowired
 	private AccountService accountService;
-	
+
 	@Autowired
 	private AppConfig config;
 
@@ -252,7 +261,7 @@ public class AccessService {
 
 		return ug;
 	}
-	
+
 	/**
 	 * @param article
 	 * @return
@@ -274,9 +283,11 @@ public class AccessService {
 					throw new ResponseStatusException(HttpStatus.FORBIDDEN,
 							"Ce groupe d'utilisateur est déjà associé à d'autres données, un utilisateur par exemple");
 				else if (exception.getMessage().contains("UniqueName"))
-					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Un autre groupe utilisateur porte déjà le mêm nom");
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+							"Un autre groupe utilisateur porte déjà le mêm nom");
 				else if (exception.getMessage().contains("ne peut être vide"))
-					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Le nom du group utilisateur ne peut être vide");
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+							"Le nom du group utilisateur ne peut être vide");
 				else
 					throw new ResponseStatusException(HttpStatus.FORBIDDEN, exception.getMessage());
 
@@ -576,7 +587,7 @@ public class AccessService {
 		// Check permission
 		if (!this.canDeletable(Feature.accessCtrlAccess))
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
-		
+
 		Optional<Access> optional = accessRepos.findById(id);
 		if (optional.isEmpty())
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Access non trouvé");
@@ -590,33 +601,82 @@ public class AccessService {
 		accessRepos.delete(acs);
 		return true;
 	}
-	
-	/*** Gestion de la verification du  ***/
-	
+
+	/*** Gestion de la verification du ***/
+
 	/**
 	 * 
 	 * @param serialKey
 	 * @return
-	 * @throws URISyntaxException 
+	 * @throws URISyntaxException
+	 * @throws SSLException 
 	 */
-	public String checkSecrialKey(String serialKey) throws URISyntaxException {
-		WebClient client = WebClient.create();
-		
-		MultiValueMap<String, String> bodyValues = new LinkedMultiValueMap<>();
+	public boolean checkSecrialKey(String serialKey) throws URISyntaxException, SSLException {
+		SslContext sslContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE)
+				.build();
 
-		bodyValues.add("login", config.getSaUsername());
-		bodyValues.add("password", config.getSaPassword());
+		HttpClient httpClient = HttpClient.create().secure(t -> t.sslContext(sslContext));
 
-		JwtAuthenticationResponse response = client.post()
-		    .uri(new URI(config.getSkUri()))
-//		    .header("Authorization", "Bearer MY_SECRET_TOKEN")
-		    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-		    .accept(MediaType.APPLICATION_JSON)
-		    .body(BodyInserters.fromFormData(bodyValues))
-		    .retrieve()
-		    .bodyToMono(JwtAuthenticationResponse.class)
-		    .block();
+//		WebClient client = WebClient.create();
+		WebClient client = WebClient.builder()
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .build();
+
+//		MultiValueMap<String, String> bodyValues = new LinkedMultiValueMap<>();
+
 		
-		return response.getToken();
+		Map<String, String> bodyMap = new HashMap<>();
+//	    bodyMap.put("key1","value1");
+	    bodyMap.put("login", config.getSaUsername());
+	    bodyMap.put("password", config.getSaPassword());
+
+	    String token = loginInForSerialChecking(client, bodyMap);	    	
+
+	    return serialKeyChecking(serialKey, client, token);
+	}
+
+	/**
+	 * @param serialKey
+	 * @param client
+	 * @param token
+	 * @return
+	 * @throws URISyntaxException
+	 */
+	private boolean serialKeyChecking(String serialKey, WebClient client, String token) throws URISyntaxException {
+		boolean response = client.post()
+				.uri(new URI(config.getSkChckUri() + serialKey))
+		    .header("Authorization", "Bearer " + token)
+//					.contentType(MediaType.APP•LICATION_FORM_URLENCODED)
+//					.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+//					.body(BodyInserters.fromFormData(bodyValues))
+				.body(null)
+				.retrieve()
+				.bodyToMono(boolean.class)
+				.block();
+		
+		return response;
+	}
+
+	/**
+	 * @param client
+	 * @param bodyMap
+	 * @return
+	 * @throws URISyntaxException
+	 */
+	private String loginInForSerialChecking(WebClient client, Map<String, String> bodyMap) throws URISyntaxException {
+		ResponseEntity<JwtAuthResponsePayload> response = client.post()
+				.uri(new URI(config.getSkLoginUri()))
+  //		    .header("Authorization", "Bearer MY_SECRET_TOKEN")
+//				.contentType(MediaType.APP•LICATION_FORM_URLENCODED)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+//				.body(BodyInserters.fromFormData(bodyValues))
+				.body(BodyInserters.fromValue(bodyMap))
+				.retrieve()
+				.toEntity(JwtAuthResponsePayload.class)
+				.block();	    
+	    
+	    	return response.getBody().getToken();
 	}
 }

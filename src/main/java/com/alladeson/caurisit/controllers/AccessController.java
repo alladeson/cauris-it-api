@@ -6,6 +6,8 @@ package com.alladeson.caurisit.controllers;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import javax.net.ssl.SSLException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -277,17 +279,18 @@ public class AccessController {
 		return accessService.deleteAccess(id);
 	}
 	
-	/*** Gestion de la clé d'activation ***/
-
-	/**
-	 * @param serialKey
-	 * @return
-	 * @throws URISyntaxException
-	 * @see com.alladeson.caurisit.services.AccessService#checkSecrialKey(java.lang.String)
-	 */
-	@PostMapping("access/serial-key/check/key/{serialKey}")
-	public String checkSecrialKey(@PathVariable(value = "serialKey") String serialKey) throws URISyntaxException {
-		return accessService.checkSecrialKey(serialKey);
-	}
+//	/*** Gestion de la clé d'activation ***/
+//
+//	/**
+//	 * @param serialKey
+//	 * @return
+//	 * @throws URISyntaxException
+//	 * @throws SSLException 
+//	 * @see com.alladeson.caurisit.services.AccessService#checkSecrialKey(java.lang.String)
+//	 */
+//	@PostMapping("access/serial-key/check/key/{serialKey}")
+//	public boolean checkSecrialKey(@PathVariable(value = "serialKey") String serialKey) throws URISyntaxException, SSLException {
+//		return accessService.checkSecrialKey(serialKey);
+//	}
 
 }

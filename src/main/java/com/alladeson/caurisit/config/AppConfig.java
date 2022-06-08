@@ -41,9 +41,11 @@ public class AppConfig {
 	private String formatDemandeNo;
 	private String formatJugementNo;
 	private String qrCodeSecretKey;
-	private String skUri;
+	private String skChckBaseUri;
 	private String saUsername;
 	private String saPassword;
+	private String skLoginUri;
+	private String skChckUri;
 
 	public String getAppName() {
 		return appName;
@@ -252,17 +254,17 @@ public class AppConfig {
 	}
 
 	/**
-	 * @return the skUri
+	 * @return the skChckBaseUri
 	 */
-	public String getSkUri() {
-		return skUri;
+	public String getSkChckBaseUri() {
+		return skChckBaseUri;
 	}
 
 	/**
-	 * @param skUri the skUri to set
+	 * @param skChckBaseUri the skChckBaseUri to set
 	 */
-	public void setSkUri(String skUri) {
-		this.skUri = skUri;
+	public void setSkChckBaseUri(String skChckBaseUri) {
+		this.skChckBaseUri = skChckBaseUri;
 	}
 
 	/**
@@ -291,6 +293,34 @@ public class AppConfig {
 	 */
 	public void setSaPassword(String saPassword) {
 		this.saPassword = saPassword;
+	}
+
+	/**
+	 * @return the skLoginUri
+	 */
+	public String getSkLoginUri() {
+		return skLoginUri;
+	}
+
+	/**
+	 * @param skLoginUri the skLoginUri to set
+	 */
+	public void setSkLoginUri(String skLoginUri) {
+		this.skLoginUri = skLoginUri;
+	}
+
+	/**
+	 * @return the skChckUri
+	 */
+	public String getSkChckUri() {
+		return skChckUri;
+	}
+
+	/**
+	 * @param skChckUri the skChckUri to set
+	 */
+	public void setSkChckUri(String skChckUri) {
+		this.skChckUri = skChckUri;
 	}
 
 	@PostConstruct

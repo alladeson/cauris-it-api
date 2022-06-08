@@ -26,10 +26,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -77,6 +79,21 @@ public class Tool {
 			return null;
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
 		return simpleDateFormat.format(date);
+	}
+	
+	/**
+	 * @param dateString
+	 * @param formatter
+	 * @return
+	 * @throws ParseException
+	 */
+	public Date stringToDate(String dateString, String formatter) throws ParseException {
+		SimpleDateFormat SDFormat = new SimpleDateFormat(formatter);
+//						SDFormat.setTimeZone(TimeZone.getTimeZone("UTC+1"));
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(SDFormat.parse(dateString));
+		Date date = cal.getTime();
+		return date;
 	}
 
 	public static String formatDate(LocalDate date, String format) {

@@ -62,14 +62,14 @@ public class SystemService {
 			}
 
 			//
-			if (!userService.existsByUsername("super_admin")) {
+			if (!userService.existsByUsername(config.getSaUsername())) {
 				watch.start("Init - Users");
 				/* User SA */
 				var roleSuperAdmin = roleService.save(new Role(TypeRole.SUPER_ADMIN.name()));
 				var account = new Account();
-				account.setUsername("super_admin");
+				account.setUsername(config.getSaUsername());
 				account.setEmail(config.getEmailAdmin());
-				account.setPassword(passwordEncoder.encode("super@admin"));
+				account.setPassword(passwordEncoder.encode(config.getSaPassword()));
 //                account.setEnabled(true);
 //                account.setPasswordEnabled(false);
 //                account.setSys(true);

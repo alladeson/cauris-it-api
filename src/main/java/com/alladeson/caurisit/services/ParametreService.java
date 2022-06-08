@@ -3,8 +3,17 @@
  */
 package com.alladeson.caurisit.services;
 
+import java.net.URISyntaxException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
+
+import javax.net.ssl.SSLException;
 
 import org.apache.commons.io.FilenameUtils;
 import org.hibernate.exception.ConstraintViolationException;
@@ -12,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.alladeson.caurisit.models.entities.Taxe;
@@ -176,13 +186,37 @@ public class ParametreService {
 
 		if (emcefInfo.isStatus() != null && emcefInfo.isStatus()) {
 			if ((paramRepos.findAll()).isEmpty()) {
-				var params = saveParametre(parametre, false);
-				// Gestion audit : valeurApres
-				String valApres = tool.toJson(params);
-				// Enregistrement de la trace de changement
-				auditService.traceChange(Operation.SYSTEM_CREATE, valAvant, valApres);
-				// Renvoie du paramètre
-				return params;
+				// Vérification de la clé d'activation
+				try {
+						// Mise à jour de la date d'expiration de l'emcef
+						String expirationDate = emcefInfo.getTokenValid().toString().substring(0, 19);
+						Date date = tool.stringToDate(expirationDate, "yyyy-MM-dd'T'HH:mm:ss");
+						parametre.setExpiration(date);	
+						// Validation de la clé d'activation
+					if (accessService.checkSecrialKey(parametre.getSerialKey())) {
+						var params = saveParametre(parametre, false);
+						// Gestion audit : valeurApres
+						String valApres = tool.toJson(params);
+						// Enregistrement de la trace de changement
+						auditService.traceChange(Operation.SYSTEM_CREATE, valAvant, valApres);
+						// Renvoie du paramètre
+						return params;
+					} else {
+						throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Clé d'activation non valable");
+					}
+				} catch (SSLException | URISyntaxException | WebClientResponseException | ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					if (e instanceof WebClientResponseException) {
+						if(e.getLocalizedMessage().contains("Bad Request"))
+							throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La clé d'activation n'est pas valable");
+						else
+							throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La clé d'activation n'est pas valable");
+					}
+					else
+						throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "");
+				}
+
 			} else
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 						"Votre système est déjà configuré. Veuillez contactez votre fournisseur du SFE pour plus d'assistance. Merci !");
@@ -233,14 +267,20 @@ public class ParametreService {
 				else if (exception.getMessage().contains("UniqueToken"))
 					throw new ResponseStatusException(HttpStatus.FORBIDDEN,
 							"Une autre société est déjà enregistrée avec ce token de sécurité");
-				else if (exception.getMessage().contains("Le champ 'ifu' ne peut être vide"))
+				else if (exception.getMessage().contains("UniqueSerialKey"))
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Doublon de la clé d'activation");
+				else if (exception.getMessage().contains("'ifu'"))
 					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "L'IFU de la société ne peut être vide");
-				else if (exception.getMessage().contains("Le champ 'name' ne peut être vide"))
+				else if (exception.getMessage().contains("'name'"))
 					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Le nom de la société ne peut être vide");
-				else if (exception.getMessage().contains("Le champ 'nim' ne peut être vide"))
+				else if (exception.getMessage().contains("'nim'"))
 					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Le NIM de la société ne peut être vide");
-				else if (exception.getMessage().contains("Le champ 'token' ne peut être vide"))
+				else if (exception.getMessage().contains("'token'"))
 					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Le token de sécurité ne peut être vide");
+				else if (exception.getMessage().contains("'serial_key'"))
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La clé d'activation ne peut être vide");
+				else if (exception.getMessage().contains("'expiration'"))
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La date d'expiration de l'e-mecef ne peut être vide");
 				else
 					throw new ResponseStatusException(HttpStatus.FORBIDDEN, exception.getMessage());
 
@@ -305,6 +345,10 @@ public class ParametreService {
 				params.setToken(parametre.getTokenTmp());
 			if (parametre.getTypeSystem() != null)
 				params.setTypeSystem(parametre.getTypeSystem());
+			if(parametre.getExpiration() != null)
+				params.setExpiration(parametre.getExpiration());
+			if(parametre.getSerialKey() != null)
+				params.setSerialKey(parametre.getSerialKey());
 		}
 		params.setUpdatedAt(null);
 

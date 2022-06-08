@@ -278,8 +278,8 @@ public class AccessController {
 	public boolean deleteAccess(Long id) throws JsonProcessingException {
 		return accessService.deleteAccess(id);
 	}
-	
-	/**** Gestion des clés d'activation *****/
+
+	/*** Gestion de la clé d'activation ***/
 
 	/**
 	 * @return
@@ -317,7 +317,8 @@ public class AccessController {
 	 * @return
 	 * @throws NoSuchAlgorithmException
 	 * @throws UnsupportedEncodingException
-	 * @see com.alladeson.caurisit.services.AccessService#updateSerialKey(com.alladeson.caurisit.models.entities.SerialKey, java.lang.Long)
+	 * @see com.alladeson.caurisit.services.AccessService#updateSerialKey(com.alladeson.caurisit.models.entities.SerialKey,
+	 *      java.lang.Long)
 	 */
 	@PutMapping("access/serial-key/{keyId}")
 	public SerialKey updateSerialKey(@PathVariable(value = "keyId") Long serialKeyId)
@@ -344,4 +345,18 @@ public class AccessController {
 	public boolean activateSerialKey(@PathVariable(value = "serailKey") String key) {
 		return accessService.activateSerialKey(key);
 	}
+
+//	/*** Vérification de la clé d'activation ***/
+//
+//	/**
+//	 * @param serialKey
+//	 * @return
+//	 * @throws URISyntaxException
+//	 * @throws SSLException 
+//	 * @see com.alladeson.caurisit.services.AccessService#checkSecrialKey(java.lang.String)
+//	 */
+//	@PostMapping("access/serial-key/check/key/{serialKey}")
+//	public boolean checkSecrialKey(@PathVariable(value = "serialKey") String serialKey) throws URISyntaxException, SSLException {
+//		return accessService.checkSecrialKey(serialKey);
+//	}
 }

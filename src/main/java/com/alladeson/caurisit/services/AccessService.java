@@ -3,6 +3,8 @@
  */
 package com.alladeson.caurisit.services;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,11 +13,16 @@ import java.util.Optional;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.alladeson.caurisit.config.AppConfig;
 import com.alladeson.caurisit.models.entities.Access;
-import com.alladeson.caurisit.models.entities.Article;
 import com.alladeson.caurisit.models.entities.Feature;
 import com.alladeson.caurisit.models.entities.Operation;
 import com.alladeson.caurisit.models.entities.User;
@@ -24,6 +31,7 @@ import com.alladeson.caurisit.repositories.AccessRepository;
 import com.alladeson.caurisit.repositories.FeatureRepository;
 import com.alladeson.caurisit.repositories.UserGroupRepository;
 import com.alladeson.caurisit.repositories.UserRepository;
+import com.alladeson.caurisit.security.auth.jwt.JwtAuthenticationResponse;
 import com.alladeson.caurisit.security.core.AccountService;
 import com.alladeson.caurisit.security.entities.Account;
 import com.alladeson.caurisit.security.entities.TypeRole;
@@ -51,6 +59,9 @@ public class AccessService {
 
 	@Autowired
 	private AccountService accountService;
+	
+	@Autowired
+	private AppConfig config;
 
 	/**
 	 * Récupération de l'utilisateur connecté
@@ -578,5 +589,34 @@ public class AccessService {
 
 		accessRepos.delete(acs);
 		return true;
+	}
+	
+	/*** Gestion de la verification du  ***/
+	
+	/**
+	 * 
+	 * @param serialKey
+	 * @return
+	 * @throws URISyntaxException 
+	 */
+	public String checkSecrialKey(String serialKey) throws URISyntaxException {
+		WebClient client = WebClient.create();
+		
+		MultiValueMap<String, String> bodyValues = new LinkedMultiValueMap<>();
+
+		bodyValues.add("login", config.getSaUsername());
+		bodyValues.add("password", config.getSaPassword());
+
+		JwtAuthenticationResponse response = client.post()
+		    .uri(new URI(config.getSkUri()))
+//		    .header("Authorization", "Bearer MY_SECRET_TOKEN")
+		    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+		    .accept(MediaType.APPLICATION_JSON)
+		    .body(BodyInserters.fromFormData(bodyValues))
+		    .retrieve()
+		    .bodyToMono(JwtAuthenticationResponse.class)
+		    .block();
+		
+		return response.getToken();
 	}
 }

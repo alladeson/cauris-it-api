@@ -7,23 +7,7 @@ package com.alladeson.caurisit.models.reports;
  * @author allad
  *
  */
-public class InvoiceData {
-
-	// Le numéro de la facture
-	private String invoice_id;
-	// La date de confirmation de la facture
-	private String invoice_date;
-	// Le type de la facture
-	private String invoice_type;
-	// Le montant total de la facture
-	private Long invoice_total;
-	// Le montant total de la facture en lettre
-	private String invoice_total_toWord;
-	// Le nom de l'agent opérateur ayant établi la facture
-	private String invoice_operator;
-	// Le code MCef/DGI de la facture origniale : utile pour les factures d'avoir
-	private String invoice_origine_ref;
-
+public class ConfigReportData {
 	// Les informations de la société
 	private String ste_ifu;
 	private String ste_name;
@@ -36,106 +20,10 @@ public class InvoiceData {
 	private String ste_rccm;
 	private String ste_logo;
 	private String ste_contact;
-	// Le numero de la machine e-mcef
-	private String emcef_nim;
-
-	/**
-	 * @return the invoice_id
-	 */
-	public String getInvoice_id() {
-		return invoice_id;
-	}
-
-	/**
-	 * @param invoice_id the invoice_id to set
-	 */
-	public void setInvoice_id(String invoice_id) {
-		this.invoice_id = invoice_id;
-	}
-
-	/**
-	 * @return the invoice_date
-	 */
-	public String getInvoice_date() {
-		return invoice_date;
-	}
-
-	/**
-	 * @param invoice_date the invoice_date to set
-	 */
-	public void setInvoice_date(String invoice_date) {
-		this.invoice_date = invoice_date;
-	}
-
-	/**
-	 * @return the invoice_type
-	 */
-	public String getInvoice_type() {
-		return invoice_type;
-	}
-
-	/**
-	 * @param invoice_type the invoice_type to set
-	 */
-	public void setInvoice_type(String invoice_type) {
-		this.invoice_type = invoice_type;
-	}
-
-	/**
-	 * @return the invoice_total
-	 */
-	public Long getInvoice_total() {
-		return invoice_total;
-	}
-
-	/**
-	 * @param invoice_total the invoice_total to set
-	 */
-	public void setInvoice_total(Long invoice_total) {
-		this.invoice_total = invoice_total;
-	}
-
-	/**
-	 * @return the invoice_total_toWord
-	 */
-	public String getInvoice_total_toWord() {
-		return invoice_total_toWord;
-	}
-
-	/**
-	 * @param invoice_total_toWord the invoice_total_toWord to set
-	 */
-	public void setInvoice_total_toWord(String invoice_total_toWord) {
-		this.invoice_total_toWord = invoice_total_toWord;
-	}
-
-	/**
-	 * @return the invoice_operator
-	 */
-	public String getInvoice_operator() {
-		return invoice_operator;
-	}
-
-	/**
-	 * @param invoice_operator the invoice_operator to set
-	 */
-	public void setInvoice_operator(String invoice_operator) {
-		this.invoice_operator = invoice_operator;
-	}
-
-	/**
-	 * @return the invoice_origine_ref
-	 */
-	public String getInvoice_origine_ref() {
-		return invoice_origine_ref;
-	}
-
-	/**
-	 * @param invoice_origine_ref the invoice_origine_ref to set
-	 */
-	public void setInvoice_origine_ref(String invoice_origine_ref) {
-		this.invoice_origine_ref = invoice_origine_ref;
-	}
+	// La clé d'activation
+	private String serialKey;
+	// La date d'activation
+	private String date;
 
 	/**
 	 * @return the ste_ifu
@@ -292,17 +180,30 @@ public class InvoiceData {
 	}
 
 	/**
-	 * @return the emcef_nim
+	 * @return the serialKey
 	 */
-	public String getEmcef_nim() {
-		return emcef_nim;
+	public String getSerialKey() {
+		return serialKey;
 	}
 
 	/**
-	 * @param emcef_nim the emcef_nim to set
+	 * @param serialKey the serialKey to set
 	 */
-	public void setEmcef_nim(String emcef_nim) {
-		this.emcef_nim = emcef_nim;
+	public void setSerialKey(String serialKey) {
+		this.serialKey = serialKey;
 	}
 
+	/**
+	 * @return the date
+	 */
+	public String getDate() {
+		return date;
+	}
+
+	/**
+	 * @param date the date to set
+	 */
+	public void setDate(String date) {
+		this.date = date;
+	}
 }

@@ -847,8 +847,12 @@ public class FactureService {
 		// Initialisation des données
 		// Récupération du parametre system
 		Parametre param = paramRepos.findOneParams().orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre système n'est pas encore paramètré."));
+				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre système n'est pas encore paramètré"));
 
+		// Vérification de la validité de l'e-mecef
+		if(param.getExpiration().before(new Date()))
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre machine virtuelle e-MECef est expirée");
+		
 		// Rcupération de l'utilisateur connecté
 		User operateur = this.getAuthenticated();
 		// Récupération du client de la facture

@@ -12,6 +12,8 @@ import com.alladeson.caurisit.models.reports.BilanPeriodiqueData;
 import com.alladeson.caurisit.repositories.FactureRepository.BilanRecapMontant;
 import com.alladeson.caurisit.models.reports.ClientData;
 import com.alladeson.caurisit.models.reports.CompanyContact;
+import com.alladeson.caurisit.models.reports.ConfigReportData;
+import com.alladeson.caurisit.models.reports.ConfigTableData;
 import com.alladeson.caurisit.models.reports.InvoiceData;
 import com.alladeson.caurisit.models.reports.InvoiceDetailData;
 import com.alladeson.caurisit.models.reports.InvoicePayement;
@@ -27,6 +29,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -84,7 +87,8 @@ public class ReportService {
 			invoiceDetail.setPrix_u(detail.getPrixUnitaire().longValue());
 			invoiceDetail.setQte(detail.getQuantite());
 			// Formatage du montant ttc
-			invoiceDetail.setMontant_ttc(formatNumber(detail.getMontantTtc()) + " [" + detail.getTaxe().getGroupe().name() + "]");
+			invoiceDetail.setMontant_ttc(
+					formatNumber(detail.getMontantTtc()) + " [" + detail.getTaxe().getGroupe().name() + "]");
 			liste.add(invoiceDetail);
 			// Gestion de la taxe spécifique
 			if (detail.getTs() != null) {
@@ -92,16 +96,17 @@ public class ReportService {
 				var ts = detail.getTs();
 				var invoiceDetailTs = new InvoiceDetailData();
 				invoiceDetailTs.setNumero(++i);
-				invoiceDetailTs.setName("TS (" + ((ts.getName() != null && !ts.getName().isBlank()) ? ts.getName() : "Taxe spécifique") + ")");
+				invoiceDetailTs.setName("TS ("
+						+ ((ts.getName() != null && !ts.getName().isBlank()) ? ts.getName() : "Taxe spécifique") + ")");
 				invoiceDetailTs.setTaxe(ts.getTaxe().getAbreviation());
 				invoiceDetailTs.setPrix_u(Math.round(ts.getTsUnitaireTtc()));
 				invoiceDetailTs.setQte(ts.getQuantite());
-				invoiceDetailTs.setMontant_ttc(formatNumber(ts.getTsTotal()) + " ["
-						+ ts.getTaxe().getGroupe().name() + "]");
+				invoiceDetailTs
+						.setMontant_ttc(formatNumber(ts.getTsTotal()) + " [" + ts.getTaxe().getGroupe().name() + "]");
 				liste.add(invoiceDetailTs);
 			}
 			// Gestion de la remise
-			if(detail.isRemise()) {
+			if (detail.isRemise()) {
 				var discount = detail.getDiscount();
 				invoiceDetail.setRemise(discount.getTaux() + "%");
 				invoiceDetail.setPrix_u(discount.getOriginalPrice().longValue());
@@ -307,13 +312,14 @@ public class ReportService {
 	 * @throws IOException
 	 * @throws JRException
 	 */
-	public ResponseEntity<byte[]> invoiceReport(InvoiceData invoice, HashMap<String, Object> params, String invoiceTemplate, String invoiceFileName)
-			throws IOException, JRException {
+	public ResponseEntity<byte[]> invoiceReport(InvoiceData invoice, HashMap<String, Object> params,
+			String invoiceTemplate, String invoiceFileName) throws IOException, JRException {
 		return tool.generateInvoice(Collections.singleton(invoice), params, invoiceTemplate, invoiceFileName);
 	}
-	
+
 	/**
 	 * Générer la facture normalisée et l'enregistrer
+	 * 
 	 * @param invoice
 	 * @param params
 	 * @param invoiceTemplate
@@ -322,13 +328,13 @@ public class ReportService {
 	 * @throws IOException
 	 * @throws JRException
 	 */
-	public String invoiceReportAndStoreIt(InvoiceData invoice, HashMap<String, Object> params, String invoiceTemplate, String invoiceFileName)
-			throws IOException, JRException {
+	public String invoiceReportAndStoreIt(InvoiceData invoice, HashMap<String, Object> params, String invoiceTemplate,
+			String invoiceFileName) throws IOException, JRException {
 		return tool.generateInvoiceAndStoreIt(Collections.singleton(invoice), params, invoiceTemplate, invoiceFileName);
 	}
-	
+
 	/*** Bilan Périodique ***/
-	
+
 	/**
 	 * Mise en place des données du bilan périodique pour l'impression
 	 * 
@@ -337,7 +343,7 @@ public class ReportService {
 	 */
 	public BilanPeriodiqueData setBilanPeriodiqueData(Parametre params) {
 		// Instanciation de InvoiceData
-		var bilan = new BilanPeriodiqueData();		
+		var bilan = new BilanPeriodiqueData();
 		// Mise à jour des champs pour la société
 		bilan.setSte_name(params.getName());
 		bilan.setSte_ifu(params.getIfu());
@@ -355,7 +361,7 @@ public class ReportService {
 		bilan.setEmcef_nim(params.getNim());
 		return bilan;
 	}
-	
+
 	/**
 	 * Définition de la liste des recaps de la facture
 	 * 
@@ -449,7 +455,7 @@ public class ReportService {
 			recaps.add(recap);
 		}
 
-		if(recaps.size() == 0) {
+		if (recaps.size() == 0) {
 			InvoiceRecapData recap = new InvoiceRecapData();
 			recap.setTaxe_group("-");
 			recap.setTotal(0l);
@@ -460,7 +466,7 @@ public class ReportService {
 		}
 		return recaps;
 	}
-	
+
 	/**
 	 * Générer le bilan périodique
 	 * 
@@ -472,8 +478,146 @@ public class ReportService {
 	 * @throws IOException
 	 * @throws JRException
 	 */
-	public ResponseEntity<byte[]> bilanPeriodiqueReport(BilanPeriodiqueData bilanData, HashMap<String, Object> params, String bilanTemplate, String bilanFileName)
-			throws IOException, JRException {
+	public ResponseEntity<byte[]> bilanPeriodiqueReport(BilanPeriodiqueData bilanData, HashMap<String, Object> params,
+			String bilanTemplate, String bilanFileName) throws IOException, JRException {
 		return tool.generateInvoice(Collections.singleton(bilanData), params, bilanTemplate, bilanFileName);
 	}
+
+	/** Rapport de configuration **/
+
+	/**
+	 * Instanciation et mise à jour des informations du rapport de configuration
+	 * pour l'impression
+	 * 
+	 * @param Parametre
+	 * @return {@link ConfigReportData}
+	 */
+	public ConfigReportData setConfigReportData(Parametre params) {
+		// Instanciation
+		var configData = new ConfigReportData();
+		// Mise à jour des champs pour la société
+		configData.setSte_name(appConfig.getAppName());
+		configData.setSte_ifu(appConfig.getAppIfu());
+//		configData.setSte_address(params.getAddress());
+//		configData.setSte_contact(params.getContact());
+//		configData.setSte_email(params.getEmail());
+//		configData.setSte_pays(params.getPays());
+		configData.setSte_rccm(appConfig.getAppRcm());
+//		configData.setSte_telephone(params.getTelephone());
+//		configData.setSte_raisonSociale(params.getRaisonSociale());
+//		configData.setSte_ville(params.getVille());
+		// Mise à jour du logo de la société
+		configData.setSte_logo(appConfig.getAppLogo());
+		// Mise à jour de la clé de sécurité
+		configData.setSerialKey(params.getSerialKey());
+		// Mise à jour de la date de configuration
+		// Récupération de la date de creation
+		configData.setDate(Tool.formatDate(params.getActivationDate(), "dd/MM/yyyy HH:mm:ss"));
+		// Renvoie des donné de confgiuration
+		return configData;
+	}
+
+	/**
+	 * Instanciation et mise à jour des informations de la sociéteé du rapport de
+	 * configuration pour l'impression
+	 * 
+	 * @param Parametre
+	 * @return {@link List<ConfigTableData>}
+	 */
+	public List<ConfigTableData> setConfigCompanyData(Parametre params) {
+		// Creation de liste
+		List<ConfigTableData> data = new ArrayList<ConfigTableData>();
+		// Instanciation
+		var tableData = new ConfigTableData();
+		// Mise à jour des champs pour la société
+		tableData.setField("IFU");
+		tableData.setContent(params.getIfu());
+		data.add(tableData);
+
+		tableData = new ConfigTableData();
+		tableData.setField("Nom ou Raison sociale");
+		tableData.setContent(params.getName());
+		data.add(tableData);
+
+		tableData = new ConfigTableData();
+		tableData.setField("RCCM");
+		tableData.setContent(params.getRcm());
+		data.add(tableData);
+
+		tableData = new ConfigTableData();
+		tableData.setField("Adresse");
+		tableData.setContent(params.getAddress());
+		data.add(tableData);
+
+		tableData = new ConfigTableData();
+		tableData.setField("Ville");
+		tableData.setContent(params.getVille());
+		data.add(tableData);
+
+		tableData = new ConfigTableData();
+		tableData.setField("Nom ou Raison sociale");
+		tableData.setContent(params.getPays());
+		data.add(tableData);
+
+		tableData = new ConfigTableData();
+		tableData.setField("Téléphone");
+		tableData.setContent(params.getTelephone());
+		data.add(tableData);
+
+		tableData = new ConfigTableData();
+		tableData.setField("E-mail");
+		tableData.setContent(params.getEmail());
+		data.add(tableData);
+
+		// Renvoie des donné de confgiuration
+		return data;
+	}
+
+	/**
+	 * Instanciation et mise à jour des informations de l'emecef du rapport de
+	 * configuration pour l'impression
+	 * 
+	 * @param Parametre
+	 * @return {@link List<ConfigTableData>}
+	 */
+	public List<ConfigTableData> setConfigEmecefData(Parametre params) {
+		// Creation de liste
+		List<ConfigTableData> data = new ArrayList<ConfigTableData>();
+		// Instanciation
+		var tableData = new ConfigTableData();
+		// Mise à jour des champs pour la société
+		tableData.setField("NIM");
+		tableData.setContent(params.getNim());
+		data.add(tableData);
+
+		tableData = new ConfigTableData();
+		tableData.setField("Mode");
+		tableData.setContent(params.getTypeSystem().name());
+		data.add(tableData);
+
+		tableData = new ConfigTableData();
+		tableData.setField("Expiration");
+		tableData.setContent(Tool.formatDate(params.getExpiration(), "dd/MM/yyyy HH:mm:ss"));
+		data.add(tableData);
+
+		// Renvoie des donné de confgiuration
+		return data;
+	}
+
+	/**
+	 * Générer le rapport de configuration
+	 * 
+	 * @param reportData
+	 * @param params
+	 * @param bilanTemplate
+	 * @param bilanFileName
+	 * @return
+	 * @throws IOException
+	 * @throws JRException
+	 */
+	public ResponseEntity<byte[]> generateConfigReport(ConfigReportData reportData, HashMap<String, Object> params,
+			String reportTemplate, String reportFileName) throws IOException, JRException {
+		return tool.generateConfigReport(Collections.singleton(reportData), params, reportTemplate, reportFileName);
+	}
+
 }

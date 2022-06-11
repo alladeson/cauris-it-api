@@ -3,23 +3,35 @@
  */
 package com.alladeson.caurisit.services;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.TimeZone;
 
 import javax.net.ssl.SSLException;
 
 import org.apache.commons.io.FilenameUtils;
 import org.hibernate.exception.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
@@ -30,6 +42,17 @@ import com.alladeson.caurisit.models.entities.TypeFacture;
 import com.alladeson.caurisit.models.entities.TypePaiement;
 import com.alladeson.caurisit.models.entities.TypeSystem;
 import com.alladeson.caurisit.models.entities.User;
+import com.alladeson.caurisit.models.reports.ClientData;
+import com.alladeson.caurisit.models.reports.ConfigReportData;
+import com.alladeson.caurisit.models.reports.ConfigTableData;
+import com.alladeson.caurisit.models.reports.InvoiceData;
+import com.alladeson.caurisit.models.reports.InvoiceDetailData;
+import com.alladeson.caurisit.models.reports.InvoicePayement;
+import com.alladeson.caurisit.models.reports.InvoiceRecapData;
+import com.alladeson.caurisit.config.AppConfig;
+import com.alladeson.caurisit.models.entities.Facture;
+import com.alladeson.caurisit.models.entities.FactureFinalisationDgi;
+import com.alladeson.caurisit.models.entities.FactureResponseDgi;
 import com.alladeson.caurisit.models.entities.Feature;
 import com.alladeson.caurisit.models.entities.FrontendLayoutSettings;
 import com.alladeson.caurisit.models.entities.Operation;
@@ -50,6 +73,8 @@ import bj.impots.dgi.Configuration;
 import bj.impots.dgi.auth.ApiKeyAuth;
 import bj.impots.dgi.emcf.InfoResponseDto;
 import bj.impots.dgi.emcf.SfeInfoApi;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 /**
  * @author allad
@@ -57,6 +82,7 @@ import bj.impots.dgi.emcf.SfeInfoApi;
  */
 @Service
 public class ParametreService {
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private ParametreRepository paramRepos;
@@ -84,6 +110,15 @@ public class ParametreService {
 	private AuditService auditService;
 	@Autowired
 	private Tool tool;
+
+	@Autowired
+	private ReportService reportService;
+
+	@Autowired
+	private AppConfig config;
+
+	private static final String CONFIG_REPORT_TEMPLATE = "report/rapport-de-configuration.jrxml";
+	private static final String CONFIG_REPORT_MAIL_TEMPLATE = "rapport-de-configuration";
 
 	/**
 	 * Récupération de l'utilisateur connecté
@@ -188,33 +223,45 @@ public class ParametreService {
 			if ((paramRepos.findAll()).isEmpty()) {
 				// Vérification de la clé d'activation
 				try {
-						// Mise à jour de la date d'expiration de l'emcef
-						String expirationDate = emcefInfo.getTokenValid().toString().substring(0, 19);
-						Date date = tool.stringToDate(expirationDate, "yyyy-MM-dd'T'HH:mm:ss");
-						parametre.setExpiration(date);	
-						// Validation de la clé d'activation
+					// Mise à jour de la date d'expiration de l'emcef
+					String expirationDate = emcefInfo.getTokenValid().toString().substring(0, 19);
+					Date date = tool.stringToDate(expirationDate, "yyyy-MM-dd'T'HH:mm:ss");
+					parametre.setExpiration(date);
+					// Mise à jour de la date d'activation
+					parametre.setActivationDate(new Date());
+					// Validation de la clé d'activation
 					if (accessService.checkSecrialKey(parametre.getSerialKey())) {
+						// Sauvegarde
 						var params = saveParametre(parametre, false);
 						// Gestion audit : valeurApres
 						String valApres = tool.toJson(params);
 						// Enregistrement de la trace de changement
 						auditService.traceChange(Operation.SYSTEM_CREATE, valAvant, valApres);
+
+						// Envoi du mail
+						this.sendMail(params);
+
 						// Renvoie du paramètre
 						return params;
 					} else {
 						throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Clé d'activation non valable");
 					}
-				} catch (SSLException | URISyntaxException | WebClientResponseException | ParseException e) {
-					// TODO Auto-generated catch block
+				}
+//				catch (IOException | URISyntaxException | WebClientResponseException | ParseException
+//						| JRException e) {
+				catch (Exception e) {
 					e.printStackTrace();
 					if (e instanceof WebClientResponseException) {
-						if(e.getLocalizedMessage().contains("Bad Request"))
-							throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La clé d'activation n'est pas valable");
+						if (e.getLocalizedMessage().contains("Bad Request"))
+							throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+									"La clé d'activation n'est pas valable");
 						else
-							throw new ResponseStatusException(HttpStatus.NOT_FOUND, "La clé d'activation n'est pas valable");
+							throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+									"La clé d'activation n'est pas valable");
+					} else {
+						e.printStackTrace();
+						throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());
 					}
-					else
-						throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "");
 				}
 
 			} else
@@ -280,7 +327,8 @@ public class ParametreService {
 				else if (exception.getMessage().contains("'serial_key'"))
 					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La clé d'activation ne peut être vide");
 				else if (exception.getMessage().contains("'expiration'"))
-					throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La date d'expiration de l'e-mecef ne peut être vide");
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+							"La date d'expiration de l'e-mecef ne peut être vide");
 				else
 					throw new ResponseStatusException(HttpStatus.FORBIDDEN, exception.getMessage());
 
@@ -288,6 +336,32 @@ public class ParametreService {
 				throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
 		}
 		return params;
+	}
+
+	@Async
+	private boolean sendMail(Parametre param) throws IOException, JRException {
+		if (!StringUtils.hasText(param.getEmail()))
+			return false;
+
+		// Récupération du fichier du rapport de configuration et mise à jour du
+		// paramètre
+		String configReport = this.getConfigReportPrintName(param);
+		param.setConfigReport(configReport);
+		param = paramRepos.save(param);
+
+		//
+		Map<String, Object> vars = new HashMap<>();
+		vars.put("parametre", param);
+		// Ajout de la pièce jointe
+		File[] file = new File[1];
+		file[0] = new File(config.getUploadDir() + "/" + param.getConfigReport());
+		// Titre du mail
+		String title = "Rapport de configuration";
+		// Template du mail
+		String template = CONFIG_REPORT_MAIL_TEMPLATE;
+
+		return tool.sendMail(config.getEmailNoReply(), config.getAppName(),
+				new String[] { param.getEmail(), config.getEmailAdmin() }, title, template, vars, file);
 	}
 
 	public Parametre getParametre(Long parametreId) {
@@ -345,9 +419,9 @@ public class ParametreService {
 				params.setToken(parametre.getTokenTmp());
 			if (parametre.getTypeSystem() != null)
 				params.setTypeSystem(parametre.getTypeSystem());
-			if(parametre.getExpiration() != null)
+			if (parametre.getExpiration() != null)
 				params.setExpiration(parametre.getExpiration());
-			if(parametre.getSerialKey() != null)
+			if (parametre.getSerialKey() != null)
 				params.setSerialKey(parametre.getSerialKey());
 		}
 		params.setUpdatedAt(null);
@@ -406,6 +480,98 @@ public class ParametreService {
 		auditService.traceChange(Operation.SYSTEM_LOGO_UPDATE, valAvant, valApres);
 		// Renvoie du paramètre
 		return param;
+	}
+
+	/**
+	 * Générer la facture normalisée
+	 * 
+	 * @param id
+	 * @return {@link ResponseEntity}
+	 * @throws IOException
+	 * @throws JRException
+	 */
+	public ResponseEntity<byte[]> genererRapportConfig(Long id) throws IOException, JRException {
+
+		// Récupération de la facture
+		Optional<Parametre> optional = paramRepos.findById(id);
+		if (optional.isEmpty())
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Les données du système ne sont pas disponibles");
+		Parametre param = optional.get();
+
+		return getConfigReportPrint(param);
+	}
+
+	/**
+	 * Imprimer la facture et l'envoiyer telle quelle
+	 * 
+	 * @param facture La facture confirmée par l'emcef
+	 * @return
+	 * @throws IOException
+	 * @throws JRException
+	 */
+	private String getConfigReportPrintName(Parametre param) throws IOException, JRException {
+		// Récupération du type de la facture
+		var template = CONFIG_REPORT_TEMPLATE;
+
+		// Les données de la facture
+		ConfigReportData configReportDate = reportService.setConfigReportData(param);
+
+		// Setting Invoice Report Params
+		HashMap<String, Object> map = setConfigReportParams(param);
+		// Ajout des données de l'entête
+//		map.put("entete", new JRBeanCollectionDataSource(Collections.singleton(invoice)));
+
+		// Générer la facture
+		var reportName = "rapport_configuration_" + param.getSerialKey().substring(0, 10) + ".pdf";
+		reportService.generateConfigReport(configReportDate, map, template, reportName);
+		// Renvoie du nom du fichier généré
+		return reportName;
+	}
+
+	/**
+	 * Imprimer la facture et l'envoiyer telle quelle
+	 * 
+	 * @param facture La facture confirmée par l'emcef
+	 * @return
+	 * @throws IOException
+	 * @throws JRException
+	 */
+	private ResponseEntity<byte[]> getConfigReportPrint(Parametre param) throws IOException, JRException {
+		// Récupération du type de la facture
+		var template = CONFIG_REPORT_TEMPLATE;
+
+		// Les données de la facture
+		ConfigReportData configReportDate = reportService.setConfigReportData(param);
+
+		// Setting Invoice Report Params
+		HashMap<String, Object> map = setConfigReportParams(param);
+		// Ajout des données de l'entête
+//		map.put("entete", new JRBeanCollectionDataSource(Collections.singleton(invoice)));
+		// Générer la facture
+		var reportName = "rapport_configuration_" + param.getSerialKey().substring(0, 10) + ".pdf";
+		return reportService.generateConfigReport(configReportDate, map, template, reportName);
+	}
+
+	/**
+	 * Dénfinir les données de paramètre pour l'impression de la facture
+	 * 
+	 * @param facture
+	 * @param param
+	 * @return
+	 */
+	private HashMap<String, Object> setConfigReportParams(Parametre param) {
+
+		// Les données de la société
+		List<ConfigTableData> companyData = reportService.setConfigCompanyData(param);
+		// Les données de l'e-mecef
+		List<ConfigTableData> emecefData = reportService.setConfigEmecefData(param);
+
+		// Instanciation de la liste des paramètres
+		HashMap<String, Object> map = new HashMap<>();
+		// Ajout des paramètres
+		map.put("societe_data", new JRBeanCollectionDataSource(companyData));
+		map.put("emecef_data", new JRBeanCollectionDataSource(emecefData));
+		return map;
 	}
 
 	// Gestion du taxe

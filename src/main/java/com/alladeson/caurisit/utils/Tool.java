@@ -237,6 +237,18 @@ public class Tool {
 		headers.set(HttpHeaders.CONTENT_DISPOSITION, "inline;filename=" + invoiceFileName);
 		return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF).body(reportPdf);
 	}
+	
+	public ResponseEntity<byte[]> generateConfigReport(Collection<?> collection, HashMap<String, Object> params,
+			String reportTemplate, String reportFileName) throws JRException, IOException {
+		JRBeanCollectionDataSource beanCollectionDataSource = new JRBeanCollectionDataSource(collection);
+		JasperReport compileReport = JasperCompileManager.compileReport(this.getResourceAsStream(reportTemplate));
+		JasperPrint report = JasperFillManager.fillReport(compileReport, params, beanCollectionDataSource);
+		JasperExportManager.exportReportToPdfFile(report, appConfig.getUploadDir() + "/" + reportFileName);
+		byte[] reportPdf = JasperExportManager.exportReportToPdf(report);
+		HttpHeaders headers = new HttpHeaders();
+		headers.set(HttpHeaders.CONTENT_DISPOSITION, "inline;filename=" + reportFileName);
+		return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF).body(reportPdf);
+	}
 
 	/* Conversion des nombres en lettres françaises */
 

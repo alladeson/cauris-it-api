@@ -78,6 +78,10 @@ public class Parametre extends BaseEntity {
 	// Pour l'enregistrement de la clé d'activation
 	@Column(nullable = false)
 	private String serialKey;
+	// Enregistrement de la date de configuration
+	private Date activationDate;
+	// Pour le fichier du rapport de la configuration
+	private String configReport;
 
 	/**
 	 * @return the id
@@ -342,5 +346,33 @@ public class Parametre extends BaseEntity {
 	 */
 	public void setSerialKey(String serialKey) {
 		this.serialKey = serialKey;
+	}
+
+	/**
+	 * @return the activationDate
+	 */
+	public Date getActivationDate() {
+		return activationDate;
+	}
+
+	/**
+	 * @param activationDate the activationDate to set
+	 */
+	public void setActivationDate(Date activationDate) {
+		this.activationDate = activationDate;
+	}
+
+	/**
+	 * @return the configReport
+	 */
+	public String getConfigReport() {
+		return configReport;
+	}
+
+	/**
+	 * @param configReport the configReport to set
+	 */
+	public void setConfigReport(String configReport) {
+		this.configReport = configReport;
 	}
 }

@@ -17,7 +17,11 @@ import java.lang.reflect.Field;
 @ConfigurationProperties(prefix = "api")
 public class AppConfig {
 	private String appName;
+	private String appIfu;
+	private String appRcm;
+	private String appLogo;
 	private String appCopyright;
+	private String appCaurisitFrontend;
 	private String baseUrl;
 	private String uploadDir;
 	private String emailNoReply;
@@ -55,12 +59,68 @@ public class AppConfig {
 		this.appName = appName;
 	}
 
+	/**
+	 * @return the appIfu
+	 */
+	public String getAppIfu() {
+		return appIfu;
+	}
+
+	/**
+	 * @param appIfu the appIfu to set
+	 */
+	public void setAppIfu(String appIfu) {
+		this.appIfu = appIfu;
+	}
+
+	/**
+	 * @return the appRcm
+	 */
+	public String getAppRcm() {
+		return appRcm;
+	}
+
+	/**
+	 * @param appRcm the appRcm to set
+	 */
+	public void setAppRcm(String appRcm) {
+		this.appRcm = appRcm;
+	}
+
+	/**
+	 * @return the appLogo
+	 */
+	public String getAppLogo() {
+		return appLogo;
+	}
+
+	/**
+	 * @param appLogo the appLogo to set
+	 */
+	public void setAppLogo(String appLogo) {
+		this.appLogo = appLogo;
+	}
+
 	public String getAppCopyright() {
 		return appCopyright;
 	}
 
 	public void setAppCopyright(String appCopyright) {
 		this.appCopyright = appCopyright;
+	}
+
+	/**
+	 * @return the appCaurisitFrontend
+	 */
+	public String getAppCaurisitFrontend() {
+		return appCaurisitFrontend;
+	}
+
+	/**
+	 * @param appCaurisitFrontend the appCaurisitFrontend to set
+	 */
+	public void setAppCaurisitFrontend(String appCaurisitFrontend) {
+		this.appCaurisitFrontend = appCaurisitFrontend;
 	}
 
 	public String getMailSignupRequestTitle() {

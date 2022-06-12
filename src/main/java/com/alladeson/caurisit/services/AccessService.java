@@ -935,12 +935,15 @@ public class AccessService {
 
 		Field[] fields = paramClass.getDeclaredFields();
 
+		// Mise à jour du tokenTmp : utile pour l'enregistrement car le token n'est par reçu par JSON
+		parametre.setTokenTmp(parametre.getToken());
+		// Formatage du bodyMap
 		for (Field field : fields) {
 			String fieldName = field.getName();
 			String methodName = "get" + this.capitalize(fieldName);
 			try {
-				Method method = paramClass.getDeclaredMethod(methodName, (Class<?>) null);
-				bodyMap.put(fieldName, (T) method.invoke(parametre, (Object) null));
+				Method method = paramClass.getDeclaredMethod(methodName);
+				bodyMap.put(fieldName, (T) method.invoke(parametre));
 			} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException e) {
 				// TODO Auto-generated catch block

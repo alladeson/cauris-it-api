@@ -21,13 +21,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *
  */
 @Table(uniqueConstraints = { 
-		@UniqueConstraint(name = "UniqueIfu", columnNames = { "ifu" }),
-		@UniqueConstraint(name = "UniqueName", columnNames = { "name" }),
-		@UniqueConstraint(name = "UniqueRcm", columnNames = { "rcm" }),
-		@UniqueConstraint(name = "UniquePhone", columnNames = { "telephone" }),
-		@UniqueConstraint(name = "UniqueEmail", columnNames = { "email" }),
-		@UniqueConstraint(name = "UniqueNim", columnNames = { "nim" }),
-		@UniqueConstraint(name = "UniqueToken", columnNames = { "token" }),
+//		@UniqueConstraint(name = "UniqueIfu", columnNames = { "ifu" }),
+//		@UniqueConstraint(name = "UniqueName", columnNames = { "name" }),
+//		@UniqueConstraint(name = "UniqueRcm", columnNames = { "rcm" }),
+//		@UniqueConstraint(name = "UniquePhone", columnNames = { "telephone" }),
+//		@UniqueConstraint(name = "UniqueEmail", columnNames = { "email" }),
+//		@UniqueConstraint(name = "UniqueNim", columnNames = { "nim" }),
+//		@UniqueConstraint(name = "UniqueToken", columnNames = { "token" }),
 		@UniqueConstraint(name = "UniqueSerialKey", columnNames = { "serialKey" })
 })
 @Entity

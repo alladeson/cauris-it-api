@@ -19,4 +19,6 @@ public interface ParametreRepository extends JpaRepository<Parametre, Long> {
 	@Query(value = "select * from parametre limit 1", nativeQuery = true)
 	Optional<Parametre> findOneParams();
 
+	Optional<Parametre> findBySerialKey(String serialKey);
+
 }

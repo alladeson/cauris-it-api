@@ -376,5 +376,27 @@ public class ParametreController {
 	public ResponseEntity<byte[]> genererRapportConfig(@PathVariable(value = "id") Long id) throws IOException, JRException {
 		return paramService.genererRapportConfig(id);
 	}
+
+	/** Sauvegarde des données du contribuable **/
 	
+	/**
+	 * @param parametre
+	 * @return
+	 * @see com.alladeson.caurisit.services.ParametreService#createParametreFromClient(com.alladeson.caurisit.models.entities.Parametre)
+	 */
+	@PostMapping("parametre/params/fromWebClient")
+	public Parametre createParametreFromClient(@RequestBody Parametre parametre) {
+		return paramService.createParametreFromClient(parametre);
+	}
+
+	/**
+	 * @param serialKey
+	 * @param file
+	 * @return
+	 * @see com.alladeson.caurisit.services.ParametreService#setParamLogoFromClient(java.lang.String, org.springframework.web.multipart.MultipartFile)
+	 */
+	@PutMapping("parametre/params/{serialKey}/logo")
+	public Parametre setParamLogoFromClient(@PathVariable(value = "serialKey") String serialKey, @RequestParam("file") MultipartFile file) {
+		return paramService.setParamLogoFromClient(serialKey, file);
+	}	
 }

@@ -213,8 +213,8 @@ public class ParametreService {
 
 						// Envoi du mail
 						accessService.sendMail(params, CONFIG_REPORT_MAIL_TEMPLATE);
-						// Envoie des données de paramètre au serveur distant
-						accessService.sendParametreData(params);
+//						// Envoie des données de paramètre au serveur distant
+//						accessService.sendParametreData(params);
 						// Renvoie du paramètre
 						return params;
 					} else {
@@ -244,6 +244,32 @@ public class ParametreService {
 		} else
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
 					"Vos informations ne correspondent à aucune machine emcef de la DGI. Veuillez revoir vos informations et reprenez svp. Merci !");
+	}
+
+	/**
+	 * Sauvegarder les données de paramètre d'entreprise
+	 * 
+	 * @param parametre
+	 * @return
+	 */
+	public Parametre createParametreFromClient(Parametre parametre) {
+		// Check permission
+		if (!accessService.canWritable(Feature.parametreDonneSysteme))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
+		// Gestion audit : valeurAvant
+		String valAvant = null;
+		// Remise à null de l'ID pour éviter les contraintes d'unicité
+		parametre.setId(null);
+		// Sauvegarde
+		var params = saveParametre(parametre, false);
+		// Gestion audit : valeurApres
+		String valApres = tool.toJson(params);
+		// Enregistrement de la trace de changement
+		auditService.traceChange(Operation.SYSTEM_CREATE, valAvant, valApres);
+
+		// Renvoie du paramètre
+		return params;
 	}
 
 	/**
@@ -340,7 +366,7 @@ public class ParametreService {
 
 	public Parametre updateParametre(Parametre parametre, Long parametreId) {
 		// Check permission
-		if (!accessService.canWritable(Feature.parametreDonneSysteme))
+		if (!accessService.canWritable(Feature.parametreSysteme))
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
 
 		var params = paramRepos.findById(parametreId)
@@ -386,7 +412,7 @@ public class ParametreService {
 
 	public boolean deleteParametre(Long parametreId) {
 		// Check permission
-		if (!accessService.canDeletable(Feature.parametreDonneSysteme))
+		if (!accessService.canDeletable(Feature.parametreSysteme))
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
 
 		Parametre parametre = paramRepos.findById(parametreId)
@@ -403,6 +429,12 @@ public class ParametreService {
 		return true;
 	}
 
+	/**
+	 * Sauvegarge du logo
+	 * @param paramId
+	 * @param file
+	 * @return
+	 */
 	public Parametre setParamLogo(Long paramId, MultipartFile file) {
 		// Check permission
 		if (!accessService.canWritable(Feature.parametreDonneSysteme))
@@ -426,16 +458,51 @@ public class ParametreService {
 
 		// Enregistrement des traces de changement
 		auditService.traceChange(Operation.SYSTEM_LOGO_UPDATE, valAvant, valApres);
-		
-		// Envoie du logo au serveur distant
-		try {
-			accessService.sendParametreLogo(param);
-//		} catch (SSLException | URISyntaxException e) {
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+
+//		// Envoie du logo au serveur distant
+//		try {
+//			accessService.sendParametreLogo(param);
+////		} catch (SSLException | URISyntaxException e) {
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+
+		// Renvoie du paramètre
+		return param;
+	}
+
+	/**
+	 * Sauvegarde du logo de l'entreprise du contribuable
+	 * 
+	 * @param serialKey
+	 * @param file
+	 * @return
+	 */
+	public Parametre setParamLogoFromClient(String serialKey, MultipartFile file) {
+		// Check permission
+		if (!accessService.canWritable(Feature.parametreSysteme))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
+		Parametre param = paramRepos.findBySerialKey(serialKey)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Parametre non trouvé"));
+
+		// Gestion audit : valeurAvant
+		String valAvant = tool.toJson(param);
+
+		var filename = "logo_" + param.getId() + "." + FilenameUtils.getExtension(file.getOriginalFilename());
+		fileService.store(file, filename);
+		// Mise à jour du logo du parametre
+		param.setLogo(filename);
+		// Enregistrement et renvoie du parametre
+		param = paramRepos.save(param);
+
+		// Gestion audit : valeurApres
+		String valApres = tool.toJson(param);
+
+		// Enregistrement des traces de changement
+		auditService.traceChange(Operation.SYSTEM_LOGO_UPDATE, valAvant, valApres);
+
 		// Renvoie du paramètre
 		return param;
 	}

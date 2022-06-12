@@ -297,7 +297,7 @@ public class Parametre extends BaseEntity {
 	/**
 	 * @return the serialversionuid
 	 */
-	public static long getSerialversionuid() {
+	public static long getSerialVersionUID() {
 		return serialVersionUID;
 	}
 

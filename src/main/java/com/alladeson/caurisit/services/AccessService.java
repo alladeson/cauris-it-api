@@ -760,8 +760,8 @@ public class AccessService {
 			String fieldName = field.getName();
 			String methodName = "get" + this.capitalize(fieldName);
 			try {
-				Method method = paramClass.getDeclaredMethod(methodName, (Class<?>) null);
-				bodyMap.put(fieldName, (T) method.invoke(parametre, (Object) null));
+				Method method = paramClass.getDeclaredMethod(methodName);
+				bodyMap.put(fieldName, (T) method.invoke(parametre));
 			} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException e) {
 				// TODO Auto-generated catch block

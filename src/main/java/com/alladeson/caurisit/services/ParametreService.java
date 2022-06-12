@@ -3,35 +3,18 @@
  */
 package com.alladeson.caurisit.services;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.TimeZone;
-
-import javax.net.ssl.SSLException;
-
 import org.apache.commons.io.FilenameUtils;
 import org.hibernate.exception.ConstraintViolationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
@@ -42,17 +25,8 @@ import com.alladeson.caurisit.models.entities.TypeFacture;
 import com.alladeson.caurisit.models.entities.TypePaiement;
 import com.alladeson.caurisit.models.entities.TypeSystem;
 import com.alladeson.caurisit.models.entities.User;
-import com.alladeson.caurisit.models.reports.ClientData;
 import com.alladeson.caurisit.models.reports.ConfigReportData;
 import com.alladeson.caurisit.models.reports.ConfigTableData;
-import com.alladeson.caurisit.models.reports.InvoiceData;
-import com.alladeson.caurisit.models.reports.InvoiceDetailData;
-import com.alladeson.caurisit.models.reports.InvoicePayement;
-import com.alladeson.caurisit.models.reports.InvoiceRecapData;
-import com.alladeson.caurisit.config.AppConfig;
-import com.alladeson.caurisit.models.entities.Facture;
-import com.alladeson.caurisit.models.entities.FactureFinalisationDgi;
-import com.alladeson.caurisit.models.entities.FactureResponseDgi;
 import com.alladeson.caurisit.models.entities.Feature;
 import com.alladeson.caurisit.models.entities.FrontendLayoutSettings;
 import com.alladeson.caurisit.models.entities.Operation;
@@ -82,8 +56,6 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
  */
 @Service
 public class ParametreService {
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
 	@Autowired
 	private ParametreRepository paramRepos;
 	@Autowired
@@ -113,9 +85,6 @@ public class ParametreService {
 
 	@Autowired
 	private ReportService reportService;
-
-	@Autowired
-	private AppConfig config;
 
 	private static final String CONFIG_REPORT_TEMPLATE = "report/rapport-de-configuration.jrxml";
 	private static final String CONFIG_REPORT_MAIL_TEMPLATE = "rapport-de-configuration";
@@ -231,6 +200,10 @@ public class ParametreService {
 					parametre.setActivationDate(new Date());
 					// Validation de la clé d'activation
 					if (accessService.checkSecrialKey(parametre.getSerialKey())) {
+						// Récupération du fichier du rapport de configuration et mise à jour du
+						// paramètre
+						String configReport = this.getConfigReportPrintName(parametre);
+						parametre.setConfigReport(configReport);
 						// Sauvegarde
 						var params = saveParametre(parametre, false);
 						// Gestion audit : valeurApres
@@ -239,8 +212,9 @@ public class ParametreService {
 						auditService.traceChange(Operation.SYSTEM_CREATE, valAvant, valApres);
 
 						// Envoi du mail
-						this.sendMail(params);
-
+						accessService.sendMail(params, CONFIG_REPORT_MAIL_TEMPLATE);
+						// Envoie des données de paramètre au serveur distant
+						accessService.sendParametreData(params);
 						// Renvoie du paramètre
 						return params;
 					} else {
@@ -336,32 +310,6 @@ public class ParametreService {
 				throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
 		}
 		return params;
-	}
-
-	@Async
-	private boolean sendMail(Parametre param) throws IOException, JRException {
-		if (!StringUtils.hasText(param.getEmail()))
-			return false;
-
-		// Récupération du fichier du rapport de configuration et mise à jour du
-		// paramètre
-		String configReport = this.getConfigReportPrintName(param);
-		param.setConfigReport(configReport);
-		param = paramRepos.save(param);
-
-		//
-		Map<String, Object> vars = new HashMap<>();
-		vars.put("parametre", param);
-		// Ajout de la pièce jointe
-		File[] file = new File[1];
-		file[0] = new File(config.getUploadDir() + "/" + param.getConfigReport());
-		// Titre du mail
-		String title = "Rapport de configuration";
-		// Template du mail
-		String template = CONFIG_REPORT_MAIL_TEMPLATE;
-
-		return tool.sendMail(config.getEmailNoReply(), config.getAppName(),
-				new String[] { param.getEmail(), config.getEmailAdmin() }, title, template, vars, file);
 	}
 
 	public Parametre getParametre(Long parametreId) {
@@ -478,6 +426,16 @@ public class ParametreService {
 
 		// Enregistrement des traces de changement
 		auditService.traceChange(Operation.SYSTEM_LOGO_UPDATE, valAvant, valApres);
+		
+		// Envoie du logo au serveur distant
+		try {
+			accessService.sendParametreLogo(param);
+//		} catch (SSLException | URISyntaxException e) {
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		// Renvoie du paramètre
 		return param;
 	}

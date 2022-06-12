@@ -261,6 +261,8 @@ public class ParametreService {
 		String valAvant = null;
 		// Remise à null de l'ID pour éviter les contraintes d'unicité
 		parametre.setId(null);
+		// Mise à jour du token du param
+		parametre.setToken(parametre.getTokenTmp());
 		// Sauvegarde
 		var params = saveParametre(parametre, false);
 		// Gestion audit : valeurApres
@@ -431,6 +433,7 @@ public class ParametreService {
 
 	/**
 	 * Sauvegarge du logo
+	 * 
 	 * @param paramId
 	 * @param file
 	 * @return

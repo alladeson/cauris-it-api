@@ -3,6 +3,11 @@
  */
 package com.alladeson.caurisit.services;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -11,16 +16,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import javax.net.ssl.SSLException;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
@@ -29,6 +41,7 @@ import com.alladeson.caurisit.config.AppConfig;
 import com.alladeson.caurisit.models.entities.Access;
 import com.alladeson.caurisit.models.entities.Feature;
 import com.alladeson.caurisit.models.entities.Operation;
+import com.alladeson.caurisit.models.entities.Parametre;
 import com.alladeson.caurisit.models.entities.User;
 import com.alladeson.caurisit.models.entities.UserGroup;
 import com.alladeson.caurisit.models.paylaods.JwtAuthResponsePayload;
@@ -45,6 +58,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import net.sf.jasperreports.engine.JRException;
 import reactor.netty.http.client.HttpClient;
 
 /**
@@ -609,30 +623,43 @@ public class AccessService {
 	 * @param serialKey
 	 * @return
 	 * @throws URISyntaxException
-	 * @throws SSLException 
+	 * @throws SSLException
 	 */
 	public boolean checkSecrialKey(String serialKey) throws URISyntaxException, SSLException {
+		WebClient client = webClientBuilder();
+
+//		MultiValueMap<String, String> bodyValues = new LinkedMultiValueMap<>();
+
+		Map<String, String> bodyMap = loginData();
+
+		String token = remoteLogin(client, bodyMap);
+
+		return serialKeyChecking(serialKey, client, token);
+	}
+
+	/**
+	 * @return
+	 */
+	public Map<String, String> loginData() {
+		Map<String, String> bodyMap = new HashMap<>();
+		bodyMap.put("login", config.getSaUsername());
+		bodyMap.put("password", config.getSaPassword());
+		return bodyMap;
+	}
+
+	/**
+	 * @return
+	 * @throws SSLException
+	 */
+	public WebClient webClientBuilder() throws SSLException {
 		SslContext sslContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE)
 				.build();
 
 		HttpClient httpClient = HttpClient.create().secure(t -> t.sslContext(sslContext));
 
 //		WebClient client = WebClient.create();
-		WebClient client = WebClient.builder()
-                .clientConnector(new ReactorClientHttpConnector(httpClient))
-                .build();
-
-//		MultiValueMap<String, String> bodyValues = new LinkedMultiValueMap<>();
-
-		
-		Map<String, String> bodyMap = new HashMap<>();
-//	    bodyMap.put("key1","value1");
-	    bodyMap.put("login", config.getSaUsername());
-	    bodyMap.put("password", config.getSaPassword());
-
-	    String token = loginInForSerialChecking(client, bodyMap);	    	
-
-	    return serialKeyChecking(serialKey, client, token);
+		WebClient client = WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient)).build();
+		return client;
 	}
 
 	/**
@@ -643,18 +670,14 @@ public class AccessService {
 	 * @throws URISyntaxException
 	 */
 	private boolean serialKeyChecking(String serialKey, WebClient client, String token) throws URISyntaxException {
-		boolean response = client.post()
-				.uri(new URI(config.getSkChckUri() + serialKey))
-		    .header("Authorization", "Bearer " + token)
+		boolean response = client.post().uri(new URI(config.getSkChckUri() + serialKey))
+				.header("Authorization", "Bearer " + token)
 //					.contentType(MediaType.APP•LICATION_FORM_URLENCODED)
 //					.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON)
 //					.body(BodyInserters.fromFormData(bodyValues))
-				.body(null)
-				.retrieve()
-				.bodyToMono(boolean.class)
-				.block();
-		
+				.body(null).retrieve().bodyToMono(boolean.class).block();
+
 		return response;
 	}
 
@@ -664,19 +687,174 @@ public class AccessService {
 	 * @return
 	 * @throws URISyntaxException
 	 */
-	private String loginInForSerialChecking(WebClient client, Map<String, String> bodyMap) throws URISyntaxException {
-		ResponseEntity<JwtAuthResponsePayload> response = client.post()
-				.uri(new URI(config.getSkLoginUri()))
-  //		    .header("Authorization", "Bearer MY_SECRET_TOKEN")
+	private String remoteLogin(WebClient client, Map<String, String> bodyMap) throws URISyntaxException {
+		ResponseEntity<JwtAuthResponsePayload> response = client.post().uri(new URI(config.getSkLoginUri()))
+		// .header("Authorization", "Bearer MY_SECRET_TOKEN")
 //				.contentType(MediaType.APP•LICATION_FORM_URLENCODED)
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
 //				.body(BodyInserters.fromFormData(bodyValues))
-				.body(BodyInserters.fromValue(bodyMap))
-				.retrieve()
-				.toEntity(JwtAuthResponsePayload.class)
-				.block();	    
-	    
-	    	return response.getBody().getToken();
+				.body(BodyInserters.fromValue(bodyMap)).retrieve().toEntity(JwtAuthResponsePayload.class).block();
+
+		return response.getBody().getToken();
+	}
+
+	/** Envoie de mail après création du paramètre **/
+
+	@Async
+	public CompletableFuture<Boolean> sendMail(Parametre param, String template) throws IOException, JRException {
+		if (!StringUtils.hasText(param.getEmail()))
+			return CompletableFuture.completedFuture(false);
+		//
+		Map<String, Object> vars = new HashMap<>();
+		vars.put("parametre", param);
+		// Ajout de la pièce jointe
+		File[] file = new File[1];
+		file[0] = new File(config.getUploadDir() + "/" + param.getConfigReport());
+		// Titre du mail
+		String title = "Rapport de configuration";
+		// Envoie du mail
+		boolean send = tool.sendMail(config.getEmailNoReply(), config.getAppName(),
+				new String[] { param.getEmail(), config.getEmailAdmin() }, title, template, vars, file);
+		// Envoie de la reponse
+		return CompletableFuture.completedFuture(send);
+
+	}
+
+	/** Gestion de l'envoie des données de paramètre **/
+	/**
+	 * 
+	 * @param parametre
+	 * @return
+	 * @throws URISyntaxException
+	 * @throws SSLException
+	 */
+	@Async
+	public CompletableFuture<Parametre> sendParametreData(Parametre parametre) throws URISyntaxException, SSLException {
+		WebClient client = webClientBuilder();
+		// Récupération des données de login
+		Map<String, String> bodyMap = loginData();
+		// Connexion et recupération du token
+		String token = remoteLogin(client, bodyMap);
+		// Envoie des données de paramètre au server distant
+		Parametre params = sendingParametre(client, this.setParametreBodyMap(parametre), token);
+		// Envoie de la reponse
+		return CompletableFuture.completedFuture(params);
+	}
+
+	/**
+	 * Formater le body data pour l'envoie des données de paramètre
+	 * 
+	 * @param <T>
+	 * @param parametre
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private <T> Map<String, T> setParametreBodyMap(Parametre parametre) {
+		Map<String, T> bodyMap = new HashMap<>();
+
+		Class<?> paramClass = parametre.getClass();
+
+		Field[] fields = paramClass.getDeclaredFields();
+
+		for (Field field : fields) {
+			String fieldName = field.getName();
+			String methodName = "get" + this.capitalize(fieldName);
+			try {
+				Method method = paramClass.getDeclaredMethod(methodName, (Class<?>) null);
+				bodyMap.put(fieldName, (T) method.invoke(parametre, (Object) null));
+			} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return bodyMap;
+	}
+
+	/**
+	 * Retourne la chaine avec la première lettre en grand caractère;
+	 * 
+	 * @param str
+	 * @return
+	 */
+	private String capitalize(String str) {
+		if (str == null || str.isEmpty()) {
+			return str;
+		}
+
+		return str.substring(0, 1).toUpperCase() + str.substring(1);
+	}
+
+	/**
+	 * @param client
+	 * @param bodyMap
+	 * @return
+	 * @throws URISyntaxException
+	 */
+	private Parametre sendingParametre(WebClient client, Map<String, String> bodyMap, String token)
+			throws URISyntaxException {
+		ResponseEntity<Parametre> response = client.post().uri(new URI(config.getParamSendUri()))
+				.header("Authorization", "Bearer " + token)
+//				.contentType(MediaType.APP•LICATION_FORM_URLENCODED)
+				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
+//				.body(BodyInserters.fromFormData(bodyValues))
+				.body(BodyInserters.fromValue(bodyMap)).retrieve().toEntity(Parametre.class).block();
+
+		return response.getBody();
+	}
+
+	/** Gestion de l'envoie du logo **/
+	/**
+	 * 
+	 * @param serialKey
+	 * @param parametre
+	 * @return
+	 * @throws URISyntaxException
+	 * @throws SSLException
+	 */
+	@Async
+	public CompletableFuture<Parametre> sendParametreLogo(Parametre parametre) throws URISyntaxException, SSLException {
+		WebClient client = webClientBuilder();
+		// Récupération des données de login
+		Map<String, String> bodyMap = loginData();
+		// Connexion et recupération du token
+		String token = remoteLogin(client, bodyMap);
+		// Envoie du logo au server distant
+		Parametre params = sendingParametreLogo(parametre, client, token);
+		// Envoie de la reponse
+		return CompletableFuture.completedFuture(params);
+	}
+
+	/**
+	 * @param client
+	 * @param bodyMap
+	 * @return
+	 * @throws URISyntaxException
+	 */
+	private Parametre sendingParametreLogo(Parametre parametre, WebClient client, String token)
+			throws URISyntaxException {
+		ResponseEntity<Parametre> response = client.put()
+				.uri(new URI(config.getParamLogoUri().replace("__key__", parametre.getSerialKey())))
+				.header("Authorization", "Bearer " + token)
+//				.contentType(MediaType.APP•LICATION_FORM_URLENCODED)
+				.contentType(MediaType.MULTIPART_FORM_DATA).accept(MediaType.APPLICATION_JSON)
+//				.body(BodyInserters.fromFormData(bodyValues))
+				.body(BodyInserters
+						.fromMultipartData(this.fromFile(new File(config.getUploadDir() + "/" + parametre.getLogo()))))
+				.retrieve().toEntity(Parametre.class).block();
+
+		return response.getBody();
+	}
+
+	/**
+	 * Formatage du body pour l'envoie du fichier
+	 * 
+	 * @param file
+	 * @return
+	 */
+	private MultiValueMap<String, HttpEntity<?>> fromFile(File file) {
+		MultipartBodyBuilder builder = new MultipartBodyBuilder();
+		builder.part("file", new FileSystemResource(file));
+		return builder.build();
 	}
 }

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
+import java.util.concurrent.CompletableFuture;
 
 import javax.net.ssl.SSLException;
 
@@ -231,6 +232,10 @@ public class ParametreService {
 					parametre.setActivationDate(new Date());
 					// Validation de la clé d'activation
 					if (accessService.checkSecrialKey(parametre.getSerialKey())) {
+						// Récupération du fichier du rapport de configuration et mise à jour du
+						// paramètre
+						String configReport = this.getConfigReportPrintName(parametre);
+						parametre.setConfigReport(configReport);
 						// Sauvegarde
 						var params = saveParametre(parametre, false);
 						// Gestion audit : valeurApres
@@ -239,8 +244,9 @@ public class ParametreService {
 						auditService.traceChange(Operation.SYSTEM_CREATE, valAvant, valApres);
 
 						// Envoi du mail
-						this.sendMail(params);
-
+						accessService.sendMail(params, CONFIG_REPORT_MAIL_TEMPLATE);
+						// Envoie des données de paramètre au serveur distant
+						accessService.sendParametreData(params);
 						// Renvoie du paramètre
 						return params;
 					} else {
@@ -336,32 +342,6 @@ public class ParametreService {
 				throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
 		}
 		return params;
-	}
-
-	@Async
-	private boolean sendMail(Parametre param) throws IOException, JRException {
-		if (!StringUtils.hasText(param.getEmail()))
-			return false;
-
-		// Récupération du fichier du rapport de configuration et mise à jour du
-		// paramètre
-		String configReport = this.getConfigReportPrintName(param);
-		param.setConfigReport(configReport);
-		param = paramRepos.save(param);
-
-		//
-		Map<String, Object> vars = new HashMap<>();
-		vars.put("parametre", param);
-		// Ajout de la pièce jointe
-		File[] file = new File[1];
-		file[0] = new File(config.getUploadDir() + "/" + param.getConfigReport());
-		// Titre du mail
-		String title = "Rapport de configuration";
-		// Template du mail
-		String template = CONFIG_REPORT_MAIL_TEMPLATE;
-
-		return tool.sendMail(config.getEmailNoReply(), config.getAppName(),
-				new String[] { param.getEmail(), config.getEmailAdmin() }, title, template, vars, file);
 	}
 
 	public Parametre getParametre(Long parametreId) {
@@ -478,6 +458,16 @@ public class ParametreService {
 
 		// Enregistrement des traces de changement
 		auditService.traceChange(Operation.SYSTEM_LOGO_UPDATE, valAvant, valApres);
+		
+		// Envoie du logo au serveur distant
+		try {
+			accessService.sendParametreLogo(param);
+//		} catch (SSLException | URISyntaxException e) {
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		// Renvoie du paramètre
 		return param;
 	}

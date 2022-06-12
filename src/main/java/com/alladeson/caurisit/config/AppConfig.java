@@ -50,6 +50,8 @@ public class AppConfig {
 	private String saPassword;
 	private String skLoginUri;
 	private String skChckUri;
+	private String paramSendUri;
+	private String paramLogoUri;
 
 	public String getAppName() {
 		return appName;
@@ -381,6 +383,34 @@ public class AppConfig {
 	 */
 	public void setSkChckUri(String skChckUri) {
 		this.skChckUri = skChckUri;
+	}
+
+	/**
+	 * @return the paramSendUri
+	 */
+	public String getParamSendUri() {
+		return paramSendUri;
+	}
+
+	/**
+	 * @param paramSendUri the paramSendUri to set
+	 */
+	public void setParamSendUri(String paramSendUri) {
+		this.paramSendUri = paramSendUri;
+	}
+
+	/**
+	 * @return the paramLogoUri
+	 */
+	public String getParamLogoUri() {
+		return paramLogoUri;
+	}
+
+	/**
+	 * @param paramLogoUri the paramLogoUri to set
+	 */
+	public void setParamLogoUri(String paramLogoUri) {
+		this.paramLogoUri = paramLogoUri;
 	}
 
 	@PostConstruct

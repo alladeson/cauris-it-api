@@ -395,7 +395,7 @@ public class ParametreController {
 	 * @return
 	 * @see com.alladeson.caurisit.services.ParametreService#setParamLogoFromClient(java.lang.String, org.springframework.web.multipart.MultipartFile)
 	 */
-	@PutMapping("parametre/params/{serialKey}/logo")
+	@PutMapping("parametre/params/serialKey/{serialKey}/logo")
 	public Parametre setParamLogoFromClient(@PathVariable(value = "serialKey") String serialKey, @RequestParam("file") MultipartFile file) {
 		return paramService.setParamLogoFromClient(serialKey, file);
 	}	

@@ -426,7 +426,7 @@ public class ParametreService {
 
 		// Enregistrement des traces de changement
 		auditService.traceChange(Operation.SYSTEM_LOGO_UPDATE, valAvant, valApres);
-		
+
 		// Envoie du logo au serveur distant
 		try {
 			accessService.sendParametreLogo(param);
@@ -435,7 +435,7 @@ public class ParametreService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		// Renvoie du paramètre
 		return param;
 	}
@@ -448,15 +448,28 @@ public class ParametreService {
 	 * @throws IOException
 	 * @throws JRException
 	 */
-	public ResponseEntity<byte[]> genererRapportConfig(Long id) throws IOException, JRException {
-
+	public ResponseEntity<byte[]> genererRapportConfig(Long id, boolean sendMail) throws IOException, JRException {
 		// Récupération de la facture
 		Optional<Parametre> optional = paramRepos.findById(id);
 		if (optional.isEmpty())
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Les données du système ne sont pas disponibles");
 		Parametre param = optional.get();
 
-		return getConfigReportPrint(param);
+		// Nomdu fichier du rapport
+		var reportName = "rapport_configuration_" + param.getSerialKey().substring(0, 10) + ".pdf";
+		// Générer le rapport
+		ResponseEntity<byte[]>  bytes = printConfigReport(param, reportName);
+		
+		// Mise à jour du paramètre
+		param.setConfigReport(reportName);
+		param = paramRepos.save(param);
+		
+		// Envoie de mail
+		if(sendMail)
+			accessService.sendMail(param, CONFIG_REPORT_MAIL_TEMPLATE);
+		
+		// Renvoie du fichier
+		return bytes;
 	}
 
 	/**
@@ -468,33 +481,22 @@ public class ParametreService {
 	 * @throws JRException
 	 */
 	private String getConfigReportPrintName(Parametre param) throws IOException, JRException {
-		// Récupération du type de la facture
-		var template = CONFIG_REPORT_TEMPLATE;
-
-		// Les données de la facture
-		ConfigReportData configReportDate = reportService.setConfigReportData(param);
-
-		// Setting Invoice Report Params
-		HashMap<String, Object> map = setConfigReportParams(param);
-		// Ajout des données de l'entête
-//		map.put("entete", new JRBeanCollectionDataSource(Collections.singleton(invoice)));
-
-		// Générer la facture
+		// Nomdu fichier du rapport
 		var reportName = "rapport_configuration_" + param.getSerialKey().substring(0, 10) + ".pdf";
-		reportService.generateConfigReport(configReportDate, map, template, reportName);
+		printConfigReport(param, reportName);
 		// Renvoie du nom du fichier généré
 		return reportName;
 	}
 
 	/**
-	 * Imprimer la facture et l'envoiyer telle quelle
-	 * 
-	 * @param facture La facture confirmée par l'emcef
+	 * @param param
+	 * @param reportName
 	 * @return
 	 * @throws IOException
 	 * @throws JRException
 	 */
-	private ResponseEntity<byte[]> getConfigReportPrint(Parametre param) throws IOException, JRException {
+	private ResponseEntity<byte[]> printConfigReport(Parametre param, String reportName)
+			throws IOException, JRException {
 		// Récupération du type de la facture
 		var template = CONFIG_REPORT_TEMPLATE;
 
@@ -505,8 +507,8 @@ public class ParametreService {
 		HashMap<String, Object> map = setConfigReportParams(param);
 		// Ajout des données de l'entête
 //		map.put("entete", new JRBeanCollectionDataSource(Collections.singleton(invoice)));
-		// Générer la facture
-		var reportName = "rapport_configuration_" + param.getSerialKey().substring(0, 10) + ".pdf";
+
+		// Générer le rapport
 		return reportService.generateConfigReport(configReportDate, map, template, reportName);
 	}
 

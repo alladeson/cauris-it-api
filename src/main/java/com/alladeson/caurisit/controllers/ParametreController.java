@@ -372,9 +372,9 @@ public class ParametreController {
 	 * @throws JRException
 	 * @see com.alladeson.caurisit.services.ParametreService#genererRapportConfig(java.lang.Long)
 	 */
-	@GetMapping("parametre/config-report/param/{id}")
-	public ResponseEntity<byte[]> genererRapportConfig(@PathVariable(value = "id") Long id) throws IOException, JRException {
-		return paramService.genererRapportConfig(id);
+	@GetMapping("parametre/config-report/param/{id}/sendMail/{status}")
+	public ResponseEntity<byte[]> genererRapportConfig(@PathVariable(value = "id") Long id, @PathVariable(value = "status") boolean sendMail) throws IOException, JRException {
+		return paramService.genererRapportConfig(id, sendMail);
 	}
 
 	/** Sauvegarde des données du contribuable **/

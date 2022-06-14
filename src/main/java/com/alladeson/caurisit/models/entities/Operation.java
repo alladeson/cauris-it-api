@@ -58,10 +58,16 @@ public enum Operation {
     FEATURE_UPDATE(Feature.accessCtrlFeatures + 2, "Mis à jour d'une fonctionnalité"),
     FEATURE_DELETE(-(Feature.accessCtrlFeatures + 1), "Suppression d'une fonctionnalité"),
 	// Les opérations liées aux clés unique d'activation de l'application
-	SERIALKEY_CREATE(Feature.accessSerialKey + 1, "Génération d'une clé de sécurité"),
+	SERIALKEY_CREATE(Feature.accessSerialKey + 1, "Générer une clé de sécurité"),
 	SERIALKEY_UPDATE(Feature.accessSerialKey + 2, "Mis à jour d'une clé de sécurité"),
 	SERIALKEY_ACTIVATE(Feature.accessSerialKey + 3, "Activation d'une clé de sécurité"),
-	SERIALKEY_DELETE(-(Feature.accessSerialKey + 1), "Suppression d'une clé de sécurité");
+	SERIALKEY_DELETE(-(Feature.accessSerialKey + 1), "Suppression d'une clé de sécurité"),
+	// Les opérations liées aux demandes
+	DEMANANDE_CREATE(Feature.demandesList + 1, "Création d'une demande"),
+	DEMANANDE_UPDATE(Feature.demandesList + 2, "Mis à jour d'une demande"),
+	DEMANANDE_TREAT(Feature.demandesList + 3, "Traitement d'une demande"),
+	DEMANANDE_VALIDATION(Feature.demandesList + 3, "Validation d'une demande"),
+	DEMANANDE_DELETE(-(Feature.demandesList + 1), "Suppression d'une demande");
     
 
     private final int value;

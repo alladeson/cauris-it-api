@@ -56,7 +56,7 @@ public class SystemService {
 			logger.info(">> APP INIT DATA - START");
 
 			// User-groups
-			UserGroup sa = null, adm = null;
+			UserGroup sa = null;
 			if (accessService.countGroupe() == 0) {
 				sa = accessService.saveGroupe("Super Admin", "Super Administrateur", TypeRole.SUPER_ADMIN);
 			}
@@ -221,7 +221,6 @@ public class SystemService {
 				tp.setDescription("AUTRE");
 				paramService.saveTypePaiement(tp);
 			}
-
 			/* Les fonctionnalités de l'application */
 			if (accessService.countFeature() == 0) {
 				// Gestion de stock
@@ -252,6 +251,10 @@ public class SystemService {
 				// Les statistiques
 				accessService.saveFeature(Feature.stats, "Statistiques", true, false, false);
 				accessService.saveFeature(Feature.statsBilanPeriodique, "Bilan Périodique", true, true, true);
+				// Les demandes
+				accessService.saveFeature(Feature.demandes, "Demandes", true, false, false);
+				accessService.saveFeature(Feature.demandesList, "Liste des demandes", true, true, true);
+				accessService.saveFeature(Feature.parametreList, "Paramètres des contribuables", true, true, true);
 				
 				
 				// Permissions

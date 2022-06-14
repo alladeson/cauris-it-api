@@ -704,6 +704,15 @@ public class AccessService {
 		return serialKeyRepos.findById(serialKeyId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Clé d'activation non trouvée"));
 	}
+	
+	public SerialKey getSerialKeyByKey(String serialKey) {
+		// Check permission
+		if (!this.canReadable(Feature.accessSerialKey))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+		
+		return serialKeyRepos.findBySerialKey(serialKey)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Clé d'activation non trouvée"));
+	}
 
 	public List<SerialKey> getAllSerialKey() {
 		// Check permission

@@ -303,6 +303,16 @@ public class AccessController {
 	}
 
 	/**
+	 * @param serialKey
+	 * @return
+	 * @see com.alladeson.caurisit.services.AccessService#getSerialKeyByKey(java.lang.String)
+	 */
+	@GetMapping("access/serial-key/key/{serialKey}")
+	public SerialKey getSerialKeyByKey(@PathVariable(value = "serialKey") String serialKey) {
+		return accessService.getSerialKeyByKey(serialKey);
+	}
+
+	/**
 	 * @return
 	 * @see com.alladeson.caurisit.services.AccessService#getAllSerialKey()
 	 */
@@ -341,8 +351,8 @@ public class AccessController {
 	 * @return
 	 * @see com.alladeson.caurisit.services.AccessService#activateSerialKey(java.lang.String)
 	 */
-	@PostMapping("access/serial-key/key/{serailKey}")
-	public boolean activateSerialKey(@PathVariable(value = "serailKey") String key) {
+	@PostMapping("access/serial-key/key/{serialKey}")
+	public boolean activateSerialKey(@PathVariable(value = "serialKey") String key) {
 		return accessService.activateSerialKey(key);
 	}
 

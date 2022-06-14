@@ -57,6 +57,10 @@ public class Feature extends BaseEntity {
 	// Les statistiques
 	public static final int stats = 60000;
 	public static final int statsBilanPeriodique = 61000;
+	// Les demandes
+	public static final int demandes = 70000;
+	public static final int demandesList = 71000;
+	public static final int parametreList = 72000;
 	/** Fin des constantes de codes des fonctionnalités **/
 
 	@Id

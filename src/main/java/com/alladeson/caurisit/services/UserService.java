@@ -214,6 +214,10 @@ public class UserService {
 		// récupère l'utilisateur
 		var user = repository.findById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé"));
+		
+		// Vérification du super_admin
+		if(user.isSA())
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
 
 		auditService.traceChange(Operation.USER_DELETE, user, null);
 		

@@ -830,7 +830,7 @@ public class AccessService {
 	public Map<String, String> loginData() {
 		Map<String, String> bodyMap = new HashMap<>();
 		bodyMap.put("login", config.getSaUsername());
-		bodyMap.put("password", config.getSaPassword());
+		bodyMap.put("password", config.getSaPassword() + "G6erxOlQkKitFlZlxZgyP27V6mu");
 		return bodyMap;
 	}
 

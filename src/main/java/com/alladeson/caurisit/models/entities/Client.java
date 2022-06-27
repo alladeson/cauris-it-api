@@ -204,7 +204,7 @@ public class Client extends BaseEntity {
 			contact += this.telephone;
 		if (this.email != null) {
 			if (this.telephone != null)
-				contact += "," + this.email;
+				contact += ", " + this.email;
 			else
 				contact += this.email;
 

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="company_contact" pageWidth="147" pageHeight="210" columnWidth="137" leftMargin="5" rightMargin="5" topMargin="0" bottomMargin="0" uuid="1a1c1a59-2d89-49f5-891b-596671b5161c">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="address" class="java.lang.String"/>
+	<field name="ville" class="java.lang.String"/>
+	<field name="contact" class="java.lang.String"/>
+	<field name="emcef" class="java.lang.String"/>
+	<field name="telephone" class="java.lang.String"/>
+	<field name="email" class="java.lang.String"/>
+	<detail>
+		<band height="18" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="137" height="6" uuid="b2090ced-84a2-45bf-bc16-37333c538e9f">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="4" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{address} != null ? $F{address} : ""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="6" width="137" height="6" uuid="2471a6e8-f504-44ef-a697-540aeb8abf8a">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="4" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ville} != null ? $F{ville} : ""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="12" width="137" height="6" uuid="4e944619-b031-48f9-9a6d-35fccd137ff1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="4" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{contact} != null ? $F{contact} : ""]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

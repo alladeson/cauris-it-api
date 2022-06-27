@@ -82,6 +82,9 @@ public class Parametre extends BaseEntity {
 	private Date activationDate;
 	// Pour le fichier du rapport de la configuration
 	private String configReport;
+	// Pour la format d'impression de la facture
+	@Column(nullable = false)
+	private TypeData formatFacture;
 
 	/**
 	 * @return the id
@@ -312,7 +315,7 @@ public class Parametre extends BaseEntity {
 			contact += this.telephone;
 		if (this.email != null) {
 			if (this.telephone != null)
-				contact += "," + this.email;
+				contact += ", " + this.email;
 			else
 				contact += this.email;
 
@@ -374,5 +377,19 @@ public class Parametre extends BaseEntity {
 	 */
 	public void setConfigReport(String configReport) {
 		this.configReport = configReport;
+	}
+
+	/**
+	 * @return the formatFacture
+	 */
+	public TypeData getFormatFacture() {
+		return formatFacture;
+	}
+
+	/**
+	 * @param formatFacture the formatFacture to set
+	 */
+	public void setFormatFacture(TypeData formatFacture) {
+		this.formatFacture = formatFacture;
 	}
 }

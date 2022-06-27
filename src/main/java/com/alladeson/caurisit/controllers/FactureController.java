@@ -167,9 +167,9 @@ public class FactureController {
 	 * @see com.alladeson.caurisit.services.FactureService#genererFacture(java.lang.Long)
 	 */
 	@GetMapping("/public/facture/{id}/imprimer")
-	public ResponseEntity<byte[]> genererFacture(@PathVariable(value = "id") Long factureId)
+	public ResponseEntity<byte[]> genererFacture(@PathVariable(value = "id") Long factureId, @RequestParam(name = "format", required = false, defaultValue = "") String format)
 			throws IOException, JRException {
-		return service.genererFacture(factureId);
+		return service.genererFacture(factureId, format);
 	}
 
 	/**

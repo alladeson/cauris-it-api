@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alladeson.caurisit.models.entities.FrontendLayoutSettings;
 import com.alladeson.caurisit.models.entities.Parametre;
 import com.alladeson.caurisit.models.entities.Taxe;
+import com.alladeson.caurisit.models.entities.TypeData;
 import com.alladeson.caurisit.models.entities.TypeFacture;
 import com.alladeson.caurisit.models.entities.TypePaiement;
 import com.alladeson.caurisit.models.entities.User;
@@ -119,6 +120,17 @@ public class ParametreController {
 	@PutMapping("parametre/params/{id}/logo")
 	public Parametre setParamLogo(@PathVariable(value = "id") Long paramId, @RequestParam("file") MultipartFile file) {
 		return paramService.setParamLogo(paramId, file);
+	}
+
+	/**
+	 * @param paramId
+	 * @param format
+	 * @return
+	 * @see com.alladeson.caurisit.services.ParametreService#setFormatFacture(java.lang.Long, com.alladeson.caurisit.models.entities.TypeData)
+	 */
+	@PutMapping("parametre/params/{id}/format-facture/{format}")
+	public Parametre setFormatFacture(@PathVariable(value = "id") Long paramId, @PathVariable(value = "format") TypeData format) {
+		return paramService.setFormatFacture(paramId, format);
 	}
 
 	/**

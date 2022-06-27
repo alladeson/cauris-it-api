@@ -303,6 +303,9 @@ public class ParametreService {
 				else if (exception.getMessage().contains("'expiration'"))
 					throw new ResponseStatusException(HttpStatus.FORBIDDEN,
 							"La date d'expiration de l'e-mecef ne peut être vide");
+				else if (exception.getMessage().contains("'format_facture'"))
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+							"Le format de la facture ne peut être vide");
 				else
 					throw new ResponseStatusException(HttpStatus.FORBIDDEN, exception.getMessage());
 

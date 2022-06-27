@@ -440,7 +440,7 @@ public class ParametreService {
 	 */
 	public Parametre setParamLogo(Long paramId, MultipartFile file) {
 		// Check permission
-		if (!accessService.canWritable(Feature.parametreDonneSysteme))
+		if (!accessService.canWritable(Feature.parametreSysteme))
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
 
 		Parametre param = paramRepos.findById(paramId)
@@ -506,6 +506,37 @@ public class ParametreService {
 		// Enregistrement des traces de changement
 		auditService.traceChange(Operation.SYSTEM_LOGO_UPDATE, valAvant, valApres);
 
+		// Renvoie du paramètre
+		return param;
+	}
+	
+	/**
+	 * Mettre à jour le format de la facture pour l'impression
+	 * @param paramId
+	 * @param format
+	 * @return
+	 */
+	public Parametre setFormatFacture(Long paramId, TypeData format) {
+		// Check permission
+		if (!accessService.canWritable(Feature.parametreSysteme))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+		
+		Parametre param = paramRepos.findById(paramId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Parametre non trouvé"));
+		
+		// Gestion audit : valeurAvant
+		String valAvant = tool.toJson(param);
+		// Mise à jour du logo du parametre
+		param.setFormatFacture(format);
+		// Enregistrement et renvoie du parametre
+		param = paramRepos.save(param);
+		
+		// Gestion audit : valeurApres
+		String valApres = tool.toJson(param);
+		
+		// Enregistrement des traces de changement
+		auditService.traceChange(Operation.SYSTEM_FORMAT_FACTURE_UPDATE, valAvant, valApres);
+		
 		// Renvoie du paramètre
 		return param;
 	}

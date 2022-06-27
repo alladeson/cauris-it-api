@@ -110,10 +110,10 @@ public class FactureService {
 	private Tool tool;
 
 	private static final String INVOICE_REPORT_BASE_NAME = "facture-";
-	private static final String INVOICE_REPORT_TEMPLATE_FV = "report/facture-vente.jrxml";
-	private static final String INVOICE_REPORT_TEMPLATE_FA = "report/facture-avoir.jrxml";
-	private static final String INVOICE_REPORT_TEMPLATE_FV_REMISE = "report/facture-vente-remise.jrxml";
-	private static final String INVOICE_REPORT_TEMPLATE_FA_REMISE = "report/facture-avoir-remise.jrxml";
+	private static final String INVOICE_REPORT_TEMPLATE_FV = "facture-vente.jrxml";
+	private static final String INVOICE_REPORT_TEMPLATE_FA = "facture-avoir.jrxml";
+	private static final String INVOICE_REPORT_TEMPLATE_FV_REMISE = "facture-vente-remise.jrxml";
+	private static final String INVOICE_REPORT_TEMPLATE_FA_REMISE = "facture-avoir-remise.jrxml";
 
 	/**
 	 * Récupération de l'utilisateur connecté
@@ -1113,7 +1113,7 @@ public class FactureService {
 	 * @throws IOException
 	 * @throws JRException
 	 */
-	public ResponseEntity<byte[]> genererFacture(Long id) throws IOException, JRException {
+	public ResponseEntity<byte[]> genererFacture(Long id, String format) throws IOException, JRException {
 
 		// Récupération de la facture
 		Optional<Facture> optional = repository.findByIdAndConfirmTrue(id);
@@ -1121,7 +1121,7 @@ public class FactureService {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Facture non trouvée");
 		Facture facture = optional.get();
 
-		return getInvoicePrint(facture);
+		return getInvoicePrint(facture, format);
 	}
 
 	/**
@@ -1132,22 +1132,24 @@ public class FactureService {
 	 * @throws IOException
 	 * @throws JRException
 	 */
-	private ResponseEntity<byte[]> getInvoicePrint(Facture facture) throws IOException, JRException {
+	private ResponseEntity<byte[]> getInvoicePrint(Facture facture, String format) throws IOException, JRException {
 		// Récupération des données du parametres
 		Parametre param = paramRepos.findOneParams().orElseThrow(
 				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre système n'est pas encore paramètré."));
-
+		System.out.println("format = " + format);
 		// Récupération du type de la facture
 		var type = facture.getType();
+//		var templateDir = format.equals("A8") ? "report-A8/" : "report/";
+		var templateDir = param.getFormatFacture().equals(TypeData.A8) ? "report-A8/" : "report/";
 		var template = "";
 		if (type.getGroupe().equals(TypeData.FV)) {
-			template = INVOICE_REPORT_TEMPLATE_FV;
+			template = templateDir + INVOICE_REPORT_TEMPLATE_FV;
 			if (facture.isRemise())
-				template = INVOICE_REPORT_TEMPLATE_FV_REMISE;
+				template = templateDir + INVOICE_REPORT_TEMPLATE_FV_REMISE;
 		} else if (type.getGroupe().equals(TypeData.FA)) {
-			template = INVOICE_REPORT_TEMPLATE_FA;
+			template = templateDir + INVOICE_REPORT_TEMPLATE_FA;
 			if (facture.isRemise())
-				template = INVOICE_REPORT_TEMPLATE_FA_REMISE;
+				template = templateDir + INVOICE_REPORT_TEMPLATE_FA_REMISE;
 		}
 
 		// Les données de la facture
@@ -1159,8 +1161,8 @@ public class FactureService {
 //		map.put("entete", new JRBeanCollectionDataSource(Collections.singleton(invoice)));
 
 		// Générer la facture
-		return reportService.invoiceReport(invoice, map, template,
-				INVOICE_REPORT_BASE_NAME + facture.getNumero() + ".pdf");
+		var invoiceName = INVOICE_REPORT_BASE_NAME + facture.getNumero() + (format.equals("A8") ? "-A8" : "-A4") + ".pdf";
+		return reportService.invoiceReport(invoice, map, template, invoiceName);
 	}
 
 	/**

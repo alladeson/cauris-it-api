@@ -15,5 +15,5 @@ public enum TypeData {
 	 * FV pour les types de facture de vente
 	 * FA pour les types de facture d'avoir
 	 * */
-	U, IMPOT, AIB, FV, FA
+	U, IMPOT, AIB, FV, FA, A4, A8
 }

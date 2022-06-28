@@ -344,7 +344,7 @@
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle" markup="html">
-					<font size="8"/>
+					<font size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Code MECef/DGI de la facture originale :    <b>" + $F{invoice_origine_ref} + "</b>"]]></textFieldExpression>
 			</textField>
@@ -372,16 +372,16 @@
 							<staticText>
 								<reportElement x="0" y="0" width="50" height="20" uuid="59702152-bb37-4769-aa98-ac787a8ec272"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8" isBold="true"/>
+									<font size="10" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Numéro]]></text>
 							</staticText>
 						</jr:columnHeader>
-						<jr:detailCell style="Table 3_TD" height="25">
+						<jr:detailCell style="Table 3_TD" height="26">
 							<textField>
-								<reportElement mode="Opaque" x="0" y="0" width="50" height="25" backcolor="#E6E8E9" uuid="ac5ed17a-61b1-42b8-b8c7-21efcf5b071f"/>
+								<reportElement mode="Opaque" x="0" y="0" width="50" height="26" backcolor="#E6E8E9" uuid="ac5ed17a-61b1-42b8-b8c7-21efcf5b071f"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8" isBold="true"/>
+									<font size="10" isBold="true"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{numero}]]></textFieldExpression>
 							</textField>
@@ -393,16 +393,17 @@
 							<staticText>
 								<reportElement x="0" y="0" width="210" height="20" uuid="6b9e01db-29aa-4abd-9949-79289eb9a6e3"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8" isBold="true"/>
+									<font size="10" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Désignation]]></text>
 							</staticText>
 						</jr:columnHeader>
-						<jr:detailCell style="Table 3_TD" height="25">
+						<jr:detailCell style="Table 3_TD" height="26">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
 							<textField>
-								<reportElement x="0" y="0" width="210" height="25" uuid="8ad27764-14a0-4ea3-91e2-b01453ef73e7"/>
+								<reportElement x="0" y="0" width="210" height="26" uuid="bc21c91c-2ff3-4bb7-be63-f35145e8529d"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
 							</textField>
@@ -414,16 +415,16 @@
 							<staticText>
 								<reportElement x="0" y="0" width="90" height="20" uuid="26613f01-0b70-46fb-a434-018206b34353"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8" isBold="true"/>
+									<font size="10" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Prix unitaire]]></text>
 							</staticText>
 						</jr:columnHeader>
-						<jr:detailCell style="Table 3_TD" height="25">
+						<jr:detailCell style="Table 3_TD" height="26">
 							<textField>
-								<reportElement x="0" y="0" width="90" height="25" uuid="b58ce3fa-8a06-425c-b561-c83fd3931f0a"/>
+								<reportElement x="0" y="0" width="90" height="26" uuid="b58ce3fa-8a06-425c-b561-c83fd3931f0a"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[new DecimalFormat("#,###.##", 
   new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{prix_u}))]]></textFieldExpression>
@@ -436,17 +437,17 @@
 							<staticText>
 								<reportElement x="0" y="0" width="60" height="20" uuid="4ee16643-1a47-4b89-93f8-7ae518531374"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8" isBold="true"/>
+									<font size="10" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Quantité]]></text>
 							</staticText>
 						</jr:columnHeader>
-						<jr:detailCell style="Table 3_TD" height="25">
+						<jr:detailCell style="Table 3_TD" height="26">
 							<property name="com.jaspersoft.studio.unit.height" value="px"/>
 							<textField>
-								<reportElement x="0" y="0" width="60" height="25" uuid="97e2dfff-e9d5-4d38-8758-0eaaf54cfa76"/>
+								<reportElement x="0" y="0" width="60" height="26" uuid="97e2dfff-e9d5-4d38-8758-0eaaf54cfa76"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{qte}]]></textFieldExpression>
 							</textField>
@@ -458,16 +459,16 @@
 							<staticText>
 								<reportElement x="0" y="0" width="99" height="20" uuid="06669c9d-d4a6-432e-9423-98dc59aaee52"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8" isBold="true"/>
+									<font size="10" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Montant T.T.C]]></text>
 							</staticText>
 						</jr:columnHeader>
-						<jr:detailCell style="Table 3_TD" height="25">
+						<jr:detailCell style="Table 3_TD" height="26">
 							<textField>
-								<reportElement x="0" y="0" width="99" height="25" uuid="4d00bafa-77a6-4fdf-bece-0b500a0358d2"/>
+								<reportElement x="0" y="0" width="99" height="26" uuid="4d00bafa-77a6-4fdf-bece-0b500a0358d2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{montant_ttc}]]></textFieldExpression>
 							</textField>
@@ -479,16 +480,16 @@
 							<staticText>
 								<reportElement x="0" y="0" width="46" height="20" uuid="69a13a92-ea70-4f37-a7de-e2bf3a59703d"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8" isBold="true"/>
+									<font size="10" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Remise]]></text>
 							</staticText>
 						</jr:columnHeader>
-						<jr:detailCell style="Table 3_TD" height="25">
+						<jr:detailCell style="Table 3_TD" height="26">
 							<textField>
-								<reportElement x="0" y="0" width="46" height="25" uuid="f8e6b764-d4bd-4e01-a908-d18e9ecf0c68"/>
+								<reportElement x="0" y="0" width="46" height="26" uuid="f8e6b764-d4bd-4e01-a908-d18e9ecf0c68"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{remise} != null ? $F{remise} : "-"]]></textFieldExpression>
 							</textField>
@@ -515,7 +516,7 @@
 							<staticText>
 								<reportElement x="0" y="0" width="140" height="20" uuid="9b9922fa-c87c-4fe1-96c3-596cbd0f1e55"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8" isBold="true"/>
+									<font size="10" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Groupe de Taxe]]></text>
 							</staticText>
@@ -524,7 +525,7 @@
 							<textField>
 								<reportElement x="0" y="0" width="140" height="20" uuid="9fa4694c-1ad0-451a-9567-4ded686a2aee"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{taxe_group}]]></textFieldExpression>
 							</textField>
@@ -536,7 +537,7 @@
 							<staticText>
 								<reportElement x="0" y="0" width="90" height="20" uuid="db5cf242-25db-468e-9ee5-a16bad540ab0"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8" isBold="true"/>
+									<font size="10" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Total]]></text>
 							</staticText>
@@ -545,7 +546,7 @@
 							<textField>
 								<reportElement x="0" y="0" width="90" height="20" uuid="bed18872-f3f9-4741-93dc-d9d1d3b115b2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[new DecimalFormat("#,###.##", 
   new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{total}))]]></textFieldExpression>
@@ -558,7 +559,7 @@
 							<staticText>
 								<reportElement x="0" y="0" width="80" height="20" uuid="1ddd07d4-78bb-46bd-9e63-b8b02083b2d6"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8" isBold="true"/>
+									<font size="10" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Montant HT]]></text>
 							</staticText>
@@ -567,7 +568,7 @@
 							<textField>
 								<reportElement x="0" y="0" width="80" height="20" uuid="571c3154-f2fd-45ab-a45a-a6caf94a7039"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[new DecimalFormat("#,###.##", 
   new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{imposable}))]]></textFieldExpression>
@@ -580,7 +581,7 @@
 							<staticText>
 								<reportElement x="0" y="0" width="70" height="20" uuid="eee5ede8-923b-49e8-a006-4a33836d42a9"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8" isBold="true"/>
+									<font size="10" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Montant TVA]]></text>
 							</staticText>
@@ -589,7 +590,7 @@
 							<textField>
 								<reportElement x="0" y="0" width="70" height="20" uuid="730c480c-e48b-4e27-a8c1-6345dd8f6fb4"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[new DecimalFormat("#,###.##", 
   new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{impot}))]]></textFieldExpression>
@@ -607,17 +608,17 @@
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle" markup="html">
-					<font size="10" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Total : <b>" + new DecimalFormat("#,###.##", 
   new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{invoice_total})) + "</b> FCFA"]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="10" y="3" width="230" height="11" uuid="989e3023-f951-4ba7-b161-9afc5d695bc1">
+				<reportElement x="10" y="2" width="230" height="12" uuid="989e3023-f951-4ba7-b161-9afc5d695bc1">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement verticalAlignment="Middle">
-					<font size="8" isItalic="false"/>
+					<font size="9" isItalic="false"/>
 				</textElement>
 				<text><![CDATA[RÉPARTITION DES MONTANTS]]></text>
 			</staticText>
@@ -630,7 +631,7 @@
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="Serif" size="9" isBold="false" isItalic="true"/>
+					<font fontName="Serif" size="10" isBold="false" isItalic="true"/>
 				</textElement>
 				<text><![CDATA[CECI EST UNE FACTURE NORMALISÉE PAR UNE MACHINE ELECTRONIQUE DE TEST E-MCEF/DGI]]></text>
 			</staticText>
@@ -656,7 +657,7 @@
 							<staticText>
 								<reportElement x="0" y="0" width="180" height="20" uuid="60f1cdac-a49f-4403-bc76-bb595b2f54ce"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8" isBold="true"/>
+									<font size="10" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Mode de payement]]></text>
 							</staticText>
@@ -665,7 +666,7 @@
 							<textField>
 								<reportElement x="0" y="0" width="180" height="20" uuid="9237c2f8-a6ea-43f9-9c80-d1627479a189"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{type_payement}]]></textFieldExpression>
 							</textField>
@@ -677,7 +678,7 @@
 							<staticText>
 								<reportElement x="0" y="0" width="130" height="20" uuid="550001f1-a9f1-499a-a0d0-f2ed841a30d6"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8" isBold="true"/>
+									<font size="10" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Montant Reçu]]></text>
 							</staticText>
@@ -686,7 +687,7 @@
 							<textField>
 								<reportElement x="0" y="0" width="130" height="20" uuid="d5d298ae-d85e-4819-bd0e-f09a7dc6191f"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[new DecimalFormat("#,###.##", 
   new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{montant}))]]></textFieldExpression>
@@ -699,7 +700,7 @@
 							<staticText>
 								<reportElement x="0" y="0" width="130" height="20" uuid="e16aecb7-0ed5-458d-a98f-b531914e608b"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8" isBold="true"/>
+									<font size="10" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Montant Payé]]></text>
 							</staticText>
@@ -708,7 +709,7 @@
 							<textField>
 								<reportElement x="0" y="0" width="130" height="20" uuid="907e3452-1d47-4d36-9386-26b09b1e1532"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[new DecimalFormat("#,###.##", 
   new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{payer}))]]></textFieldExpression>
@@ -721,7 +722,7 @@
 							<staticText>
 								<reportElement x="0" y="0" width="114" height="20" uuid="518a136e-b44e-4b64-86f2-5c1141f00891"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8" isBold="true"/>
+									<font size="10" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Montant Rendu]]></text>
 							</staticText>
@@ -730,7 +731,7 @@
 							<textField>
 								<reportElement x="0" y="0" width="114" height="20" uuid="40477381-789e-4e56-afbd-7136590c43be"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="8"/>
+									<font size="10"/>
 								</textElement>
 								<textFieldExpression><![CDATA[new DecimalFormat("#,###.##", 
   new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{rendu}))]]></textFieldExpression>
@@ -742,7 +743,7 @@
 			<textField>
 				<reportElement x="0" y="60" width="554" height="26" uuid="44a59961-b91a-4a24-95f4-fb07139159c7"/>
 				<textElement textAlignment="Justified" markup="html">
-					<font size="9" isBold="false"/>
+					<font size="10" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Arrêté la présente facture à la somme de  <b>" + $F{invoice_total_toWord} + " (" +new DecimalFormat("#,###.##", 
   new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{invoice_total}))  + ")</b> Francs CFA."]]></textFieldExpression>
@@ -755,11 +756,9 @@
 				<text><![CDATA[Le Responsable]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="10" y="3" width="230" height="11" uuid="a84977aa-0b64-433d-8601-0a0d80951192">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="10" y="2" width="230" height="12" uuid="a84977aa-0b64-433d-8601-0a0d80951192"/>
 				<textElement verticalAlignment="Middle">
-					<font size="8" isItalic="false"/>
+					<font size="9" isItalic="false"/>
 				</textElement>
 				<text><![CDATA[RÉPARTITION DES PAIEMENTS]]></text>
 			</staticText>

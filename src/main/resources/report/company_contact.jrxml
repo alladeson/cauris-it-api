@@ -21,98 +21,84 @@
 	<field name="telephone" class="java.lang.String"/>
 	<field name="email" class="java.lang.String"/>
 	<detail>
-		<band height="103" splitType="Stretch">
+		<band height="108" splitType="Stretch">
 			<rectangle>
-				<reportElement mode="Transparent" x="0" y="1" width="274" height="101" uuid="15b9fc3a-b80a-441b-b4a8-aa6171f78e82">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				<reportElement mode="Transparent" x="0" y="1" width="274" height="107" uuid="15b9fc3a-b80a-441b-b4a8-aa6171f78e82">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 			</rectangle>
 			<staticText>
-				<reportElement x="9" y="7" width="49" height="21" uuid="61cf4d4f-b4af-443b-8838-3734ebe13b92"/>
+				<reportElement x="9" y="7" width="49" height="13" uuid="61cf4d4f-b4af-443b-8838-3734ebe13b92">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
 				<textElement>
-					<font size="8"/>
+					<font size="10"/>
 				</textElement>
 				<text><![CDATA[Adresse : ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="9" y="35" width="49" height="11" uuid="3f774827-cf85-43eb-88d5-655c6a100b5c">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="9" y="37" width="49" height="13" uuid="3f774827-cf85-43eb-88d5-655c6a100b5c"/>
 				<textElement>
-					<font size="8"/>
+					<font size="10"/>
 				</textElement>
 				<text><![CDATA[Ville :]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="8" y="52" width="50" height="11" uuid="638cf0e2-a165-4546-9508-1c1935fb11dc">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="8" y="54" width="50" height="13" uuid="638cf0e2-a165-4546-9508-1c1935fb11dc"/>
 				<textElement>
-					<font size="8"/>
+					<font size="10"/>
 				</textElement>
 				<text><![CDATA[Téléphone :]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="8" y="86" width="49" height="11" uuid="33df831e-0763-45de-8bda-e968342f1c5b">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="8" y="88" width="49" height="13" uuid="33df831e-0763-45de-8bda-e968342f1c5b"/>
 				<textElement>
-					<font size="8"/>
+					<font size="10"/>
 				</textElement>
 				<text><![CDATA[e-MECeF :]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="68" y="7" width="200" height="21" uuid="b2090ced-84a2-45bf-bc16-37333c538e9f">
+				<reportElement x="68" y="7" width="200" height="26" uuid="b2090ced-84a2-45bf-bc16-37333c538e9f">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
-					<font size="8" isBold="true"/>
+					<font size="10" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{address} != null ? $F{address} : ""]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="68" y="35" width="200" height="11" uuid="2471a6e8-f504-44ef-a697-540aeb8abf8a">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="68" y="37" width="200" height="13" uuid="2471a6e8-f504-44ef-a697-540aeb8abf8a"/>
 				<textElement>
-					<font size="8" isBold="true"/>
+					<font size="10" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ville} != null ? $F{ville} : ""]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="68" y="52" width="200" height="11" uuid="4e944619-b031-48f9-9a6d-35fccd137ff1">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="68" y="54" width="200" height="13" uuid="4e944619-b031-48f9-9a6d-35fccd137ff1"/>
 				<textElement>
-					<font size="8" isBold="true"/>
+					<font size="10" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{telephone} != null ? $F{telephone} : ""]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="68" y="86" width="200" height="11" uuid="b0c7b01b-b3a9-4be8-ad53-042a105747f4">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="68" y="88" width="200" height="13" uuid="b0c7b01b-b3a9-4be8-ad53-042a105747f4"/>
 				<textElement>
-					<font size="8" isBold="true"/>
+					<font size="10" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{emcef} != null ? $F{emcef} : ""]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="8" y="69" width="49" height="11" uuid="81aa1755-0006-4390-afe6-23ef1ec5428e">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="8" y="71" width="49" height="13" uuid="81aa1755-0006-4390-afe6-23ef1ec5428e"/>
 				<textElement>
-					<font size="8"/>
+					<font size="10"/>
 				</textElement>
 				<text><![CDATA[E-mail : ]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="68" y="69" width="200" height="11" uuid="24db40e6-ec2a-4927-b7e1-f4912be1f2ae">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="68" y="71" width="200" height="13" uuid="24db40e6-ec2a-4927-b7e1-f4912be1f2ae"/>
 				<textElement>
-					<font size="8" isBold="true"/>
+					<font size="10" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{email} != null ? $F{email} : ""]]></textFieldExpression>
 			</textField>

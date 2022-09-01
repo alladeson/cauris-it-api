@@ -410,5 +410,16 @@ public class ParametreController {
 	@PutMapping("parametre/params/serialKey/{serialKey}/logo")
 	public Parametre setParamLogoFromClient(@PathVariable(value = "serialKey") String serialKey, @RequestParam("file") MultipartFile file) {
 		return paramService.setParamLogoFromClient(serialKey, file);
-	}	
+	}
+	
+	/**
+	 * @param serialKey
+	 * @param file
+	 * @return
+	 * @see com.alladeson.caurisit.services.ParametreService#setParamLogoFromClient(java.lang.String, com.alladeson.caurisit.models.entities.Parametre)
+	 */
+	@PutMapping("parametre/params/serialKey/{serialKey}/update-params")
+	public Parametre updateParametreFromClient(@PathVariable(value = "serialKey") String serialKey, @RequestBody Parametre parametre) {
+		return paramService.updateParametreFromClient(serialKey, parametre);
+	}
 }

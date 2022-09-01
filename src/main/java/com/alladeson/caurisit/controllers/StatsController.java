@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alladeson.caurisit.models.entities.Facture;
-import com.alladeson.caurisit.models.paylaods.ReportResponse;
 import com.alladeson.caurisit.models.paylaods.StatsPayload;
 import com.alladeson.caurisit.repositories.FactureRepository.BilanRecapMontant;
 import com.alladeson.caurisit.services.StatsService;

@@ -4,15 +4,11 @@
 package com.alladeson.caurisit.services;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-
-import javax.net.ssl.SSLException;
 
 import org.apache.commons.io.FilenameUtils;
 import org.hibernate.exception.ConstraintViolationException;

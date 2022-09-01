@@ -6,7 +6,6 @@ package com.alladeson.caurisit.services;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -47,35 +46,36 @@ public class StatsService {
 
 	@Autowired
 	private FactureRepository factureRepos;
-//	@Autowired
-//	private FacRespRepository frRepos;
-//	@Autowired
-//	private ReglementRepository reglementRepos;
+	// @Autowired
+	// private FacRespRepository frRepos;
+	// @Autowired
+	// private ReglementRepository reglementRepos;
 	@Autowired
 	private ParametreRepository paramRepos;
 	@Autowired
 	private ReportService reportService;
-//	@Autowired
-//	private UserRepository userRepository;
-//
-//	@Autowired
-//	private AccountService accountService;
+	// @Autowired
+	// private UserRepository userRepository;
+	//
+	// @Autowired
+	// private AccountService accountService;
 
 	@Autowired
 	private AccessService accessService;
 
 	private static final String BILAN_PERIODIQUE_REPORT_TEMPLATE = "report/bilan-periodique.jrxml";
 
-//	/**
-//	 * Récupération de l'utilisateur connecté
-//	 * 
-//	 * @return {@link User}
-//	 */
-//	private User getAuthenticated() {
-//		Account account = accountService.getAuthenticated();
-//		return userRepository.findByAccount(account)
-//				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé"));
-//	}
+	// /**
+	// * Récupération de l'utilisateur connecté
+	// *
+	// * @return {@link User}
+	// */
+	// private User getAuthenticated() {
+	// Account account = accountService.getAuthenticated();
+	// return userRepository.findByAccount(account)
+	// .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+	// "Utilisateur non trouvé"));
+	// }
 
 	/**
 	 * Récupérer la liste des factures de vente en fonction de la date de
@@ -213,10 +213,11 @@ public class StatsService {
 
 		// Récupération des nombre des factures
 		Integer nbFv = getListFactureVenteByConfirmedDate(payload).size();
-//		// Si le nombre des factrue de vente est égale à 0, pas la peine de continuer
-//		if(nbFv == 0)
-//			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Aucune facture trouvée pour cette période");
-//		// Sinon, l'exécution continue
+		// // Si le nombre des factrue de vente est égale à 0, pas la peine de continuer
+		// if(nbFv == 0)
+		// throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Aucune facture
+		// trouvée pour cette période");
+		// // Sinon, l'exécution continue
 		Integer nbFa = getListFactureAvoirByConfirmedDate(payload).size();
 		Integer nbFvRecap = getListFactureRecapByConfirmedDate(payload).size();
 
@@ -258,29 +259,32 @@ public class StatsService {
 		map.put("recap_montant_recap", new JRBeanCollectionDataSource(recapsFvRecap));
 
 		// Générer la facture
-		String reportName = "bilan_du_" + ((dateDebut.replace(" ", "_")).replace(":", "")).replace("/", "") + "_au_" + ((dateFin.replace(" ", "_")).replace(":", "")).replace("/", "") + ".pdf";
+		String reportName = "bilan_du_" + ((dateDebut.replace(" ", "_")).replace(":", "")).replace("/", "") + "_au_"
+				+ ((dateFin.replace(" ", "_")).replace(":", "")).replace("/", "") + ".pdf";
 		return reportService.bilanPeriodiqueReport(bilanData, map, BILAN_PERIODIQUE_REPORT_TEMPLATE, reportName);
 		// Formatage de données de retour
-//		ReportResponse rr = new ReportResponse();
-//		rr.setFileName(reportName);
-//		return rr;
+		// ReportResponse rr = new ReportResponse();
+		// rr.setFileName(reportName);
+		// return rr;
 	}
-	
-	
+
 	/**** Statistiques pour tableau de bord *****/
 	/*** Bilan des mois pour un an ***/
 	/**
-	 * Récupération des données de statistiques du dashboard pour le bilan d'une année
+	 * Récupération des données de statistiques du dashboard pour le bilan d'une
+	 * année
+	 * 
 	 * @param payloads
 	 * @return
 	 */
-	public Map<String, List<Long>> bilanDashboard(List<StatsPayload> payloads){
-		if(payloads.isEmpty())
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Les données de bilan ne sont pas correctement définies");
-		
+	public Map<String, List<Long>> bilanDashboard(List<StatsPayload> payloads) {
+		if (payloads.isEmpty())
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					"Les données de bilan ne sont pas correctement définies");
+
 		// Initialisation du tableau des bilan
-		Map<String, List<Long>> map = new HashMap<>();		
-		
+		Map<String, List<Long>> map = new HashMap<>();
+
 		for (StatsPayload statsPayload : payloads) {
 			System.out.println("keyword : " + statsPayload.getKeyword());
 			// Initalisation du bilan de ce mois (dans statsPayload.getKeyword)
@@ -295,7 +299,7 @@ public class StatsService {
 			// Ajout du bilan de ce mois
 			map.put(statsPayload.getKeyword(), stats);
 		}
-		
+
 		return map;
 	}
 }

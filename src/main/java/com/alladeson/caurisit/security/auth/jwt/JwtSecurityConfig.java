@@ -3,8 +3,8 @@ package com.alladeson.caurisit.security.auth.jwt;
 import com.alladeson.caurisit.config.AppConfig;
 import com.alladeson.caurisit.security.core.AccountDetailsService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 @EnableGlobalMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true)
 public class JwtSecurityConfig extends WebSecurityConfigurerAdapter {
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	// private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private AccountDetailsService accountDetailsService;
@@ -83,13 +83,13 @@ public class JwtSecurityConfig extends WebSecurityConfigurerAdapter {
 		for (String m : methods)
 			if (StringUtils.hasText(m))
 				config.addAllowedMethod(m);
-//        config.addAllowedOrigin(this.appConfig.getFrontEndBaseUrl());
-//        config.addAllowedOrigin("*");
-//        config.addAllowedMethod("OPTIONS");
-//        config.addAllowedMethod("GET");
-//        config.addAllowedMethod("POST");
-//        config.addAllowedMethod("PUT");
-//        config.addAllowedMethod("DELETE");
+		// config.addAllowedOrigin(this.appConfig.getFrontEndBaseUrl());
+		// config.addAllowedOrigin("*");
+		// config.addAllowedMethod("OPTIONS");
+		// config.addAllowedMethod("GET");
+		// config.addAllowedMethod("POST");
+		// config.addAllowedMethod("PUT");
+		// config.addAllowedMethod("DELETE");
 		source.registerCorsConfiguration("/**", config);
 		return new CorsFilter(source);
 	}
@@ -144,15 +144,16 @@ public class JwtSecurityConfig extends WebSecurityConfigurerAdapter {
 				.permitAll().anyRequest().authenticated();
 
 		// Add our custom JWT com.techdigita.eshopping.security filter
-//        http.addFilterBefore(new BasicAuthenticationFilter(authenticationManager()), UsernamePasswordAuthenticationFilter.class);
+		// http.addFilterBefore(new BasicAuthenticationFilter(authenticationManager()),
+		// UsernamePasswordAuthenticationFilter.class);
 		http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
 	}
 
-//    @Bean
-//    public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
-//        StrictHttpFirewall firewall = new StrictHttpFirewall();
-//        firewall.setAllowUrlEncodedSlash(true);
-//        return firewall;
-//    }
+	// @Bean
+	// public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
+	// StrictHttpFirewall firewall = new StrictHttpFirewall();
+	// firewall.setAllowUrlEncodedSlash(true);
+	// return firewall;
+	// }
 }

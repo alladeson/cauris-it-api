@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+
 import org.apache.commons.io.FilenameUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,15 +149,15 @@ public class ParametreService {
 
 		System.out.println(Bearer);
 
-//		try {
-//			// INFO
+		// try {
+		// // INFO
 		infoResponseDto = apiInfoInstance.apiInfoStatusGet();
 		System.out.println(infoResponseDto);
 
-//		} catch (ApiException e) {
-//			System.err.println("Exception when calling SfeInvoiceApi");
-//			e.printStackTrace();
-//		}
+		// } catch (ApiException e) {
+		// System.err.println("Exception when calling SfeInvoiceApi");
+		// e.printStackTrace();
+		// }
 
 		return infoResponseDto;
 	}
@@ -172,33 +173,19 @@ public class ParametreService {
 
 		// Mise à jour du token du param
 		parametre.setToken(parametre.getTokenTmp());
-		// Vérification des données de l'emcef
-		InfoResponseDto emcefInfo = new InfoResponseDto();
-		try {
-			emcefInfo = this.emcefStatus(parametre);
-		} catch (ApiException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-
-			if (e.getCode() == HttpStatus.UNAUTHORIZED.value())
-				throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-						"Le token que vous avez fourni n'est pas valide.");
-			if (e.getCode() == 0)
-				throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
-						"Nous ne parvenons pas à vérifier le status de l'emcef. Vérifier la connexion internet de votre machine svp !");
-		}
-
+		// Récupération du status de l'emcef du serveur de la DGI
+		InfoResponseDto emcefInfo = infoResponseDto(parametre);
+		// Si l'emcef est actif, alors enregistrement du paramètre
 		if (emcefInfo.isStatus() != null && emcefInfo.isStatus()) {
-			if ((paramRepos.findAll()).isEmpty()) {
-				// Vérification de la clé d'activation
+			if ((paramRepos.findAll()).isEmpty()) { // Une seule ligne de données requise pour l'installation du client
 				try {
 					// Mise à jour de la date d'expiration de l'emcef
-					String expirationDate = emcefInfo.getTokenValid().toString().substring(0, 19);
-					Date date = tool.stringToDate(expirationDate, "yyyy-MM-dd'T'HH:mm:ss");
+					String expirationDate = emcefInfo.getTokenValid().toString().substring(0, 16);
+					Date date = tool.stringToDate(expirationDate, "yyyy-MM-dd'T'HH:mm");
 					parametre.setExpiration(date);
 					// Mise à jour de la date d'activation
 					parametre.setActivationDate(new Date());
-					// Validation de la clé d'activation
+					// Vérification et Validation de la clé d'activation
 					if (accessService.checkSecrialKey(parametre.getSerialKey())) {
 						// Récupération du fichier du rapport de configuration et mise à jour du
 						// paramètre
@@ -214,15 +201,16 @@ public class ParametreService {
 						// Envoi du mail
 						accessService.sendMail(params, CONFIG_REPORT_MAIL_TEMPLATE);
 						// Envoie des données de paramètre au serveur distant
-						accessService.sendParametreData(params);
+						accessService.sendParametreData(params, false);
 						// Renvoie du paramètre
 						return params;
 					} else {
 						throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Clé d'activation non valable");
 					}
 				}
-//				catch (IOException | URISyntaxException | WebClientResponseException | ParseException
-//						| JRException e) {
+				// catch (IOException | URISyntaxException | WebClientResponseException |
+				// ParseException
+				// | JRException e) {
 				catch (Exception e) {
 					e.printStackTrace();
 					if (e instanceof WebClientResponseException) {
@@ -233,7 +221,6 @@ public class ParametreService {
 							throw new ResponseStatusException(HttpStatus.NOT_FOUND,
 									"La clé d'activation n'est pas valable");
 					} else {
-						e.printStackTrace();
 						throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());
 					}
 				}
@@ -244,6 +231,25 @@ public class ParametreService {
 		} else
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
 					"Vos informations ne correspondent à aucune machine emcef de la DGI. Veuillez revoir vos informations et reprenez svp. Merci !");
+	}
+
+	private InfoResponseDto infoResponseDto(Parametre parametre) {
+		// Vérification des données de l'emcef
+		InfoResponseDto emcefInfo = new InfoResponseDto();
+		try {
+			emcefInfo = this.emcefStatus(parametre);
+		} catch (ApiException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+
+			if (e.getCode() == HttpStatus.UNAUTHORIZED.value())
+				throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+						"Le token que vous avez fourni n'est pas valide.");
+			if (e.getCode() == 0)
+				throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+						"Nous ne parvenons pas à vérifier le status de l'emcef. Vérifier la connexion internet de votre machine svp !");
+		}
+		return emcefInfo;
 	}
 
 	/**
@@ -354,6 +360,18 @@ public class ParametreService {
 
 		// Gestion audit : valeurAvant
 		String valAvant = tool.toJson(params);
+		// Initiation des données de l'emcef DGI
+		InfoResponseDto emcefInfo = null;
+		// Si le token est fourni dans les données du paramètre
+		if (parametre.getTokenTmp() != null) {
+			// Récupération du status de l'emcef du serveur de la DGI
+			emcefInfo = infoResponseDto(parametre);
+		}
+
+		// Initiation d'un flag pour la mise à jour des données de paramètre sur le
+		// serveur distant en cas de changement du token
+		boolean sendParamData = false;
+
 		// Mise à jour des champs de paramètre
 		params.setName(parametre.getName());
 		params.setTelephone(parametre.getTelephone());
@@ -363,26 +381,55 @@ public class ParametreService {
 		params.setVille(parametre.getVille());
 		params.setPays(parametre.getPays());
 		params.setRcm(parametre.getRcm());
-		if (user.isSA()) {
-			params.setIfu(parametre.getIfu());
-			params.setNim(parametre.getNim());
-			if (parametre.getTokenTmp() != null)
+		// En cas de mise à jour du token, vérifier si l'emcef est actif
+		if (emcefInfo.isStatus() != null && emcefInfo.isStatus()) {
+			// Si oui, mise à jour des données sensibles par le super_admin uniquement
+			if (user.isSA()) {
+				// Mise à jour du flag
+				sendParamData = true;
+				//
+				params.setIfu(parametre.getIfu());
+				params.setNim(parametre.getNim());
+				// if (parametre.getTokenTmp() != null) // Déjà vérifié lors de la récupération
+				// du status de l'emcef
 				params.setToken(parametre.getTokenTmp());
-			if (parametre.getTypeSystem() != null)
-				params.setTypeSystem(parametre.getTypeSystem());
-			if (parametre.getExpiration() != null)
-				params.setExpiration(parametre.getExpiration());
-			if (parametre.getSerialKey() != null)
-				params.setSerialKey(parametre.getSerialKey());
-		}
-		params.setUpdatedAt(null);
+				//
+				if (parametre.getTypeSystem() != null)
+					params.setTypeSystem(parametre.getTypeSystem());
+				// if (parametre.getExpiration() != null)
+				// params.setExpiration(parametre.getExpiration());
+				// if (parametre.getSerialKey() != null)
+				// params.setSerialKey(parametre.getSerialKey());
+			}
+		} else
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+					"Vos informations ne correspondent à aucune machine emcef de la DGI. Veuillez revoir vos informations et reprenez svp. Merci !");
 
-		parametre = saveParametre(params, false);
+		// Mise à null de la data de mise à jour pour permettre à l'ORM de le gérer pour
+		// nous
+		params.setUpdatedAt(null);
+		// Si le token à été changé
+		if (sendParamData) {
+			try {
+				// Mise à jour de la date d'expiration de l'emcef				
+				String expirationDate = emcefInfo.getTokenValid().toString().substring(0, 16);
+				Date date = tool.stringToDate(expirationDate, "yyyy-MM-dd'T'HH:mm");
+				params.setExpiration(date);
+				// Envoie des données de paramètre au serveur distant
+				// accessService.sendParametreData(params, true);
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());
+			}
+		}
 
 		// Gestion audit : valeurApres
 		String valApres = tool.toJson(parametre);
 		// Enregistrement de la trace de changement
 		auditService.traceChange(Operation.SYSTEM_UPDATE, valAvant, valApres);
+
+		// Sauvegarde
+		parametre = saveParametre(params, false);
 		// Renvoie du paramètre
 		return params;
 	}
@@ -433,7 +480,7 @@ public class ParametreService {
 		// Envoie du logo au serveur distant
 		try {
 			accessService.sendParametreLogo(param);
-//		} catch (SSLException | URISyntaxException e) {
+			// } catch (SSLException | URISyntaxException e) {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -442,9 +489,10 @@ public class ParametreService {
 		// Renvoie du paramètre
 		return param;
 	}
-	
+
 	/**
 	 * Mettre à jour le format de la facture pour l'impression
+	 * 
 	 * @param paramId
 	 * @param format
 	 * @return
@@ -453,23 +501,23 @@ public class ParametreService {
 		// Check permission
 		if (!accessService.canWritable(Feature.parametreSysteme))
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
-		
+
 		Parametre param = paramRepos.findById(paramId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Parametre non trouvé"));
-		
+
 		// Gestion audit : valeurAvant
 		String valAvant = tool.toJson(param);
 		// Mise à jour du logo du parametre
 		param.setFormatFacture(format);
 		// Enregistrement et renvoie du parametre
 		param = paramRepos.save(param);
-		
+
 		// Gestion audit : valeurApres
 		String valApres = tool.toJson(param);
-		
+
 		// Enregistrement des traces de changement
 		auditService.traceChange(Operation.SYSTEM_FORMAT_FACTURE_UPDATE, valAvant, valApres);
-		
+
 		// Renvoie du paramètre
 		return param;
 	}
@@ -489,19 +537,19 @@ public class ParametreService {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Les données du système ne sont pas disponibles");
 		Parametre param = optional.get();
 
-		// Nomdu fichier du rapport
+		// Nom du fichier du rapport
 		var reportName = "rapport_configuration_" + param.getSerialKey().substring(0, 10) + ".pdf";
 		// Générer le rapport
-		ResponseEntity<byte[]>  bytes = printConfigReport(param, reportName);
-		
+		ResponseEntity<byte[]> bytes = printConfigReport(param, reportName);
+
 		// Mise à jour du paramètre
 		param.setConfigReport(reportName);
 		param = paramRepos.save(param);
-		
+
 		// Envoie de mail
-		if(sendMail)
+		if (sendMail)
 			accessService.sendMail(param, CONFIG_REPORT_MAIL_TEMPLATE);
-		
+
 		// Renvoie du fichier
 		return bytes;
 	}
@@ -540,7 +588,8 @@ public class ParametreService {
 		// Setting Invoice Report Params
 		HashMap<String, Object> map = setConfigReportParams(param);
 		// Ajout des données de l'entête
-//		map.put("entete", new JRBeanCollectionDataSource(Collections.singleton(invoice)));
+		// map.put("entete", new
+		// JRBeanCollectionDataSource(Collections.singleton(invoice)));
 
 		// Générer le rapport
 		return reportService.generateConfigReport(configReportDate, map, template, reportName);

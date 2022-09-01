@@ -3,10 +3,6 @@
  */
 package com.alladeson.caurisit.models.paylaods;
 
-import com.alladeson.caurisit.models.entities.Taxe;
-import com.alladeson.caurisit.models.entities.TypeFactureEnum;
-import com.alladeson.caurisit.models.entities.TypePaiementEnum;
-
 /**
  * @author allad
  *

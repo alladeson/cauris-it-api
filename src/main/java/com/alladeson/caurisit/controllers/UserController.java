@@ -3,13 +3,11 @@ package com.alladeson.caurisit.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.alladeson.caurisit.models.entities.User;
 import com.alladeson.caurisit.security.core.PasswordPayload;
-import com.alladeson.caurisit.security.core.PasswordResetPayload;
 import com.alladeson.caurisit.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController

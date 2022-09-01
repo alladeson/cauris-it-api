@@ -9,8 +9,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-
-
 import org.apache.commons.io.FilenameUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -280,7 +278,7 @@ public class ParametreService {
 		// Renvoie du paramètre
 		return params;
 	}
-	
+
 	/**
 	 * Mettre à jour les données de paramètre d'entreprise
 	 *
@@ -299,7 +297,7 @@ public class ParametreService {
 
 		// Gestion audit : valeurAvant
 		String valAvant = tool.toJson(params);
-		
+
 		// Mise à jour des champs de paramètre
 		params.setName(parametre.getName());
 		params.setTelephone(parametre.getTelephone());
@@ -317,9 +315,10 @@ public class ParametreService {
 			params.setTypeSystem(parametre.getTypeSystem());
 		if (parametre.getExpiration() != null)
 			params.setExpiration(parametre.getExpiration());
-		// Mise à null de la data de mise à jour pour permettre à l'ORM de le gérer pour nous
+		// Mise à null de la data de mise à jour pour permettre à l'ORM de le gérer pour
+		// nous
 		params.setUpdatedAt(null);
-		
+
 		// Sauvegarde
 		params = saveParametre(parametre, false);
 		// Gestion audit : valeurApres
@@ -563,14 +562,14 @@ public class ParametreService {
 		// Enregistrement des traces de changement
 		auditService.traceChange(Operation.SYSTEM_LOGO_UPDATE, valAvant, valApres);
 
-//		// Envoie du logo au serveur distant
-//		try {
-//			accessService.sendParametreLogo(param);
-////		} catch (SSLException | URISyntaxException e) {
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		// // Envoie du logo au serveur distant
+		// try {
+		// accessService.sendParametreLogo(param);
+		//// } catch (SSLException | URISyntaxException e) {
+		// } catch (Exception e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 
 		// Renvoie du paramètre
 		return param;

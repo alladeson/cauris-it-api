@@ -13,12 +13,12 @@ import javax.persistence.Id;
  *
  */
 @Entity
-public class FrontendLayoutSettings /*extends BaseEntity */{
+public class FrontendLayoutSettings /* extends BaseEntity */ {
 
 	/**
 	 * 
 	 */
-	/*private static final long serialVersionUID = -7240015719681583934L;*/
+	/* private static final long serialVersionUID = -7240015719681583934L; */
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -158,23 +158,23 @@ public class FrontendLayoutSettings /*extends BaseEntity */{
 	}
 
 	// /**
-	//  * @return the user
-	//  */
+	// * @return the user
+	// */
 	// public User getUser() {
-	// 	return user;
+	// return user;
 	// }
 
 	// /**
-	//  * @param user the user to set
-	//  */
+	// * @param user the user to set
+	// */
 	// public void setUser(User user) {
-	// 	this.user = user;
+	// this.user = user;
 	// }
 
 	// /**
-	//  * @return the serialversionuid
-	//  */
+	// * @return the serialversionuid
+	// */
 	// public static long getSerialversionuid() {
-	// 	return serialVersionUID;
+	// return serialVersionUID;
 	// }
 }

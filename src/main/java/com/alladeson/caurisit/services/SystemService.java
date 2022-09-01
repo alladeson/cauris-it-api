@@ -40,7 +40,7 @@ public class SystemService {
 
 	@Autowired
 	private AccessService accessService;
-	
+
 	@Autowired
 	private FeatureRepository featureRepos;
 
@@ -69,10 +69,11 @@ public class SystemService {
 				var account = new Account();
 				account.setUsername(config.getSaUsername());
 				account.setEmail(config.getEmailAdmin());
-				account.setPassword(passwordEncoder.encode(config.getSaPassword()/* + "G6erxOlQkKitFlZlxZgyP27V6mu"*/));
-//                account.setEnabled(true);
-//                account.setPasswordEnabled(false);
-//                account.setSys(true);
+				account.setPassword(
+						passwordEncoder.encode(config.getSaPassword()/* + "G6erxOlQkKitFlZlxZgyP27V6mu" */));
+				// account.setEnabled(true);
+				// account.setPasswordEnabled(false);
+				// account.setSys(true);
 				account.setRoles(Collections.singleton(roleSuperAdmin));
 				account = accountService.save(account);
 				var user = new User();
@@ -255,14 +256,13 @@ public class SystemService {
 				accessService.saveFeature(Feature.demandes, "Demandes", true, false, false);
 				accessService.saveFeature(Feature.demandesList, "Liste des demandes", true, true, true);
 				accessService.saveFeature(Feature.parametreList, "Paramètres des contribuables", true, true, true);
-				
-				
+
 				// Permissions
-                var features = featureRepos.findAll();
-                // - Super_Admin
-                for (Feature f : features) {
-                    accessService.saveAccess(sa, f, true);
-                }
+				var features = featureRepos.findAll();
+				// - Super_Admin
+				for (Feature f : features) {
+					accessService.saveAccess(sa, f, true);
+				}
 			}
 		} finally {
 			logger.info(watch.prettyPrint());

@@ -83,13 +83,13 @@ public class JwtSecurityConfig extends WebSecurityConfigurerAdapter {
 		for (String m : methods)
 			if (StringUtils.hasText(m))
 				config.addAllowedMethod(m);
-//        config.addAllowedOrigin(this.appConfig.getFrontEndBaseUrl());
-//        config.addAllowedOrigin("*");
-//        config.addAllowedMethod("OPTIONS");
-//        config.addAllowedMethod("GET");
-//        config.addAllowedMethod("POST");
-//        config.addAllowedMethod("PUT");
-//        config.addAllowedMethod("DELETE");
+		// config.addAllowedOrigin(this.appConfig.getFrontEndBaseUrl());
+		// config.addAllowedOrigin("*");
+		// config.addAllowedMethod("OPTIONS");
+		// config.addAllowedMethod("GET");
+		// config.addAllowedMethod("POST");
+		// config.addAllowedMethod("PUT");
+		// config.addAllowedMethod("DELETE");
 		source.registerCorsConfiguration("/**", config);
 		return new CorsFilter(source);
 	}
@@ -144,15 +144,16 @@ public class JwtSecurityConfig extends WebSecurityConfigurerAdapter {
 				.permitAll().anyRequest().authenticated();
 
 		// Add our custom JWT com.techdigita.eshopping.security filter
-//        http.addFilterBefore(new BasicAuthenticationFilter(authenticationManager()), UsernamePasswordAuthenticationFilter.class);
+		// http.addFilterBefore(new BasicAuthenticationFilter(authenticationManager()),
+		// UsernamePasswordAuthenticationFilter.class);
 		http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
 	}
 
-//    @Bean
-//    public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
-//        StrictHttpFirewall firewall = new StrictHttpFirewall();
-//        firewall.setAllowUrlEncodedSlash(true);
-//        return firewall;
-//    }
+	// @Bean
+	// public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
+	// StrictHttpFirewall firewall = new StrictHttpFirewall();
+	// firewall.setAllowUrlEncodedSlash(true);
+	// return firewall;
+	// }
 }

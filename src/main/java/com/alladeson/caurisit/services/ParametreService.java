@@ -180,8 +180,8 @@ public class ParametreService {
 			if ((paramRepos.findAll()).isEmpty()) { // Une seule ligne de données requise pour l'installation du client
 				try {
 					// Mise à jour de la date d'expiration de l'emcef
-					String expirationDate = emcefInfo.getTokenValid().toString().substring(0, 19);
-					Date date = tool.stringToDate(expirationDate, "yyyy-MM-dd'T'HH:mm:ss");
+					String expirationDate = emcefInfo.getTokenValid().toString().substring(0, 16);
+					Date date = tool.stringToDate(expirationDate, "yyyy-MM-dd'T'HH:mm");
 					parametre.setExpiration(date);
 					// Mise à jour de la date d'activation
 					parametre.setActivationDate(new Date());
@@ -411,12 +411,12 @@ public class ParametreService {
 		// Si le token à été changé
 		if (sendParamData) {
 			try {
-				// Mise à jour de la date d'expiration de l'emcef
-				String expirationDate = emcefInfo.getTokenValid().toString().substring(0, 19);
-				Date date = tool.stringToDate(expirationDate, "yyyy-MM-dd'T'HH:mm:ss");
-				parametre.setExpiration(date);
+				// Mise à jour de la date d'expiration de l'emcef				
+				String expirationDate = emcefInfo.getTokenValid().toString().substring(0, 16);
+				Date date = tool.stringToDate(expirationDate, "yyyy-MM-dd'T'HH:mm");
+				params.setExpiration(date);
 				// Envoie des données de paramètre au serveur distant
-				accessService.sendParametreData(params, true);
+				// accessService.sendParametreData(params, true);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());

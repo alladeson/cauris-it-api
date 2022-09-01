@@ -105,7 +105,7 @@ public class AccessService {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
 
 		var codes = new ArrayList<Integer>();
-//		codes.add(Feature.parametreSysteme);
+		// codes.add(Feature.parametreSysteme);
 		codes.add(Feature.gestStock);
 		codes.add(Feature.parametreDonneSysteme);
 		codes.add(Feature.accessCtrl);
@@ -173,7 +173,7 @@ public class AccessService {
 		if (optionalFeature.isEmpty())
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Fonctionnalité non trouvée");
 		Feature featureToUpdate = optionalFeature.get();
-//        Feature featureToUpdateSave = optionalFeature.get();
+		// Feature featureToUpdateSave = optionalFeature.get();
 
 		if (feature.getName() != null)
 			featureToUpdate.setName(feature.getName());
@@ -333,7 +333,7 @@ public class AccessService {
 	}
 
 	private UserGroup saveGroupe(UserGroup group, UserGroup ug) {
-//		logger.info(group.toString());
+		// logger.info(group.toString());
 
 		ug.setName(group.getName());
 		ug.setDescription(group.getDescription());
@@ -344,7 +344,7 @@ public class AccessService {
 		// Permissions
 		if (!ug.getAccess().isEmpty()) {
 			for (var ac : ug.getAccess()) {
-//			logger.info(ac.toString());
+				// logger.info(ac.toString());
 				var ft = findFeatureByCode(ac.getMenu());
 				this.saveAccess(ug, ft, ac.isReadable(), ac.isWritable(), ac.isDeletable());
 			}
@@ -358,9 +358,9 @@ public class AccessService {
 		return ug;
 	}
 
-//	public UserGroup saveGroupe(UserGroup group) {
-//		return groupeRepos.save(group);
-//	}
+	// public UserGroup saveGroupe(UserGroup group) {
+	// return groupeRepos.save(group);
+	// }
 
 	public boolean deleteGroupe(Long id) throws JsonProcessingException {
 		// Check permission
@@ -380,9 +380,9 @@ public class AccessService {
 		return groupeRepos.count();
 	}
 
-//	public UserGroup saveGroupe(String name, TypeRole role) {
-//		return saveGroupe(name, null, role);
-//	}
+	// public UserGroup saveGroupe(String name, TypeRole role) {
+	// return saveGroupe(name, null, role);
+	// }
 
 	public UserGroup saveGroupe(String name, String desc, TypeRole role) {
 		var group = new UserGroup();
@@ -516,13 +516,13 @@ public class AccessService {
 		return user.isSA() || user.isAdmin() || access != null && access.isDeletable();
 	}
 
-//	public List<Access> getAllAccess(String search) {
-//		return accessRepos.findByGroupNameOrFeatureNameContaining(search, search);
-//	}
+	// public List<Access> getAllAccess(String search) {
+	// return accessRepos.findByGroupNameOrFeatureNameContaining(search, search);
+	// }
 
-//	public List<Access> saveAllAccess(List<Access> access) {
-//		return accessRepos.saveAll(access);
-//	}
+	// public List<Access> saveAllAccess(List<Access> access) {
+	// return accessRepos.saveAll(access);
+	// }
 
 	public Access saveAccess(Access access, Long userGroupId, Long featureId) throws JsonProcessingException {
 		Optional<UserGroup> optionalUserGroup = groupeRepos.findById(userGroupId);
@@ -567,14 +567,15 @@ public class AccessService {
 		return accessRepos.save(access1);
 	}
 
-//	public Access saveAccess(Long userGroupId, Long featureId, boolean readable, boolean writable, boolean deletable)
-//			throws JsonProcessingException {
-//		var acces = new Access();
-//		acces.setReadable(readable);
-//		acces.setWritable(writable);
-//		acces.setDeletable(deletable);
-//		return this.saveAccess(acces, userGroupId, featureId);
-//	}
+	// public Access saveAccess(Long userGroupId, Long featureId, boolean readable,
+	// boolean writable, boolean deletable)
+	// throws JsonProcessingException {
+	// var acces = new Access();
+	// acces.setReadable(readable);
+	// acces.setWritable(writable);
+	// acces.setDeletable(deletable);
+	// return this.saveAccess(acces, userGroupId, featureId);
+	// }
 
 	public Access saveAccess(UserGroup userGroup, Feature feature, boolean readable, boolean writable,
 			boolean deletable) {
@@ -628,7 +629,7 @@ public class AccessService {
 	public boolean checkSecrialKey(String serialKey) throws URISyntaxException, SSLException {
 		WebClient client = webClientBuilder();
 
-//		MultiValueMap<String, String> bodyValues = new LinkedMultiValueMap<>();
+		// MultiValueMap<String, String> bodyValues = new LinkedMultiValueMap<>();
 
 		Map<String, String> bodyMap = loginData();
 
@@ -657,7 +658,7 @@ public class AccessService {
 
 		HttpClient httpClient = HttpClient.create().secure(t -> t.sslContext(sslContext));
 
-//		WebClient client = WebClient.create();
+		// WebClient client = WebClient.create();
 		WebClient client = WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient)).build();
 		return client;
 	}
@@ -672,10 +673,10 @@ public class AccessService {
 	private boolean serialKeyChecking(String serialKey, WebClient client, String token) throws URISyntaxException {
 		boolean response = client.post().uri(new URI(config.getSkChckUri() + serialKey))
 				.header("Authorization", "Bearer " + token)
-//					.contentType(MediaType.APP•LICATION_FORM_URLENCODED)
-//					.contentType(MediaType.APPLICATION_JSON)
+				// .contentType(MediaType.APP•LICATION_FORM_URLENCODED)
+				// .contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON)
-//					.body(BodyInserters.fromFormData(bodyValues))
+				// .body(BodyInserters.fromFormData(bodyValues))
 				.body(null).retrieve().bodyToMono(boolean.class).block();
 
 		return response;
@@ -689,10 +690,10 @@ public class AccessService {
 	 */
 	private String remoteLogin(WebClient client, Map<String, String> bodyMap) throws URISyntaxException {
 		ResponseEntity<JwtAuthResponsePayload> response = client.post().uri(new URI(config.getSkLoginUri()))
-		// .header("Authorization", "Bearer MY_SECRET_TOKEN")
-//				.contentType(MediaType.APP•LICATION_FORM_URLENCODED)
+				// .header("Authorization", "Bearer MY_SECRET_TOKEN")
+				// .contentType(MediaType.APP•LICATION_FORM_URLENCODED)
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
-//				.body(BodyInserters.fromFormData(bodyValues))
+				// .body(BodyInserters.fromFormData(bodyValues))
 				.body(BodyInserters.fromValue(bodyMap)).retrieve().toEntity(JwtAuthResponsePayload.class).block();
 
 		return response.getBody().getToken();
@@ -729,14 +730,18 @@ public class AccessService {
 	 * @throws SSLException
 	 */
 	@Async
-	public CompletableFuture<Parametre> sendParametreData(Parametre parametre) throws URISyntaxException, SSLException {
+	public CompletableFuture<Parametre> sendParametreData(Parametre parametre, boolean update) throws URISyntaxException, SSLException {
 		WebClient client = webClientBuilder();
 		// Récupération des données de login
 		Map<String, String> bodyMap = loginData();
 		// Connexion et recupération du token
 		String token = remoteLogin(client, bodyMap);
 		// Envoie des données de paramètre au server distant
-		Parametre params = sendingParametre(client, this.setParametreBodyMap(parametre), token);
+		Parametre params = null;
+		if(!update) // En cas de la création du paramètre
+			params = sendingParametre(client, this.setParametreBodyMap(parametre), token);
+		// En cas de mise à jour du paramètre
+		params = sendingUpdateParametre(parametre, client, this.setParametreBodyMap(parametre), token);
 		// Envoie de la reponse
 		return CompletableFuture.completedFuture(params);
 	}
@@ -756,7 +761,8 @@ public class AccessService {
 
 		Field[] fields = paramClass.getDeclaredFields();
 
-		// Mise à jour du tokenTmp : utile pour l'enregistrement car le token n'est par reçu par JSON
+		// Mise à jour du tokenTmp : utile pour l'enregistrement car le token n'est par
+		// reçu par JSON
 		parametre.setTokenTmp(parametre.getToken());
 		// Formatage du bodyMap
 		for (Field field : fields) {
@@ -798,9 +804,30 @@ public class AccessService {
 			throws URISyntaxException {
 		ResponseEntity<Parametre> response = client.post().uri(new URI(config.getParamSendUri()))
 				.header("Authorization", "Bearer " + token)
-//				.contentType(MediaType.APP•LICATION_FORM_URLENCODED)
+				// .contentType(MediaType.APP•LICATION_FORM_URLENCODED)
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
-//				.body(BodyInserters.fromFormData(bodyValues))
+				// .body(BodyInserters.fromFormData(bodyValues))
+				.body(BodyInserters.fromValue(bodyMap)).retrieve().toEntity(Parametre.class).block();
+
+		return response.getBody();
+	}
+
+	/**
+	 * @param parametre
+	 * @param client
+	 * @param bodyMap
+	 * @return
+	 * @throws URISyntaxException
+	 */
+	private Parametre sendingUpdateParametre(Parametre parametre, WebClient client, Map<String, String> bodyMap,
+			String token)
+			throws URISyntaxException {
+		ResponseEntity<Parametre> response = client.put()
+				.uri(new URI(config.getParamUpdateUri().replace("__key__", parametre.getSerialKey())))
+				.header("Authorization", "Bearer " + token)
+				// .contentType(MediaType.APP•LICATION_FORM_URLENCODED)
+				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
+				// .body(BodyInserters.fromFormData(bodyValues))
 				.body(BodyInserters.fromValue(bodyMap)).retrieve().toEntity(Parametre.class).block();
 
 		return response.getBody();
@@ -839,9 +866,9 @@ public class AccessService {
 		ResponseEntity<Parametre> response = client.put()
 				.uri(new URI(config.getParamLogoUri().replace("__key__", parametre.getSerialKey())))
 				.header("Authorization", "Bearer " + token)
-//				.contentType(MediaType.APP•LICATION_FORM_URLENCODED)
+				// .contentType(MediaType.APP•LICATION_FORM_URLENCODED)
 				.contentType(MediaType.MULTIPART_FORM_DATA).accept(MediaType.APPLICATION_JSON)
-//				.body(BodyInserters.fromFormData(bodyValues))
+				// .body(BodyInserters.fromFormData(bodyValues))
 				.body(BodyInserters
 						.fromMultipartData(this.fromFile(new File(config.getUploadDir() + "/" + parametre.getLogo()))))
 				.retrieve().toEntity(Parametre.class).block();

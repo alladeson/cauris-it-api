@@ -56,7 +56,7 @@ public class SystemService {
 			logger.info(">> APP INIT DATA - START");
 
 			// User-groups
-			UserGroup sa = null/* , adm = null */;
+			UserGroup sa = null;
 			if (accessService.countGroupe() == 0) {
 				sa = accessService.saveGroupe("Super Admin", "Super Administrateur", TypeRole.SUPER_ADMIN);
 			}

@@ -5,19 +5,19 @@ package com.alladeson.caurisit.models.entities;
 
 //import com.fasterxml.jackson.annotation.JsonIgnore;
 
-
 /**
  * @author TechDigita
  */
-//@Entity
+// @Entity
 public class Structure {
 
-////    @Id
-////    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_struc")
-////    @SequenceGenerator(name="gen_struc", sequenceName = "_seq_struc")
-////    @GeneratedValue(strategy = GenerationType.AUTO)
-//    private Long id;
-//    @NotBlank
-//    @Column(unique = true)
-//    private String libelle;
+    //// @Id
+    //// @GeneratedValue(strategy = GenerationType.SEQUENCE, generator =
+    //// "gen_struc")
+    //// @SequenceGenerator(name="gen_struc", sequenceName = "_seq_struc")
+    //// @GeneratedValue(strategy = GenerationType.AUTO)
+    // private Long id;
+    // @NotBlank
+    // @Column(unique = true)
+    // private String libelle;
 }

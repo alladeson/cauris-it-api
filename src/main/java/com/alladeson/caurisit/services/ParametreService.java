@@ -273,6 +273,56 @@ public class ParametreService {
 		// Renvoie du paramètre
 		return params;
 	}
+	
+	/**
+	 * Mettre à jour les données de paramètre d'entreprise
+	 *
+	 * @param serialKey
+	 * @param parametre
+	 * @return
+	 */
+	public Parametre updateParametreFromClient(String serialKey, Parametre parametre) {
+		// Check permission
+		if (!accessService.canWritable(Feature.parametreDonneSysteme))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
+		// Récupération du paramètre du client
+		Parametre params = paramRepos.findBySerialKey(serialKey)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Parametre non trouvé"));
+
+		// Gestion audit : valeurAvant
+		String valAvant = tool.toJson(params);
+		
+		// Mise à jour des champs de paramètre
+		params.setName(parametre.getName());
+		params.setTelephone(parametre.getTelephone());
+		params.setEmail(parametre.getEmail());
+		params.setAddress(parametre.getAddress());
+		params.setRaisonSociale(parametre.getRaisonSociale());
+		params.setVille(parametre.getVille());
+		params.setPays(parametre.getPays());
+		params.setRcm(parametre.getRcm());
+		params.setIfu(parametre.getIfu());
+		params.setNim(parametre.getNim());
+		if (parametre.getTokenTmp() != null)
+			params.setToken(parametre.getTokenTmp());
+		if (parametre.getTypeSystem() != null)
+			params.setTypeSystem(parametre.getTypeSystem());
+		if (parametre.getExpiration() != null)
+			params.setExpiration(parametre.getExpiration());
+		// Mise à null de la data de mise à jour pour permettre à l'ORM de le gérer pour nous
+		params.setUpdatedAt(null);
+		
+		// Sauvegarde
+		var params = saveParametre(parametre, false);
+		// Gestion audit : valeurApres
+		String valApres = tool.toJson(params);
+		// Enregistrement de la trace de changement
+		auditService.traceChange(Operation.SYSTEM_LOGO_UPDATE, valAvant, valApres);
+
+		// Renvoie du paramètre
+		return params;
+	}
 
 	/**
 	 * @param article

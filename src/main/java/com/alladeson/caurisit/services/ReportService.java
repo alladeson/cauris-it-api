@@ -79,7 +79,7 @@ public class ReportService {
 		int i = 1;
 		for (DetailFacture detail : details) {
 			var invoiceDetail = new InvoiceDetailData();
-//			System.out.println("Id de ligne de la facture : " + detail.getId());
+			// System.out.println("Id de ligne de la facture : " + detail.getId());
 			invoiceDetail.setNumero(i);
 			invoiceDetail.setName(detail.getName());
 			invoiceDetail.setTaxe(detail.getTaxe().getAbreviation());
@@ -232,7 +232,7 @@ public class ReportService {
 		if (facture.getAib() != null) {
 			InvoiceRecapData recap = new InvoiceRecapData();
 			var aib = facture.getAib();
-//			recap.setTaxe_group(aib.getGroupe().name() + " (" + aib.getValeur() + "%)");
+			// recap.setTaxe_group(aib.getGroupe().name() + " (" + aib.getValeur() + "%)");
 			recap.setTaxe_group("AIB (" + aib.getValeur() + "%)");
 			recap.setTotal(fa ? (recapdgi.getAib() * (-1)) : recapdgi.getAib());
 			recap.setImposable(0l);
@@ -497,14 +497,14 @@ public class ReportService {
 		// Mise à jour des champs pour la société
 		configData.setSte_name(appConfig.getAppName());
 		configData.setSte_ifu(appConfig.getAppIfu());
-//		configData.setSte_address(params.getAddress());
-//		configData.setSte_contact(params.getContact());
-//		configData.setSte_email(params.getEmail());
-//		configData.setSte_pays(params.getPays());
+		// configData.setSte_address(params.getAddress());
+		// configData.setSte_contact(params.getContact());
+		// configData.setSte_email(params.getEmail());
+		// configData.setSte_pays(params.getPays());
 		configData.setSte_rccm(appConfig.getAppRcm());
-//		configData.setSte_telephone(params.getTelephone());
-//		configData.setSte_raisonSociale(params.getRaisonSociale());
-//		configData.setSte_ville(params.getVille());
+		// configData.setSte_telephone(params.getTelephone());
+		// configData.setSte_raisonSociale(params.getRaisonSociale());
+		// configData.setSte_ville(params.getVille());
 		// Mise à jour du logo de la société
 		configData.setSte_logo(appConfig.getAppLogo());
 		// Mise à jour de la clé de sécurité

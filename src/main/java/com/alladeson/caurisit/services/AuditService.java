@@ -82,8 +82,8 @@ public class AuditService {
 	public List<Audit> getAll() {
 		// Check permission
 		var user = this.getAuthenticated();
-		if(user.isSA())
-		return repository.findAll();
+		if (user.isSA())
+			return repository.findAll();
 		else
 			return repository.findAllByUserRoleNot(TypeRole.SUPER_ADMIN);
 	}

@@ -1,8 +1,6 @@
 package com.alladeson.caurisit.services;
 
 import com.alladeson.caurisit.models.entities.Audit;
-import com.alladeson.caurisit.models.entities.Facture;
-import com.alladeson.caurisit.models.entities.Feature;
 import com.alladeson.caurisit.models.entities.Operation;
 import com.alladeson.caurisit.models.entities.User;
 import com.alladeson.caurisit.repositories.AuditRepository;

@@ -12,20 +12,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.alladeson.caurisit.security.core.*;
-import com.alladeson.caurisit.security.entities.Account;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -35,8 +31,6 @@ public class JwtAuthenticationManager {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationManager.class);
 
-    @Autowired
-    private AccountService accountService;
     @Autowired
     private AccountDetailsService accountDetailsService;
     @Autowired

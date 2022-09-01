@@ -3,8 +3,8 @@ package com.alladeson.caurisit.security.auth.jwt;
 import com.alladeson.caurisit.config.AppConfig;
 import com.alladeson.caurisit.security.core.AccountDetailsService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 @EnableGlobalMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true)
 public class JwtSecurityConfig extends WebSecurityConfigurerAdapter {
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	// private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private AccountDetailsService accountDetailsService;

@@ -3,8 +3,6 @@
  */
 package com.alladeson.caurisit.models.paylaods;
 
-import javax.persistence.Column;
-
 import com.alladeson.caurisit.models.entities.TypeSystem;
 
 /**

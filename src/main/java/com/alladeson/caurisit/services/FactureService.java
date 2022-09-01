@@ -5,9 +5,7 @@ package com.alladeson.caurisit.services;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -1165,44 +1163,44 @@ public class FactureService {
 		return reportService.invoiceReport(invoice, map, template, invoiceName);
 	}
 
-	/**
-	 * Imprimer la facture et l'enregistrement en local
-	 * 
-	 * @param facture La facture confirmée par l'emcef
-	 * @return
-	 * @throws IOException
-	 * @throws JRException
-	 */
-	private String printInvoiceAndStoreIt(Facture facture) throws IOException, JRException {
-		// Récupération des données du parametres
-		Parametre param = paramRepos.findOneParams().orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre système n'est pas encore paramètré."));
+// 	/**
+// 	 * Imprimer la facture et l'enregistrement en local
+// 	 * 
+// 	 * @param facture La facture confirmée par l'emcef
+// 	 * @return
+// 	 * @throws IOException
+// 	 * @throws JRException
+// 	 */
+// 	private String printInvoiceAndStoreIt(Facture facture) throws IOException, JRException {
+// 		// Récupération des données du parametres
+// 		Parametre param = paramRepos.findOneParams().orElseThrow(
+// 				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre système n'est pas encore paramètré."));
 
-		// Récupération du type de la facture
-		var type = facture.getType();
-		var template = "";
-		if (type.getGroupe().equals(TypeData.FV)) {
-			template = INVOICE_REPORT_TEMPLATE_FV;
-			if (facture.isRemise())
-				template = INVOICE_REPORT_TEMPLATE_FV_REMISE;
-		} else if (type.getGroupe().equals(TypeData.FA)) {
-			template = INVOICE_REPORT_TEMPLATE_FA;
-			if (facture.isRemise())
-				template = INVOICE_REPORT_TEMPLATE_FA_REMISE;
-		}
+// 		// Récupération du type de la facture
+// 		var type = facture.getType();
+// 		var template = "";
+// 		if (type.getGroupe().equals(TypeData.FV)) {
+// 			template = INVOICE_REPORT_TEMPLATE_FV;
+// 			if (facture.isRemise())
+// 				template = INVOICE_REPORT_TEMPLATE_FV_REMISE;
+// 		} else if (type.getGroupe().equals(TypeData.FA)) {
+// 			template = INVOICE_REPORT_TEMPLATE_FA;
+// 			if (facture.isRemise())
+// 				template = INVOICE_REPORT_TEMPLATE_FA_REMISE;
+// 		}
 
-		// Les données de la facture
-		InvoiceData invoice = reportService.setInvoiceData(facture, param);
+// 		// Les données de la facture
+// 		InvoiceData invoice = reportService.setInvoiceData(facture, param);
 
-		// Setting Invoice Report Params
-		HashMap<String, Object> map = setInvoiceReportParams(facture, param);
-		// Ajout des données de l'entête
-//		map.put("entete", new JRBeanCollectionDataSource(Collections.singleton(invoice)));
+// 		// Setting Invoice Report Params
+// 		HashMap<String, Object> map = setInvoiceReportParams(facture, param);
+// 		// Ajout des données de l'entête
+// //		map.put("entete", new JRBeanCollectionDataSource(Collections.singleton(invoice)));
 
-		// Générer la facture
-		return reportService.invoiceReportAndStoreIt(invoice, map, template,
-				INVOICE_REPORT_BASE_NAME + facture.getNumero() + ".pdf");
-	}
+// 		// Générer la facture
+// 		return reportService.invoiceReportAndStoreIt(invoice, map, template,
+// 				INVOICE_REPORT_BASE_NAME + facture.getNumero() + ".pdf");
+// 	}
 
 	/**
 	 * Dénfinir les données de paramètre pour l'impression de la facture

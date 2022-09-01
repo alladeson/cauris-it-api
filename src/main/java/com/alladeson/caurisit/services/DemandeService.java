@@ -46,10 +46,10 @@ public class DemandeService {
 	private AuditService auditService;
 	@Autowired
 	private Tool tool;
-	@Autowired
-	private ReportService reportService;
+	//@Autowired
+	//private ReportService reportService;
 
-	private static final String FORMULAIRE_DEMANDE_REPORT_TEMPLATE = "report/formulaire-de-demande.jrxml";
+	// private static final String FORMULAIRE_DEMANDE_REPORT_TEMPLATE = "report/formulaire-de-demande.jrxml";
 
 	/**
 	 * Récupération de l'utilisateur connecté

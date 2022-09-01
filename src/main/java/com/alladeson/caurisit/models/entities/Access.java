@@ -5,8 +5,6 @@ package com.alladeson.caurisit.models.entities;
 
 import javax.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 /**
  * @author William ALLADE
  *

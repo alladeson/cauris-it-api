@@ -176,7 +176,11 @@ public class ParametreService {
 		InfoResponseDto emcefInfo = infoResponseDto(parametre);
 		// Si l'emcef est actif, alors enregistrement du paramètre
 		if (emcefInfo.isStatus() != null && emcefInfo.isStatus()) {
-			if ((paramRepos.findAll()).isEmpty()) { // Une seule ligne de données requise pour l'installation du client
+			// Mise à jour de l'IFU et du NIM
+			parametre.setIfu(emcefInfo.getIfu() /* parametre.getIfu() */);
+			parametre.setNim(emcefInfo.getNim() /* parametre.getNim() */);
+			// Une seule ligne de données requise pour l'installation du client
+			if ((paramRepos.findAll()).isEmpty()) {
 				try {
 					// Mise à jour de la date d'expiration de l'emcef
 					String expirationDate = emcefInfo.getTokenValid().toString().substring(0, 16);
@@ -466,8 +470,8 @@ public class ParametreService {
 				// Mise à jour du flag
 				sendParamData = true;
 				//
-				params.setIfu(parametre.getIfu());
-				params.setNim(parametre.getNim());
+				params.setIfu(emcefInfo.getIfu() /* parametre.getIfu() */);
+				params.setNim(emcefInfo.getNim() /* parametre.getNim() */);
 				// if (parametre.getTokenTmp() != null) // Déjà vérifié lors de la récupération
 				// du status de l'emcef
 				params.setToken(parametre.getTokenTmp());
@@ -489,12 +493,12 @@ public class ParametreService {
 		// Si le token à été changé
 		if (sendParamData) {
 			try {
-				// Mise à jour de la date d'expiration de l'emcef				
+				// Mise à jour de la date d'expiration de l'emcef
 				String expirationDate = emcefInfo.getTokenValid().toString().substring(0, 16);
 				Date date = tool.stringToDate(expirationDate, "yyyy-MM-dd'T'HH:mm");
 				params.setExpiration(date);
 				// Envoie des données de paramètre au serveur distant
-				// accessService.sendParametreData(params, true);
+				accessService.sendParametreData(params, true);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());

@@ -420,6 +420,8 @@ public class ParametreService {
 				Date date = tool.stringToDate(expirationDate, "yyyy-MM-dd'T'HH:mm");
 				params.setExpiration(date);
 				// Envoie des données de paramètre au serveur distant
+				// Mise à jour du champ tokenTmp
+				params.setTokenTmp(parametre.getTokenTmp());
 				accessService.sendParametreData(params, true);
 			} catch (Exception e) {
 				e.printStackTrace();

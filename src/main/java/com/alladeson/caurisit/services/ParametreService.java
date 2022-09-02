@@ -430,7 +430,7 @@ public class ParametreService {
 		}
 
 		// Gestion audit : valeurApres
-		String valApres = tool.toJson(params);
+		String valApres = tool.toJson(parametre);
 		// Enregistrement de la trace de changement
 		auditService.traceChange(Operation.SYSTEM_UPDATE, valAvant, valApres);
 

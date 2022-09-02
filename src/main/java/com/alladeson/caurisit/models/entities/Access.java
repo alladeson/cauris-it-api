@@ -5,8 +5,6 @@ package com.alladeson.caurisit.models.entities;
 
 import javax.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 /**
  * @author William ALLADE
  *
@@ -23,7 +21,7 @@ public class Access extends BaseEntity {
 	private Long id;
 	private boolean readable;
 	private boolean writable;
-	private boolean deletable;	
+	private boolean deletable;
 	@ManyToOne
 	private UserGroup group;
 	@ManyToOne

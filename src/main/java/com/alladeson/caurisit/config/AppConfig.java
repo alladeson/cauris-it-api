@@ -52,6 +52,7 @@ public class AppConfig {
 	private String skChckUri;
 	private String paramSendUri;
 	private String paramLogoUri;
+	private String paramUpdateUri;
 
 	public String getAppName() {
 		return appName;
@@ -411,6 +412,20 @@ public class AppConfig {
 	 */
 	public void setParamLogoUri(String paramLogoUri) {
 		this.paramLogoUri = paramLogoUri;
+	}
+
+	/**
+	 * @return the paramUpdateUri
+	 */
+	public String getParamUpdateUri() {
+		return paramUpdateUri;
+	}
+
+	/**
+	 * @param paramUpdateUri the paramUpdateUri to set
+	 */
+	public void setParamUpdateUri(String paramUpdateUri) {
+		this.paramUpdateUri = paramUpdateUri;
 	}
 
 	@PostConstruct

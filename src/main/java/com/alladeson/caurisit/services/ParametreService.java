@@ -328,7 +328,7 @@ public class ParametreService {
 		// Gestion audit : valeurApres
 		String valApres = tool.toJson(params);
 		// Enregistrement de la trace de changement
-		auditService.traceChange(Operation.SYSTEM_LOGO_UPDATE, valAvant, valApres);
+		auditService.traceChange(Operation.SYSTEM_UPDATE, valAvant, valApres);
 
 		// Renvoie du paramètre
 		return params;
@@ -498,7 +498,7 @@ public class ParametreService {
 				Date date = tool.stringToDate(expirationDate, "yyyy-MM-dd'T'HH:mm");
 				params.setExpiration(date);
 				// Envoie des données de paramètre au serveur distant
-				accessService.sendParametreData(params, true);
+				// accessService.sendParametreData(params, true);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getLocalizedMessage());

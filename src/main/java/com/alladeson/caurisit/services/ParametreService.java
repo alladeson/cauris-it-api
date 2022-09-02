@@ -324,7 +324,7 @@ public class ParametreService {
 		params.setUpdatedAt(null);
 
 		// Sauvegarde
-		params = saveParametre(parametre, false);
+		params = saveParametre(params, false);
 		// Gestion audit : valeurApres
 		String valApres = tool.toJson(params);
 		// Enregistrement de la trace de changement

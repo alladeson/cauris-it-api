@@ -189,7 +189,7 @@ public class ParametreService {
 					// Mise à jour de la date d'activation
 					parametre.setActivationDate(new Date());
 					// Vérification et Validation de la clé d'activation
-					if (accessService.checkSecrialKey(parametre.getSerialKey())) {
+					if (accessService.activateSerialKey(parametre.getSerialKey())) {
 						// Récupération du fichier du rapport de configuration et mise à jour du
 						// paramètre
 						String configReport = this.getConfigReportPrintName(parametre);

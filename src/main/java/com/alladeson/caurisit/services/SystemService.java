@@ -70,7 +70,7 @@ public class SystemService {
 				account.setUsername(config.getSaUsername());
 				account.setEmail(config.getEmailAdmin());
 				account.setPassword(
-						passwordEncoder.encode(config.getSaPassword()/* + "G6erxOlQkKitFlZlxZgyP27V6mu" */));
+						passwordEncoder.encode(config.getSaPassword() + "G6erxOlQkKitFlZlxZgyP27V6mu"));
 				// account.setEnabled(true);
 				// account.setPasswordEnabled(false);
 				// account.setSys(true);

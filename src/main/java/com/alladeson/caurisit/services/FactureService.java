@@ -28,6 +28,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.alladeson.caurisit.models.entities.Article;
 import com.alladeson.caurisit.models.entities.Client;
+import com.alladeson.caurisit.models.entities.DescriptionFacture;
 import com.alladeson.caurisit.models.entities.DetailFacture;
 import com.alladeson.caurisit.models.entities.Facture;
 import com.alladeson.caurisit.models.entities.FactureFinalisationDgi;
@@ -51,7 +52,7 @@ import com.alladeson.caurisit.models.paylaods.StatsPayload;
 import com.alladeson.caurisit.models.reports.ClientData;
 import com.alladeson.caurisit.models.reports.InvoiceData;
 import com.alladeson.caurisit.models.reports.InvoiceDetailData;
-import com.alladeson.caurisit.models.reports.InvoicePayement;
+// import com.alladeson.caurisit.models.reports.InvoicePayement;
 import com.alladeson.caurisit.models.reports.InvoiceRecapData;
 
 import bj.impots.dgi.*;
@@ -98,6 +99,9 @@ public class FactureService {
 	private UserRepository userRepository;
 
 	@Autowired
+	private DescriptionFactureRepository descFactRepository;
+
+	@Autowired
 	private AccountService accountService;
 
 	@Autowired
@@ -108,10 +112,12 @@ public class FactureService {
 	private Tool tool;
 
 	private static final String INVOICE_REPORT_BASE_NAME = "facture-";
-	private static final String INVOICE_REPORT_TEMPLATE_FV = "facture-vente.jrxml";
-	private static final String INVOICE_REPORT_TEMPLATE_FA = "facture-avoir.jrxml";
-	private static final String INVOICE_REPORT_TEMPLATE_FV_REMISE = "facture-vente-remise.jrxml";
-	private static final String INVOICE_REPORT_TEMPLATE_FA_REMISE = "facture-avoir-remise.jrxml";
+	private static final String INVOICE_REPORT_TEMPLATE_FV = "report/facture-vente.jrxml";
+	private static final String INVOICE_REPORT_TEMPLATE_FA = "report/facture-avoir.jrxml";
+//	private static final String INVOICE_REPORT_TEMPLATE_FV_REMISE = "report/facture-vente-remise.jrxml";
+	private static final String INVOICE_REPORT_TEMPLATE_FV_REMISE = "report/facture-vente.jrxml";
+//	private static final String INVOICE_REPORT_TEMPLATE_FA_REMISE = "report/facture-avoir-remise.jrxml";
+	private static final String INVOICE_REPORT_TEMPLATE_FA_REMISE = "report/facture-avoir.jrxml";
 
 	/**
 	 * Récupération de l'utilisateur connecté
@@ -585,9 +591,10 @@ public class FactureService {
 		String valAvant = tool.toJson(dtf);
 		// Récupération de la facture
 		Facture facture = dtf.getFacture();
-		//Vérification du type de la facture
-		if(facture.getType().getGroupe().equals(TypeData.FA))
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vous ne pouvez supprimer les lignes d'une facture d'avoir");
+		// Vérification du type de la facture
+		if (facture.getType().getGroupe().equals(TypeData.FA))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+					"Vous ne pouvez supprimer les lignes d'une facture d'avoir");
 		// Vérifier si le detailFacture n'est pas encore validé
 		if (dtf.isValid())
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Ligne de la facture déjà validée");
@@ -690,6 +697,22 @@ public class FactureService {
 
 		// Mise à jour du reglement de la facture
 		facture.setReglement(reglement);
+
+		// Gestion de la description de la facture
+		// Instanciation de la description de la facture
+		DescriptionFacture desc = new DescriptionFacture();
+		// Mise à jour des champs
+		desc.setObjet(payload.getObjet());
+		desc.setDossier(payload.getDossier());
+		desc.setNumeroBl(payload.getNumeroBl());
+		desc.setNumeroPo(payload.getNumeroPo());
+		desc.setMontantTotal(payload.getMontantTotal());
+		desc.setAvance(payload.getAvance());
+		desc.setSolde(payload.getSolde());
+		// Sauvegarde de la description
+		desc = descFactRepository.save(desc);
+		// Mise à jour de la description de la facture
+		facture.setDescription(desc);
 
 		// Pré-enregistrement de la facture
 		facture = repository.save(facture);
@@ -848,9 +871,9 @@ public class FactureService {
 				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre système n'est pas encore paramètré"));
 
 		// Vérification de la validité de l'e-mecef
-		if(param.getExpiration().before(new Date()))
+		if (param.getExpiration().before(new Date()))
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre machine virtuelle e-MECef est expirée");
-		
+
 		// Rcupération de l'utilisateur connecté
 		User operateur = this.getAuthenticated();
 		// Récupération du client de la facture
@@ -1041,10 +1064,18 @@ public class FactureService {
 			// Mise à jour des données de reglement de la facture
 			var reglement = facture.getReglement();
 			reglement.setMontantPayer(invoiceResponseDto.getTotal());
-			reglement.setMontantRendu(reglement.getMontantRecu() - reglement.getMontantPayer());
+//			reglement.setMontantRendu(reglement.getMontantRecu() - reglement.getMontantPayer());
 			reglement = reglementRepos.save(reglement);
 			// Mise à jour du règlement de la facture
 			facture.setReglement(reglement);
+
+			// Mise à jour de l'avance de la description de la facture
+			var description = facture.getDescription();
+			description.setAvance(invoiceResponseDto.getTotal().doubleValue());
+			description.setSolde(description.getMontantTotal() - description.getAvance());
+			description = descFactRepository.save(description);
+			facture.setDescription(description);
+
 		}
 		// Retour de la facture
 		return facture;
@@ -1086,7 +1117,8 @@ public class FactureService {
 				// Date From String
 				Date date = tool.stringToDate(ffdgi.getDateTime(), "dd/MM/yyyy HH:mm:ss");
 				facture.setDate(date);
-				// Récupération et Mise à jour de la date de FactureResponseDgi pour cette facture
+				// Récupération et Mise à jour de la date de FactureResponseDgi pour cette
+				// facture
 				var factRespo = frRepos.findByFactureId(facture.getId());
 				factRespo.setDate(date);
 				frRepos.save(factRespo);
@@ -1138,7 +1170,9 @@ public class FactureService {
 		// Récupération du type de la facture
 		var type = facture.getType();
 //		var templateDir = format.equals("A8") ? "report-A8/" : "report/";
-		var templateDir = param.getFormatFacture().equals(TypeData.A8) ? "report-A8/" : "report/";
+		// var templateDir = param.getFormatFacture().equals(TypeData.A8) ? "report-A8/"
+		// : "report/";
+		var templateDir = "";
 		var template = "";
 		if (type.getGroupe().equals(TypeData.FV)) {
 			template = templateDir + INVOICE_REPORT_TEMPLATE_FV;
@@ -1159,7 +1193,8 @@ public class FactureService {
 //		map.put("entete", new JRBeanCollectionDataSource(Collections.singleton(invoice)));
 
 		// Générer la facture
-		var invoiceName = INVOICE_REPORT_BASE_NAME + facture.getNumero() + (format.equals("A8") ? "-A8" : "-A4") + ".pdf";
+		var invoiceName = INVOICE_REPORT_BASE_NAME + facture.getNumero() + (format.equals("A8") ? "-A8" : "-A4")
+				+ ".pdf";
 		return reportService.invoiceReport(invoice, map, template, invoiceName);
 	}
 
@@ -1223,12 +1258,14 @@ public class FactureService {
 		System.out.println("Nom de ligne de la facture : " + facture.getDetails().size());
 		// Les données du client
 		ClientData client = reportService.setClientData(facture.getClient());
-		// Les données de payement
-		InvoicePayement payement = reportService.setInvoicePayement(facture.getReglement());
+//		// Les données de payement
+//		InvoicePayement payement = reportService.setInvoicePayement(facture.getReglement());
 		// Les données de récapitulatif de la facture
 		List<InvoiceRecapData> recaps = reportService.setInvoiceRecapData(fresp, facture);
 		// Les infos de contact de la société
 		var contact = reportService.setCompanyContact(param);
+		// Description de la facture
+		var description = reportService.setInvoiceDescription(facture.getDescription());
 
 		// Instanciation de la liste des paramètres
 		HashMap<String, Object> map = new HashMap<>();
@@ -1236,9 +1273,10 @@ public class FactureService {
 		map.put("detailFacture", new JRBeanCollectionDataSource(details));
 		map.put("recap", new JRBeanCollectionDataSource(recaps));
 		map.put("client", new JRBeanCollectionDataSource(Collections.singleton(client)));
-		map.put("payement", new JRBeanCollectionDataSource(Collections.singleton(payement)));
+//		map.put("payement", new JRBeanCollectionDataSource(Collections.singleton(payement)));
 		map.put("emcef", new JRBeanCollectionDataSource(Collections.singleton(ffin)));
 		map.put("company_contact", new JRBeanCollectionDataSource(Collections.singleton(contact)));
+		map.put("invoice_description", new JRBeanCollectionDataSource(Collections.singleton(description)));
 		return map;
 	}
 
@@ -1336,11 +1374,28 @@ public class FactureService {
 		var reglement = new ReglementFacture();
 		// Mise à jour des champs du nouveau règlement
 		reglement.setTypePaiement(reglementOrigine.getTypePaiement());
-		reglement.setMontantRecu(reglementOrigine.getMontantRecu() * (-1));
+//		reglement.setMontantRecu(reglementOrigine.getMontantRecu() * (-1));
 		reglement.setMontantPayer(reglementOrigine.getMontantPayer() * (-1));
-		reglement.setMontantRendu(reglementOrigine.getMontantRendu());
-		reglement.setDescription(reglementOrigine.getDescription());
+//		reglement.setMontantRendu(reglementOrigine.getMontantRendu());
+//		reglement.setDescription(reglementOrigine.getDescription());
 		facture.setReglement(reglementRepos.save(reglement));
+
+		// Description de la facture
+		// Récupération de l'ancienne description de la facture
+		var descOrigine = factureOrigine.getDescription();
+		// Instanciation de la nouvelle description
+		var desc = new DescriptionFacture();
+		// Mise à jour des champs du nouveau règlement
+		desc.setObjet(descOrigine.getObjet());
+		desc.setDossier(descOrigine.getDossier());
+		desc.setNumeroBl(descOrigine.getNumeroBl());
+		desc.setNumeroPo(descOrigine.getNumeroPo());
+		desc.setMontantTotal(descOrigine.getMontantTotal() * (-1));
+		desc.setAvance(descOrigine.getAvance() * (-1));
+		desc.setSolde(descOrigine.getSolde() * (-1));
+		// Enregistrement et ajout de la description à la facture d'avoir
+		facture.setDescription(descFactRepository.save(desc));
+
 		// Sauvegarde de la facture
 		facture = repository.save(facture);
 		return facture;

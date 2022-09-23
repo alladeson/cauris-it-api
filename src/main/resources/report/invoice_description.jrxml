@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="invoice_description" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="0" uuid="49e71826-c9a9-459f-9342-4da8975e6abf">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="objet" class="java.lang.String"/>
+	<field name="dossier" class="java.lang.String"/>
+	<field name="numeroBl" class="java.lang.String"/>
+	<field name="numeroPo" class="java.lang.String"/>
+	<field name="montantTotal" class="java.lang.Double"/>
+	<field name="avance" class="java.lang.Double"/>
+	<field name="solde" class="java.lang.Double"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="141" splitType="Stretch">
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="1" width="554" height="137" uuid="6ac4af80-cd10-4cbc-b138-0f134573c786"/>
+				<graphicElement>
+					<pen lineColor="#000000"/>
+				</graphicElement>
+			</rectangle>
+			<textField>
+				<reportElement x="50" y="11" width="494" height="35" uuid="81495993-2ab3-4726-b896-1c91fe81bb0c">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="12" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{objet} != null ? $F{objet} : ""]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="20" y="46" width="80" height="13" uuid="5ca12196-61c0-4947-bed9-b8e56b1e03fe">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Dossier :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="120" y="46" width="420" height="13" uuid="4d1e1629-9543-4699-9943-a08e954229a8"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dossier} != null ? $F{dossier} : ""]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="20" y="60" width="100" height="13" uuid="24ca2492-7dc7-4d9a-9f7f-9efb6075e8a1"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[N° BL :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="120" y="60" width="420" height="13" uuid="7461c38a-0476-4182-ae83-15cd83709b80"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numeroBl} != null ? $F{numeroBl} : ""]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="20" y="75" width="80" height="13" uuid="5a9ef3c3-fcc4-477e-8d63-de845232e968"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[N° PO :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="120" y="75" width="420" height="13" uuid="5f361026-2349-4f0d-9294-daebc312d920"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numeroPo} != null ? $F{numeroPo} : ""]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="10" y="11" width="40" height="35" uuid="cbfed106-5e41-4bf6-9e0a-bf31c42d8191">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Objet :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="20" y="90" width="79" height="13" uuid="50fb79a9-d3d1-4319-a90a-c8679a924004">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Montant Total :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="120" y="90" width="419" height="13" uuid="bb521c0e-28e4-4c71-bf5d-5ca190a81d8f"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{montantTotal} != null ? new DecimalFormat("#,###.##", 
+  new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{montantTotal})) + " FCFA" : ""]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="20" y="104" width="99" height="13" uuid="f97f3bb7-4891-495e-935f-a56cc8dd4f71"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Avance :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="120" y="104" width="419" height="13" uuid="1f8d4ec6-549d-4b19-839c-e2d7543b371e"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{avance} != null ? new DecimalFormat("#,###.##", 
+  new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{avance})) + " FCFA" : ""]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="20" y="119" width="79" height="13" uuid="549fc21e-836d-45eb-8cae-9de4ef0b1b66"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Solde :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="120" y="119" width="419" height="13" uuid="1a107677-3b02-43a9-be4e-b168cf95193c"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{solde} != null ? new DecimalFormat("#,###.##", 
+  new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{solde})) + " FCFA" : ""]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

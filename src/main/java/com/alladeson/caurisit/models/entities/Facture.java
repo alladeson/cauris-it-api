@@ -79,6 +79,10 @@ public class Facture extends BaseEntity {
 	
 	// Pour vérifier la présence de remise
 	private boolean remise;
+	
+	//Description de la facture
+	@OneToOne
+	private DescriptionFacture description;
 
 	/**
 	 * @return the id
@@ -423,5 +427,19 @@ public class Facture extends BaseEntity {
 	 */
 	public void setRemise(boolean remise) {
 		this.remise = remise;
+	}
+
+	/**
+	 * @return the description
+	 */
+	public DescriptionFacture getDescription() {
+		return description;
+	}
+
+	/**
+	 * @param description the description to set
+	 */
+	public void setDescription(DescriptionFacture description) {
+		this.description = description;
 	}
 }

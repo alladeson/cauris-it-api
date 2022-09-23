@@ -1,7 +1,9 @@
 package com.alladeson.caurisit.services;
 
 import com.alladeson.caurisit.config.AppConfig;
+import com.alladeson.caurisit.models.entities.Article;
 import com.alladeson.caurisit.models.entities.Client;
+import com.alladeson.caurisit.models.entities.DescriptionFacture;
 import com.alladeson.caurisit.models.entities.DetailFacture;
 import com.alladeson.caurisit.models.entities.Facture;
 import com.alladeson.caurisit.models.entities.FactureResponseDgi;
@@ -9,12 +11,14 @@ import com.alladeson.caurisit.models.entities.Parametre;
 import com.alladeson.caurisit.models.entities.ReglementFacture;
 import com.alladeson.caurisit.models.entities.TypeData;
 import com.alladeson.caurisit.models.reports.BilanPeriodiqueData;
+import com.alladeson.caurisit.repositories.ArticleRepository;
 import com.alladeson.caurisit.repositories.FactureRepository.BilanRecapMontant;
 import com.alladeson.caurisit.models.reports.ClientData;
 import com.alladeson.caurisit.models.reports.CompanyContact;
 import com.alladeson.caurisit.models.reports.ConfigReportData;
 import com.alladeson.caurisit.models.reports.ConfigTableData;
 import com.alladeson.caurisit.models.reports.InvoiceData;
+import com.alladeson.caurisit.models.reports.InvoiceDescription;
 import com.alladeson.caurisit.models.reports.InvoiceDetailData;
 import com.alladeson.caurisit.models.reports.InvoicePayement;
 import com.alladeson.caurisit.models.reports.InvoiceRecapData;
@@ -40,6 +44,8 @@ public class ReportService {
 	private Tool tool;
 	@Autowired
 	private AppConfig appConfig;
+	@Autowired
+	private ArticleRepository articleRepos;
 
 	/**
 	 * Instanciation et mise à jour des informations du client pour l'impression de
@@ -72,27 +78,35 @@ public class ReportService {
 	public List<InvoiceDetailData> setInvoiceDetailData(Facture facture) {
 		// Instanciation de la liste des InvoiceDetailData
 		List<InvoiceDetailData> liste = new ArrayList<InvoiceDetailData>();
+		// Instanciation de la liste des InvoiceDetailData avec tous les articles
+		List<InvoiceDetailData> listeAll = new ArrayList<InvoiceDetailData>();
+		// Instanciation d'une liste pour récupérer l'id des article de chaque detail
+		List<String> idListe = new ArrayList<String>();
 
 		// Récupération de la liste des détails de la facture
 		var details = facture.getDetails();
 
 		int i = 1;
 		for (DetailFacture detail : details) {
+			// Récupération de l'id de l'article
+			idListe.add(detail.getArticle().getId() + "");
+			// Instanciation de InvoiceDetailData
 			var invoiceDetail = new InvoiceDetailData();
-			// System.out.println("Id de ligne de la facture : " + detail.getId());
 			invoiceDetail.setNumero(i);
 			invoiceDetail.setName(detail.getName());
 			invoiceDetail.setTaxe(detail.getTaxe().getAbreviation());
 			invoiceDetail.setPrix_u(detail.getPrixUnitaire().longValue());
 			invoiceDetail.setQte(detail.getQuantite());
 			// Formatage du montant ttc
-			invoiceDetail.setMontant_ttc(
-					formatNumber(detail.getMontantTtc()) + " [" + detail.getTaxe().getGroupe().name() + "]");
+			invoiceDetail.setMontant_ttc(detail.getMontantTtc() + "");
 			liste.add(invoiceDetail);
 			// Gestion de la taxe spécifique
 			if (detail.getTs() != null) {
 				// Récupération de la taxe spécifique
 				var ts = detail.getTs();
+				// Récupération de l'id du ts
+				idListe.add(detail.getArticle().getId() + "-ts");
+				//
 				var invoiceDetailTs = new InvoiceDetailData();
 				invoiceDetailTs.setNumero(++i);
 				invoiceDetailTs.setName("TS ("
@@ -100,8 +114,7 @@ public class ReportService {
 				invoiceDetailTs.setTaxe(ts.getTaxe().getAbreviation());
 				invoiceDetailTs.setPrix_u(Math.round(ts.getTsUnitaireTtc()));
 				invoiceDetailTs.setQte(ts.getQuantite());
-				invoiceDetailTs
-						.setMontant_ttc(formatNumber(ts.getTsTotal()) + " [" + ts.getTaxe().getGroupe().name() + "]");
+				invoiceDetailTs.setMontant_ttc(ts.getTsTotal() + "");
 				liste.add(invoiceDetailTs);
 			}
 			// Gestion de la remise
@@ -113,7 +126,32 @@ public class ReportService {
 			i++;
 		}
 
-		return liste;
+		// Récupération de la liste des article
+		var articles = articleRepos.findAll();
+		// Remetre le compteur à 1
+		i = 1;
+		for (Article article : articles) {
+			if (idListe.contains(article.getId() + "")) {
+				var invoiceDetail = liste.get(idListe.indexOf(article.getId() + ""));
+				invoiceDetail.setNumero(i);
+				listeAll.add(invoiceDetail);
+				if (idListe.contains(article.getId() + "-ts")) {
+					var invoiceDetailTs = liste.get((idListe.indexOf(article.getId() + "") + 1));
+					invoiceDetailTs.setNumero(++i);
+					listeAll.add(invoiceDetailTs);
+				}
+			} else {
+				// Instanciation de InvoiceDetailData
+				var invoiceDetail = new InvoiceDetailData();
+				invoiceDetail.setNumero(i);
+				invoiceDetail.setName(article.getDesignation());
+				invoiceDetail.setQte(0d);
+				listeAll.add(invoiceDetail);
+			}
+			i++;
+		}
+
+		return listeAll;
 	}
 
 	/**
@@ -298,6 +336,27 @@ public class ReportService {
 		contact.setEmail(params.getEmail());
 		// Renvoie du contact
 		return contact;
+	}
+
+	/**
+	 * Définition des données de description de la facture
+	 * 
+	 * @param description La description de facture à imprimer
+	 * @return {@link InvoiceDescription}
+	 */
+	public InvoiceDescription setInvoiceDescription(DescriptionFacture description) {
+		// Instanciation de la description de la facture
+		InvoiceDescription desc = new InvoiceDescription();
+		// Mise à jour des champs
+		desc.setObjet(description.getObjet());
+		desc.setDossier(description.getDossier());
+		desc.setNumeroBl(description.getNumeroBl());
+		desc.setNumeroPo(description.getNumeroPo());
+		desc.setMontantTotal(description.getMontantTotal());
+		desc.setAvance(description.getAvance());
+		desc.setSolde(description.getSolde());
+		// Renvoie de la description
+		return desc;
 	}
 
 	/**

@@ -222,7 +222,7 @@ public class Tool {
 		JRBeanCollectionDataSource beanCollectionDataSource = new JRBeanCollectionDataSource(collection);
 		JasperReport compileReport = JasperCompileManager.compileReport(this.getResourceAsStream(invoiceTemplate));
 		JasperPrint report = JasperFillManager.fillReport(compileReport, params, beanCollectionDataSource);
-		JasperExportManager.exportReportToPdfFile(report, appConfig.getUploadDir() + "/" + invoiceFileName);
+		JasperExportManager.exportReportToPdfFile(report, appConfig.getUploadDir() + "/" +invoiceFileName);
 		return invoiceFileName;
 	}
 

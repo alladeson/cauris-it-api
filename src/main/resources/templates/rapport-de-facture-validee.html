@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <!--/*@thymesVar id="account"*/-->
+    <!--/*@thymesVar id="user"*/-->
+    <!--/*@thymesVar id="footer"*/-->
+    <title th:text="${@environment.getProperty('api.mail-signup-request-title')}">Activation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href='https://fonts.googleapis.com/css?family=Muli:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,500&display=swap' rel='stylesheet' type='text/css' />
+
+    <!-- use the font -->
+    <style>
+        body {
+            font-family: Montserrat, Helvetica, Arial, sans-serif;
+            font-size: 16px;
+        }
+        
+        .space {
+            padding: 16px;
+        }
+        
+        .center {
+            text-align: center;
+        }
+        
+        .code {
+            font-family: monospace;
+        }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .btn {
+            padding: 0px 16px;
+            background-color: #02925F;
+            border-radius: 30px;
+            text-align: center;
+            height: 36px;
+            line-height: 36px;
+            color: #fafafa !important;
+            text-decoration: none;
+            margin: auto;
+        }
+        
+        .header,
+        .footer {
+            background-color: #647577;
+            padding: 8px 16px;
+            color: #fafafa;
+        }
+        
+        .team {
+            /*font-style: italic;*/
+            font-weight: 500;
+        }
+        
+        .fw-700 {
+            font-weight: 700;
+        }
+        
+        .fw-400 {
+            font-weight: 400;
+        }
+        
+        .text-upper {
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="max-width: 900px; margin: 0 auto ; background-color: #fafafa;">
+        <!-- <div style="padding: 16px; ">
+            <img th:src="${@environment.getProperty('api.front-end-base-url') + '/assets/images/caurisit_logo.png'}" alt="Cauris-iT" style="width: 150px; height: auto; padding: 0.2rem;
+                border-top-right-radius: 10px;
+                border-bottom-left-radius: 10px; margin: auto">
+        </div> -->
+        <div class="space">
+            <p>Bonjour Madame/Monsieur,</p>
+            <p>Une facture vient d'être validée.</p>
+            <p>Trouvez en pièce jointe l'imprimé de la facture.</p>
+            <p>Merci pour votre confiance.</p>
+        </div>
+        <div class="footer">
+            <p th:text="${@environment.getProperty('api.front-end-app-copyright')}">Copyright</p>
+            <!-- p class="fw-400" th:utext="${footer}">
+                Copyright
+                <script>
+                    var year = new Date().getFullYear()
+                    document.write(year == 2021 ? year : "2021-" + year)
+                </script> <strong>Cauris-iT</strong>
+            </!-->
+        </div>
+    </div>
+
+</body>
+
+</html>

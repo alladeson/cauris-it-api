@@ -323,7 +323,7 @@ public class ReportService {
 	 * @param params
 	 * @param invoiceTemplate
 	 * @param invoiceFileName
-	 * @return
+	 * @return Le nom du fichier de la facture
 	 * @throws IOException
 	 * @throws JRException
 	 */

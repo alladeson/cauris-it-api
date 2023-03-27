@@ -1,15 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.19.1.final using JasperReports Library version 6.19.1-867c00bf88cd4d784d404379d6c05e1b419e8a4c  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sub_report_emcef" pageWidth="147" pageHeight="210" columnWidth="137" leftMargin="5" rightMargin="5" topMargin="0" bottomMargin="0" uuid="3e1c7aaa-6a1d-43fe-a635-2f8ba8113988">
-	<property name="com.jaspersoft.studio.unit." value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+<!-- Created with Jaspersoft Studio version 6.20.1.final using JasperReports Library version 6.20.1-7584acb244139816654f64e2fd57a00d3e31921e  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sub_report_emcef" pageWidth="204" pageHeight="595" columnWidth="194" leftMargin="5" rightMargin="5" topMargin="0" bottomMargin="0" uuid="3e1c7aaa-6a1d-43fe-a635-2f8ba8113988">
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="mm"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="mm"/>
 	<subDataset name="EmcefData" uuid="109f82e1-3df3-4dc1-9ac1-8b13bd68ef2e">
 		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
 		<queryString>
@@ -33,93 +26,88 @@
 		<band splitType="Stretch"/>
 	</background>
 	<detail>
-		<band height="34" splitType="Stretch">
+		<band height="54" splitType="Stretch">
 			<rectangle>
-				<reportElement mode="Transparent" x="0" y="0" width="137" height="34" uuid="700e30a0-9d01-47d9-a225-de87a4834a95">
+				<reportElement mode="Transparent" x="0" y="0" width="194" height="54" uuid="700e30a0-9d01-47d9-a225-de87a4834a95">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<graphicElement>
-					<pen lineWidth="0.1" lineColor="#807878"/>
+					<pen lineWidth="0.5" lineColor="#000000"/>
 				</graphicElement>
 			</rectangle>
 			<textField>
-				<reportElement x="36" y="7" width="94" height="7" uuid="53e159bd-a45d-4027-81cc-58157d41d12b"/>
+				<reportElement x="54" y="11" width="134" height="8" uuid="53e159bd-a45d-4027-81cc-58157d41d12b">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="5" isBold="true"/>
+					<font size="6" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{codeMECeFDGI}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="36" y="15" width="28" height="6" uuid="8f5fd20d-be7e-46b1-a434-58a062180c2c">
+				<reportElement x="54" y="21" width="29" height="8" uuid="8f5fd20d-be7e-46b1-a434-58a062180c2c">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font size="4"/>
+					<font size="6" isBold="true"/>
 				</textElement>
 				<text><![CDATA[MECeF NIM :]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="64" y="15" width="66" height="6" uuid="311eef72-5120-4427-b08e-6856efccc2f8">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="94" y="21" width="94" height="8" uuid="311eef72-5120-4427-b08e-6856efccc2f8"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font size="4" isBold="true"/>
+					<font size="6" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{nim}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="36" y="21" width="40" height="6" uuid="3fd434ea-c9f5-4f92-97b0-42b31568c2b9">
+				<reportElement x="54" y="32" width="30" height="8" uuid="3fd434ea-c9f5-4f92-97b0-42b31568c2b9">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font size="4"/>
+					<font size="6" isBold="true"/>
 				</textElement>
 				<text><![CDATA[MECeF Compteurs :]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="76" y="21" width="54" height="6" uuid="00baac92-96af-48b1-85a4-e1ee54d6ced9">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="94" y="32" width="94" height="8" uuid="00baac92-96af-48b1-85a4-e1ee54d6ced9"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font size="4" isBold="true"/>
+					<font size="6" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{counters}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="36" y="27" width="30" height="6" uuid="efd91a06-1732-4df7-8287-2b594c27a19b">
+				<reportElement x="54" y="42" width="30" height="8" uuid="efd91a06-1732-4df7-8287-2b594c27a19b">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font size="4"/>
+					<font size="6" isBold="true"/>
 				</textElement>
 				<text><![CDATA[MECeF Heure :]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="66" y="27" width="64" height="6" uuid="c57c5d43-54a6-4497-b18e-d2593eccc85f">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="94" y="42" width="94" height="8" uuid="c57c5d43-54a6-4497-b18e-d2593eccc85f"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font size="4" isBold="true"/>
+					<font size="6" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{dateTime}]]></textFieldExpression>
 			</textField>
 			<image>
-				<reportElement x="3" y="3" width="30" height="30" uuid="4fb2f464-9ae1-4951-ae27-12543735d30e"/>
+				<reportElement x="1" y="1" width="54" height="52" uuid="4fb2f464-9ae1-4951-ae27-12543735d30e"/>
 				<imageExpression><![CDATA[com.google.zxing.client.j2se.MatrixToImageWriter.toBufferedImage(
      new com.google.zxing.qrcode.QRCodeWriter().encode(
          $F{qrCode},
          com.google.zxing.BarcodeFormat.QR_CODE, 300, 300))]]></imageExpression>
 			</image>
 			<staticText>
-				<reportElement x="36" y="0" width="94" height="7" uuid="4f721043-1b5c-4998-82f0-ebecd6fa88b3">
+				<reportElement x="54" y="1" width="134" height="8" uuid="4f721043-1b5c-4998-82f0-ebecd6fa88b3">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="5"/>
+					<font size="6" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Code MECef/DGI]]></text>
 			</staticText>

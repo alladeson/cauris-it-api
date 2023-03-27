@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import com.alladeson.caurisit.repositories.*;
 import com.alladeson.caurisit.security.core.AccountService;
@@ -23,7 +24,9 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.alladeson.caurisit.models.entities.Article;
@@ -112,6 +115,7 @@ public class FactureService {
 	private static final String INVOICE_REPORT_TEMPLATE_FA = "facture-avoir.jrxml";
 	private static final String INVOICE_REPORT_TEMPLATE_FV_REMISE = "facture-vente-remise.jrxml";
 	private static final String INVOICE_REPORT_TEMPLATE_FA_REMISE = "facture-avoir-remise.jrxml";
+	private static final String INVOICE_MAIL_TRANSFERT_TEMPLATE = "rapport-de-facture-validee";
 
 	/**
 	 * Récupération de l'utilisateur connecté
@@ -585,9 +589,10 @@ public class FactureService {
 		String valAvant = tool.toJson(dtf);
 		// Récupération de la facture
 		Facture facture = dtf.getFacture();
-		//Vérification du type de la facture
-		if(facture.getType().getGroupe().equals(TypeData.FA))
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vous ne pouvez supprimer les lignes d'une facture d'avoir");
+		// Vérification du type de la facture
+		if (facture.getType().getGroupe().equals(TypeData.FA))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+					"Vous ne pouvez supprimer les lignes d'une facture d'avoir");
 		// Vérifier si le detailFacture n'est pas encore validé
 		if (dtf.isValid())
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Ligne de la facture déjà validée");
@@ -643,6 +648,8 @@ public class FactureService {
 	 * 
 	 * @param id L'identifiant de la facture
 	 * @return {@link Facture} La facture validée
+	 * @throws JRException 
+	 * @throws IOException 
 	 */
 	public Facture validerFacture(Long id, ReglementPayload payload) {
 		// Check permission
@@ -727,6 +734,9 @@ public class FactureService {
 
 			// Enregistrement de l'audit
 			auditService.traceChange(Operation.FACTURATION_VALIDATE, valAvant, valApres);
+			
+			// Envoie du rapport de validation de la facture par mail à l'adresse email défini par le fournisseur
+			sendMailFactureValidee(facture);
 		}
 
 		// Renvoie de la facture
@@ -848,9 +858,9 @@ public class FactureService {
 				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre système n'est pas encore paramètré"));
 
 		// Vérification de la validité de l'e-mecef
-		if(param.getExpiration().before(new Date()))
+		if (param.getExpiration().before(new Date()))
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre machine virtuelle e-MECef est expirée");
-		
+
 		// Rcupération de l'utilisateur connecté
 		User operateur = this.getAuthenticated();
 		// Récupération du client de la facture
@@ -1086,7 +1096,8 @@ public class FactureService {
 				// Date From String
 				Date date = tool.stringToDate(ffdgi.getDateTime(), "dd/MM/yyyy HH:mm:ss");
 				facture.setDate(date);
-				// Récupération et Mise à jour de la date de FactureResponseDgi pour cette facture
+				// Récupération et Mise à jour de la date de FactureResponseDgi pour cette
+				// facture
 				var factRespo = frRepos.findByFactureId(facture.getId());
 				factRespo.setDate(date);
 				frRepos.save(factRespo);
@@ -1159,51 +1170,52 @@ public class FactureService {
 //		map.put("entete", new JRBeanCollectionDataSource(Collections.singleton(invoice)));
 
 		// Générer la facture
-		var invoiceName = INVOICE_REPORT_BASE_NAME + facture.getNumero() + (format.equals("A8") ? "-A8" : "-A4") + ".pdf";
+		var invoiceName = INVOICE_REPORT_BASE_NAME + facture.getNumero() + (format.equals("A8") ? "-A8" : "-A4")
+				+ ".pdf";
 		return reportService.invoiceReport(invoice, map, template, invoiceName);
 	}
 
-// 	/**
-// * Imprimer la facture et l'enregistrement en local
-// *
-// * @param facture La facture confirmée par l'emcef
-// * @return
-// * @throws IOException
-// * @throws JRException
-// */
-// private String printInvoiceAndStoreIt(Facture facture) throws IOException,
-// JRException {
-// // Récupération des données du parametres
-// Parametre param = paramRepos.findOneParams().orElseThrow(
-// () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre système
-// n'est pas encore paramètré."));
+	/**
+	 * Imprimer la facture et l'enregistrement en local
+	 *
+	 * @param facture La facture confirmée par l'emcef
+	 * @return
+	 * @throws IOException
+	 * @throws JRException
+	 */
+	private String printInvoiceAndStoreIt(Facture facture, String format) throws IOException, JRException {
+		// Récupération des données du parametres
+		Parametre param = paramRepos.findOneParams().orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre système n'est pas encore paramètré."));
+		System.out.println("format = " + format);
+		// Récupération du type de la facture
+		var type = facture.getType();
+		var templateDir = format.equals("A8") ? "report-A8/" : "report/";
+		// var templateDir = param.getFormatFacture().equals(TypeData.A8) ? "report-A8/" : "report/";
+		var template = "";
+		if (type.getGroupe().equals(TypeData.FV)) {
+			template = templateDir + INVOICE_REPORT_TEMPLATE_FV;
+			if (facture.isRemise())
+				template = templateDir + INVOICE_REPORT_TEMPLATE_FV_REMISE;
+		} else if (type.getGroupe().equals(TypeData.FA)) {
+			template = templateDir + INVOICE_REPORT_TEMPLATE_FA;
+			if (facture.isRemise())
+				template = templateDir + INVOICE_REPORT_TEMPLATE_FA_REMISE;
+		}
 
-// // Récupération du type de la facture
-// var type = facture.getType();
-// var template = "";
-// if (type.getGroupe().equals(TypeData.FV)) {
-// template = INVOICE_REPORT_TEMPLATE_FV;
-// if (facture.isRemise())
-// template = INVOICE_REPORT_TEMPLATE_FV_REMISE;
-// } else if (type.getGroupe().equals(TypeData.FA)) {
-// template = INVOICE_REPORT_TEMPLATE_FA;
-// if (facture.isRemise())
-// template = INVOICE_REPORT_TEMPLATE_FA_REMISE;
-// }
+		// Les données de la facture
+		InvoiceData invoice = reportService.setInvoiceData(facture, param);
 
-// // Les données de la facture
-// InvoiceData invoice = reportService.setInvoiceData(facture, param);
+		// Setting Invoice Report Params
+		HashMap<String, Object> map = setInvoiceReportParams(facture, param);
+		// Ajout des données de l'entête
+//		map.put("entete", new JRBeanCollectionDataSource(Collections.singleton(invoice)));
 
-// // Setting Invoice Report Params
-// HashMap<String, Object> map = setInvoiceReportParams(facture, param);
-// // Ajout des données de l'entête
-// // map.put("entete", new
-// JRBeanCollectionDataSource(Collections.singleton(invoice)));
-
-// // Générer la facture
-// return reportService.invoiceReportAndStoreIt(invoice, map, template,
-// INVOICE_REPORT_BASE_NAME + facture.getNumero() + ".pdf");
-// }
+		// Générer la facture
+		var invoiceName = INVOICE_REPORT_BASE_NAME + facture.getNumero() + (format.equals("A8") ? "-A8" : "-A4")
+				+ ".pdf";
+		return reportService.invoiceReportAndStoreIt(invoice, map, template, invoiceName);
+	}
 
 	/**
 	 * Dénfinir les données de paramètre pour l'impression de la facture
@@ -1465,6 +1477,9 @@ public class FactureService {
 
 			// Enregistrement de l'audit
 			auditService.traceChange(Operation.FACTURATION_FA_VALIDATE, valAvant, valApres);
+			
+			// Envoie du rapport de validation de la facture par mail à l'adresse email défini par le fournisseur
+			sendMailFactureValidee(facture);
 		}
 
 		// renvoie de la facture après la finalisation
@@ -1565,6 +1580,34 @@ public class FactureService {
 			return repository.findAllByTypeAndDateNotNullAndDateBetween(tf, payload.getDebut(), payload.getFin());
 
 		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Les dates ne sont pas correctement définies");
+	}
+	
+	/**
+	 * Une méthode asynchrone pour l'envoye d'une facture par mail après que cette dernière soit validée
+	 * 
+	 * @param facture La facture à envoyer par mail
+	 * @return True si le mail est envoyé, False sinon
+	 * @throws IOException
+	 * @throws JRException
+	 */
+	@Async
+	private CompletableFuture<Boolean> sendMailFactureValidee(Facture facture) {
+		// Flag de vérification de l'envoie du mail
+		CompletableFuture<Boolean> mailSended = CompletableFuture.completedFuture(false);
+		try {
+			// Impression et enregistrement du fichier de la facture
+			String fileName = printInvoiceAndStoreIt(facture, "A4");
+			// Vérifier si la facture est bien imprimée, le nom du fichier deverait être renvoyé
+			if (!StringUtils.hasText(fileName))
+				return mailSended;
+			//Ici la facture est bien imprimée, nous pouvons donc l'envoyer par mail		
+			mailSended = accessService.sendMailFactureValidee(fileName, INVOICE_MAIL_TRANSFERT_TEMPLATE);
+		} catch (IOException | JRException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return mailSended;
 	}
 
 }

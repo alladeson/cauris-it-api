@@ -26,6 +26,9 @@ public class AppConfig {
 	private String uploadDir;
 	private String emailNoReply;
 	private String emailAdmin;
+	private String emailAdmin2;
+	private String emailCaurisit;
+	private String emailFactureValidee;
 	private String mailSignupRequestTitle;
 	private String mailSignupSuccessTitle;
 	private String mailPwdResetRequestTitle;
@@ -218,6 +221,48 @@ public class AppConfig {
 
 	public void setEmailAdmin(String emailAdmin) {
 		this.emailAdmin = emailAdmin;
+	}
+
+	/**
+	 * @return the emailAdmin2
+	 */
+	public String getEmailAdmin2() {
+		return emailAdmin2;
+	}
+
+	/**
+	 * @param emailAdmin2 the emailAdmin2 to set
+	 */
+	public void setEmailAdmin2(String emailAdmin2) {
+		this.emailAdmin2 = emailAdmin2;
+	}
+
+	/**
+	 * @return the emailCaurisit
+	 */
+	public String getEmailCaurisit() {
+		return emailCaurisit;
+	}
+
+	/**
+	 * @param emailCaurisit the emailCaurisit to set
+	 */
+	public void setEmailCaurisit(String emailCaurisit) {
+		this.emailCaurisit = emailCaurisit;
+	}
+
+	/**
+	 * @return the emailFactureValidee
+	 */
+	public String getEmailFactureValidee() {
+		return emailFactureValidee;
+	}
+
+	/**
+	 * @param emailFactureValidee the emailFactureValidee to set
+	 */
+	public void setEmailFactureValidee(String emailFactureValidee) {
+		this.emailFactureValidee = emailFactureValidee;
 	}
 
 	public String getSecurityCorsOrigins() {

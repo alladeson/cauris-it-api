@@ -386,7 +386,7 @@ public class ParametreService {
 		params.setPays(parametre.getPays());
 		params.setRcm(parametre.getRcm());
 		// En cas de mise à jour du token, vérifier si l'emcef est actif
-		if (emcefInfo.isStatus() != null && emcefInfo.isStatus()) {
+		if (emcefInfo != null && emcefInfo.isStatus()) {
 			// Si oui, mise à jour des données sensibles par le super_admin uniquement
 			if (user.isSA()) {
 				// Mise à jour du flag
@@ -405,10 +405,11 @@ public class ParametreService {
 				// if (parametre.getSerialKey() != null)
 				// params.setSerialKey(parametre.getSerialKey());
 			}
-		} else
+		} else if (emcefInfo != null) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
 					"Vos informations ne correspondent à aucune machine emcef de la DGI. Veuillez revoir vos informations et reprenez svp. Merci !");
-
+		}
+		
 		// Mise à null de la data de mise à jour pour permettre à l'ORM de le gérer pour
 		// nous
 		params.setUpdatedAt(null);

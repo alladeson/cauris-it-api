@@ -386,7 +386,7 @@ public class ParametreService {
 		params.setPays(parametre.getPays());
 		params.setRcm(parametre.getRcm());
 		// En cas de mise à jour du token, vérifier si l'emcef est actif
-		if (emcefInfo.isStatus() != null && emcefInfo.isStatus()) {
+		if (emcefInfo != null && emcefInfo.isStatus()) {
 			// Si oui, mise à jour des données sensibles par le super_admin uniquement
 			if (user.isSA()) {
 				// Mise à jour du flag

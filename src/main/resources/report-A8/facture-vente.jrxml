@@ -426,7 +426,7 @@
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font size="6" isBold="true"/>
+					<font size="5" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["IFU :  " + ($F{ste_ifu} != null ? $F{ste_ifu} : "-")]]></textFieldExpression>
 			</textField>
@@ -435,7 +435,7 @@
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font size="6" isBold="true"/>
+					<font size="5" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["RCCM :  " + ($F{ste_rccm}  != null ? $F{ste_rccm} : "-")]]></textFieldExpression>
 			</textField>

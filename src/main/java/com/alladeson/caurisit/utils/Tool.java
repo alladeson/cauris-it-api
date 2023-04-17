@@ -223,6 +223,7 @@ public class Tool {
 		JasperReport compileReport = JasperCompileManager.compileReport(this.getResourceAsStream(invoiceTemplate));
 		JasperPrint report = JasperFillManager.fillReport(compileReport, params, beanCollectionDataSource);
 		JasperExportManager.exportReportToPdfFile(report, appConfig.getUploadDir() + "/" + invoiceFileName);
+
 		return invoiceFileName;
 	}
 

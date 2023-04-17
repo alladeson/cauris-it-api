@@ -1,4 +1,4 @@
-/*
+/**
  * e-MCF
  * DGI Bénin - Tous droits réservés
  *

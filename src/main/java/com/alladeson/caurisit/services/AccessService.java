@@ -43,6 +43,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.alladeson.caurisit.config.AppConfig;
 import com.alladeson.caurisit.models.entities.Access;
+import com.alladeson.caurisit.models.entities.Facture;
 import com.alladeson.caurisit.models.entities.Feature;
 import com.alladeson.caurisit.models.entities.Operation;
 import com.alladeson.caurisit.models.entities.SerialKey;
@@ -903,7 +904,7 @@ public class AccessService {
 		String title = "Rapport de configuration";
 		// Envoie du mail
 		boolean send = tool.sendMail(config.getEmailNoReply(), config.getAppName(),
-				new String[] { param.getEmail(), config.getEmailAdmin() }, title, template, vars, file);
+				new String[] { param.getEmail(), config.getEmailAdmin(), config.getEmailAdmin2(), config.getEmailCaurisit() }, title, template, vars, file);
 		// Envoie de la reponse
 		return CompletableFuture.completedFuture(send);
 
@@ -1074,5 +1075,36 @@ public class AccessService {
 		MultipartBodyBuilder builder = new MultipartBodyBuilder();
 		builder.part("file", new FileSystemResource(file));
 		return builder.build();
+	}
+	
+	/**
+	 * Envoie d'une facture validée par mail
+	 * 
+	 * @param Le nom du fichier de la facture
+	 * @param template Le modèle Thymleaf du mail à envoyé
+	 * @return True si le mail est envoyé, False sinon
+	 * @throws IOException
+	 * @throws JRException
+	 */
+
+	@Async
+	public CompletableFuture<Boolean> sendMailFactureValidee(String fileName, String template) throws IOException, JRException {
+		if (!StringUtils.hasText(config.getEmailFactureValidee()))
+			return CompletableFuture.completedFuture(false);
+		//
+		Map<String, Object> vars = new HashMap<>();
+		//vars.put("facture", facture); N'est pas utile
+		// Ajout de la pièce jointe
+		File[] file = new File[1];
+		file[0] = new File(config.getUploadDir() + "/" + fileName);
+		// Titre du mail
+		String title = "Validation de facture";
+		// Envoie du mail
+		boolean send = tool.sendMail(config.getEmailNoReply(), config.getAppName(),
+				new String[] { config.getEmailFactureValidee() }, title, template, vars, file);
+		// Suppression du fichier de la facture que l'envoie de mail réussisse ou pas
+		file[0].delete();
+		// Envoie de la reponse
+		return CompletableFuture.completedFuture(send);
 	}
 }

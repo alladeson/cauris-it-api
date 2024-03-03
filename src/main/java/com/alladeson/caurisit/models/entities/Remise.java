@@ -9,7 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
 @Entity

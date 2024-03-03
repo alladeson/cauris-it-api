@@ -18,31 +18,36 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *
  */
 @Entity
-public class DetailFacture extends BaseEntity {
+public class DetailCmdFournisseur extends BaseEntity {
 
+	
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 7510041209697636112L;
+	private static final long serialVersionUID = -4895466564591129199L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	private Date date; // Date de validation de la ligne de facture
-	// Le nom de l'article
+	// La référence de l'article
+	private String reference;
+	// Le nom ou désignation de l'article
 	private String name;
 	// La quantité de l'article
 	private Double quantite;
-	// L'unité de l'article
-	private TypeData unite;
-	// Le prix unitaire ht de l'article, sera récupéré de l'article
+	// Le prix unitaire HT de l'article,
 	private Double prixUht;
 	// Le prix unitaire ttc de l'article
 	private Double prixUnitaire;
+	// Le montant total hors taxe
 	private Double montantHt;
+	// Le montant de la tva
 	private Double montantTva;
-//	private Double montantAib;
+	// Le montant total tout taxe comprise
 	private Double montantTtc;
+	// Gérer la validation de la ligne de commande
 	private boolean valid;
+	// Date de validation de la ligne de commande
+	private Date date; // 
 
 	// Gestion de remise ou modification du prix de l'article
 	private boolean remise;
@@ -59,18 +64,6 @@ public class DetailFacture extends BaseEntity {
 	@Transient
 	private String priceModification;
 
-	// champ représente le montant HT de la taxe spécifique (TS) telle que reçu du
-	// client REST,
-	private Double taxeSpecifique;
-	// Montant de la taxe spécifique TTC
-	private Double tsTtc;
-	// Pour le nom de la taxe spécifique, utile pour la personnalisation lors de l'émission de la facture de vente
-	private String tsName;
-	// Mise en rélation avec l'entité TaxeSpécifique, utile pour l'impression et
-	// pour d'autres détails
-	@OneToOne(cascade = { CascadeType.REMOVE, CascadeType.PERSIST })
-	private TaxeSpecifique ts;
-
 	@ManyToOne
 	private Taxe taxe;
 
@@ -78,16 +71,12 @@ public class DetailFacture extends BaseEntity {
 	@Transient
 	private Long taxeId;
 
-	// Pour le type de facture, aucune persistance à cet effet
-	@Transient
-	private Long tfId;
-
 	@ManyToOne
 	private Article article;
 
 	@ManyToOne
 	@JsonIgnore
-	private Facture facture;
+	private CommandeFournisseur commande;
 
 	/**
 	 * @return the id
@@ -104,17 +93,17 @@ public class DetailFacture extends BaseEntity {
 	}
 
 	/**
-	 * @return the date
+	 * @return the reference
 	 */
-	public Date getDate() {
-		return date;
+	public String getReference() {
+		return reference;
 	}
 
 	/**
-	 * @param date the date to set
+	 * @param reference the reference to set
 	 */
-	public void setDate(Date date) {
-		this.date = date;
+	public void setReference(String reference) {
+		this.reference = reference;
 	}
 
 	/**
@@ -146,20 +135,6 @@ public class DetailFacture extends BaseEntity {
 	}
 
 	/**
-	 * @return the unite
-	 */
-	public TypeData getUnite() {
-		return unite;
-	}
-
-	/**
-	 * @param unite the unite to set
-	 */
-	public void setUnite(TypeData unite) {
-		this.unite = unite;
-	}
-
-	/**
 	 * @return the prixUht
 	 */
 	public Double getPrixUht() {
@@ -186,34 +161,6 @@ public class DetailFacture extends BaseEntity {
 	public void setPrixUnitaire(Double prixUnitaire) {
 		this.prixUnitaire = prixUnitaire;
 	}
-
-	/**
-	 * @return the taxe
-	 */
-	public Taxe getTaxe() {
-		return taxe;
-	}
-
-	/**
-	 * @param taxe the taxe to set
-	 */
-	public void setTaxe(Taxe taxe) {
-		this.taxe = taxe;
-	}
-
-//	/**
-//	 * @return the aib
-//	 */
-//	public Taxe getAib() {
-//		return aib;
-//	}
-//
-//	/**
-//	 * @param aib the aib to set
-//	 */
-//	public void setAib(Taxe aib) {
-//		this.aib = aib;
-//	}
 
 	/**
 	 * @return the montantHt
@@ -272,31 +219,17 @@ public class DetailFacture extends BaseEntity {
 	}
 
 	/**
-	 * @return the article
+	 * @return the date
 	 */
-	public Article getArticle() {
-		return article;
+	public Date getDate() {
+		return date;
 	}
 
 	/**
-	 * @param article the article to set
+	 * @param date the date to set
 	 */
-	public void setArticle(Article article) {
-		this.article = article;
-	}
-
-	/**
-	 * @return the facture
-	 */
-	public Facture getFacture() {
-		return facture;
-	}
-
-	/**
-	 * @param facture the facture to set
-	 */
-	public void setFacture(Facture facture) {
-		this.facture = facture;
+	public void setDate(Date date) {
+		this.date = date;
 	}
 
 	/**
@@ -370,66 +303,17 @@ public class DetailFacture extends BaseEntity {
 	}
 
 	/**
-	 * @return the taxeSpecifique
+	 * @return the taxe
 	 */
-	public Double getTaxeSpecifique() {
-		return taxeSpecifique;
+	public Taxe getTaxe() {
+		return taxe;
 	}
 
 	/**
-	 * @param taxeSpecifique the taxeSpecifique to set
+	 * @param taxe the taxe to set
 	 */
-	public void setTaxeSpecifique(Double taxeSpecifique) {
-		this.taxeSpecifique = taxeSpecifique;
-	}
-
-	/**
-	 * @return the tsTtc
-	 */
-	public Double getTsTtc() {
-		return tsTtc;
-	}
-
-	/**
-	 * @param tsTtc the tsTtc to set
-	 */
-	public void setTsTtc(Double tsTtc) {
-		this.tsTtc = tsTtc;
-	}
-
-	/**
-	 * @return the tsName
-	 */
-	public String getTsName() {
-		return tsName;
-	}
-
-	/**
-	 * @param tsName the tsName to set
-	 */
-	public void setTsName(String tsName) {
-		this.tsName = tsName;
-	}
-
-	/**
-	 * @return the ts
-	 */
-	public TaxeSpecifique getTs() {
-		return ts;
-	}
-
-	/**
-	 * @param ts the ts to set
-	 */
-	public void setTs(TaxeSpecifique ts) {
-		this.ts = ts;
-	}
-
-	/**
-	 * @return the serialversionuid
-	 */
-	public static long getSerialversionuid() {
-		return serialVersionUID;
+	public void setTaxe(Taxe taxe) {
+		this.taxe = taxe;
 	}
 
 	/**
@@ -447,16 +331,38 @@ public class DetailFacture extends BaseEntity {
 	}
 
 	/**
-	 * @return the tfId
+	 * @return the article
 	 */
-	public Long getTfId() {
-		return tfId;
+	public Article getArticle() {
+		return article;
 	}
 
 	/**
-	 * @param tfId the tfId to set
+	 * @param article the article to set
 	 */
-	public void setTfId(Long tfId) {
-		this.tfId = tfId;
+	public void setArticle(Article article) {
+		this.article = article;
 	}
+
+	/**
+	 * @return the commande
+	 */
+	public CommandeFournisseur getCommande() {
+		return commande;
+	}
+
+	/**
+	 * @param commande the commande to set
+	 */
+	public void setCommande(CommandeFournisseur commande) {
+		this.commande = commande;
+	}
+
+	/**
+	 * @return the serialversionuid
+	 */
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
 }

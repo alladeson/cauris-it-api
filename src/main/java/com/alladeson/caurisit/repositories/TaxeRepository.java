@@ -11,7 +11,7 @@ import com.alladeson.caurisit.models.entities.Taxe;
 import com.alladeson.caurisit.models.entities.TypeData;
 
 /**
- * @author William
+ * @author William ALLADE
  *
  */
 public interface TaxeRepository extends JpaRepository<Taxe, Long> {

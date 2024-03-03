@@ -5,14 +5,17 @@ package com.alladeson.caurisit.models.entities;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
 @Entity
@@ -33,12 +36,32 @@ public class Approvisionnement extends BaseEntity {
 	private Double montantTva;
 	private Double montantTtc;
 	private boolean valid;
-	
+	//
+	private String referenceFacture;
+	// Gestion de remise ou modification du prix de l'article
+	private boolean remise;
+
 	@ManyToOne
 	private Taxe taxe;
-	
+	// Pour la récupérationd de l'id de la facture, aucune persistance à cet effet
+	@Transient
+	private Long taxeId;
+
 	@ManyToOne
 	private Article article;
+
+	// Entité Remise : en anglais remise = discount
+	@OneToOne(cascade = { CascadeType.REMOVE, CascadeType.PERSIST })
+	private Remise discount;
+	// Le taux de la remise
+	@Transient
+	private Integer taux;
+	// Prix originale de l'article
+	@Transient
+	private Double originalPrice;
+	// Description de la modification (ex. "Remise 50%")
+	@Transient
+	private String priceModification;
 
 	/**
 	 * @return the id
@@ -153,6 +176,20 @@ public class Approvisionnement extends BaseEntity {
 	}
 
 	/**
+	 * @return the referenceFacture
+	 */
+	public String getReferenceFacture() {
+		return referenceFacture;
+	}
+
+	/**
+	 * @param referenceFacture the referenceFacture to set
+	 */
+	public void setReferenceFacture(String referenceFacture) {
+		this.referenceFacture = referenceFacture;
+	}
+
+	/**
 	 * @return the taxe
 	 */
 	public Taxe getTaxe() {
@@ -164,6 +201,20 @@ public class Approvisionnement extends BaseEntity {
 	 */
 	public void setTaxe(Taxe taxe) {
 		this.taxe = taxe;
+	}
+
+	/**
+	 * @return the taxeId
+	 */
+	public Long getTaxeId() {
+		return taxeId;
+	}
+
+	/**
+	 * @param taxeId the taxeId to set
+	 */
+	public void setTaxeId(Long taxeId) {
+		this.taxeId = taxeId;
 	}
 
 	/**
@@ -181,9 +232,66 @@ public class Approvisionnement extends BaseEntity {
 	}
 
 	/**
+	 * @return the discount
+	 */
+	public Remise getDiscount() {
+		return discount;
+	}
+
+	/**
+	 * @param discount the discount to set
+	 */
+	public void setDiscount(Remise discount) {
+		this.discount = discount;
+	}
+
+	/**
+	 * @return the taux
+	 */
+	public Integer getTaux() {
+		return taux;
+	}
+
+	/**
+	 * @param taux the taux to set
+	 */
+	public void setTaux(Integer taux) {
+		this.taux = taux;
+	}
+
+	/**
+	 * @return the originalPrice
+	 */
+	public Double getOriginalPrice() {
+		return originalPrice;
+	}
+
+	/**
+	 * @param originalPrice the originalPrice to set
+	 */
+	public void setOriginalPrice(Double originalPrice) {
+		this.originalPrice = originalPrice;
+	}
+
+	/**
+	 * @return the priceModification
+	 */
+	public String getPriceModification() {
+		return priceModification;
+	}
+
+	/**
+	 * @param priceModification the priceModification to set
+	 */
+	public void setPriceModification(String priceModification) {
+		this.priceModification = priceModification;
+	}
+
+	/**
 	 * @return the serialversionuid
 	 */
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
+
 }

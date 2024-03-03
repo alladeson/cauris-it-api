@@ -13,7 +13,7 @@ import com.alladeson.caurisit.security.entities.Account;
 import com.alladeson.caurisit.security.entities.TypeRole;
 
 /**
- * @author William
+ * @author William ALLADE
  *
  */
 public interface UserRepository extends JpaRepository<User, Long> {

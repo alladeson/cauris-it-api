@@ -8,6 +8,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
+/**
+ * @author William ALLADE
+ *
+ */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class Audit/* extends Auditable */{

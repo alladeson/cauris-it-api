@@ -24,7 +24,7 @@ import com.alladeson.caurisit.models.entities.Feature;
 import com.alladeson.caurisit.models.entities.Operation;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
 @Service

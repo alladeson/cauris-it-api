@@ -1,5 +1,9 @@
 package com.alladeson.caurisit.models.entities;
 
+/**
+ * @author William ALLADE
+ *
+ */
 public enum Operation {
 	/** Les opérations d'authentification **/
     USER_LOGIN(1, "Connexion"),

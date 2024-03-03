@@ -22,6 +22,10 @@ import org.springframework.util.StopWatch;
 import java.io.IOException;
 import java.util.Collections;
 
+/**
+ * @author William ALLADE
+ *
+ */
 @Service
 public class SystemService {
 
@@ -56,7 +60,7 @@ public class SystemService {
 			logger.info(">> APP INIT DATA - START");
 
 			// User-groups
-			UserGroup sa = null;
+			UserGroup sa = accessService.getGroupeByRole(TypeRole.SUPER_ADMIN);
 			if (accessService.countGroupe() == 0) {
 				sa = accessService.saveGroupe("Super Admin", "Super Administrateur", TypeRole.SUPER_ADMIN);
 			}
@@ -222,7 +226,7 @@ public class SystemService {
 				paramService.saveTypePaiement(tp);
 			}
 
-			/* Les fonctionnalités de l'application */
+			/* Les fonctionnalités de l'application uniquement pour la facture normalisée*/
 			if (accessService.countFeature() == 0) {
 				// Gestion de stock
 				accessService.saveFeature(Feature.gestStock, "Gestion de Stock", true, false, false);
@@ -259,6 +263,19 @@ public class SystemService {
                 for (Feature f : features) {
                     accessService.saveAccess(sa, f, true);
                 }
+			}
+			
+			/* Les fonctionnalités de l'application pour la gestion de stock*/
+			if (accessService.countFeature() == 22) {
+				// Gestion de stock : Approvisionnement et ajout de permission pour le super-admin
+				Feature feature = accessService.saveFeature(Feature.gestStockApprovisionnement, "Approvisionnement", true, true, true);
+				accessService.saveAccess(sa, feature, true);
+				// Gestion de stock : Fournisseur et ajout de permission pour le super-admin
+				feature = accessService.saveFeature(Feature.gestStockFournisseur, "Fournisseur", true, true, true);
+				accessService.saveAccess(sa, feature, true);
+				// Gestion de stock : Commande Fournisseur (ou ordre d'achat) et ajout de permission pour le super-admin
+				feature = accessService.saveFeature(Feature.gestStockCmdFournisseur, "Ordre d'achat", true, true, true);
+				accessService.saveAccess(sa, feature, true);
 			}
 		} finally {
 			logger.info(watch.prettyPrint());

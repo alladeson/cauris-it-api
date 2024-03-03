@@ -8,9 +8,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-//import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
 
 /**
  * @author William ALLADE
@@ -21,20 +21,21 @@ import javax.persistence.UniqueConstraint;
 		@UniqueConstraint(name = "UniqueName", columnNames = { "name" }),
 		@UniqueConstraint(name = "UniqueRcm", columnNames = { "rcm" }),
 		@UniqueConstraint(name = "UniquePhone", columnNames = { "telephone" }),
-		@UniqueConstraint(name = "UniqueEmail", columnNames = { "email" })
-		})
+		@UniqueConstraint(name = "UniqueEmail", columnNames = { "email" }),
+})
 @Entity
-public class Client extends BaseEntity {
+public class Fournisseur extends BaseEntity {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -3179188902873955865L;
+	private static final long serialVersionUID = 124807912428741457L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
+	// @Column(nullable = false)
 	private String ifu;
 	@Column(nullable = false)
 	private String name;
@@ -187,13 +188,6 @@ public class Client extends BaseEntity {
 	}
 
 	/**
-	 * @return the serialversionuid
-	 */
-	public static long getSerialversionuid() {
-		return serialVersionUID;
-	}
-
-	/**
 	 * Retourne le contact qui lest la combinaison du telephone et de l'email
 	 * 
 	 * @return contact
@@ -207,7 +201,6 @@ public class Client extends BaseEntity {
 				contact += ", " + this.email;
 			else
 				contact += this.email;
-
 		}
 		return contact;
 	}

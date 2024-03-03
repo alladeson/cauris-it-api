@@ -33,6 +33,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * @author William ALLADE
+ *
+ */
 @Service
 public class ReportService {
 

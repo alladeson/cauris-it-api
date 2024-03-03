@@ -32,6 +32,9 @@ public class Feature extends BaseEntity {
 	public static final int gestStock = 10000;
 	public static final int gestStockCategorie = 11000;
 	public static final int gestStockArticle = 12000;
+	public static final int gestStockApprovisionnement = 13000;
+	public static final int gestStockFournisseur = 14000;
+	public static final int gestStockCmdFournisseur = 15000;
 	// Emission des factures
 	public static final int facturation = 20000;
 	public static final int facturationFV = 21000;

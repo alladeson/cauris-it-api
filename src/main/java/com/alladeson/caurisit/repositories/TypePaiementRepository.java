@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.alladeson.caurisit.models.entities.TypePaiement;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
 public interface TypePaiementRepository extends JpaRepository<TypePaiement, Long> {

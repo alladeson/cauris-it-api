@@ -17,7 +17,7 @@ import javax.persistence.UniqueConstraint;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * @author William
+ * @author William ALLADE
  *
  */
 @Table(uniqueConstraints = { 

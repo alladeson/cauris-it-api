@@ -14,10 +14,13 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
-@Table(uniqueConstraints = { @UniqueConstraint(name = "UniqueDesignation", columnNames = { "designation" }) })
+@Table(uniqueConstraints = { 
+		@UniqueConstraint(name = "UniqueDesignation", columnNames = { "designation" }),
+		@UniqueConstraint(name = "UniqueReference", columnNames = { "reference" }),
+})
 @Entity
 public class Article extends BaseEntity {
 
@@ -29,6 +32,8 @@ public class Article extends BaseEntity {
 	@Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+	@Column(nullable = false)
+	private String reference;
 	@Column(nullable = false)
 	private String designation;
 	private Double prix;

@@ -5,14 +5,13 @@ package com.alladeson.caurisit.models.entities;
 
 import java.util.Date;
 
-import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
-import javax.persistence.Transient;
 
 /**
  * @author William ALLADE
@@ -30,6 +29,9 @@ public class MouvementArticle extends BaseEntity {
 	private Long id;
 	// La date de la création du mouvement
 	private Date date;
+	// Pour la description : utile pour le reporting
+	@Column(length = 1000, nullable = true)
+	private String description;
 	// Pour le type de mouvement
 	private TypeData type;
 
@@ -72,6 +74,20 @@ public class MouvementArticle extends BaseEntity {
 	 */
 	public void setDate(Date date) {
 		this.date = date;
+	}
+
+	/**
+	 * @return the description
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * @param description the description to set
+	 */
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	/**

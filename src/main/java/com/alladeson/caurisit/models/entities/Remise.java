@@ -29,6 +29,9 @@ public class Remise extends BaseEntity {
 	private Double originalPrice;
 	// Description de la modification (ex. "Remise 50%")
 	private String priceModification;
+	// Pour stocker le montant de la remise : utile pour les calcules
+	private Double montant;
+	
 
 	/**
 	 * @return the id
@@ -84,6 +87,20 @@ public class Remise extends BaseEntity {
 	 */
 	public void setPriceModification(String priceModification) {
 		this.priceModification = priceModification;
+	}
+
+	/**
+	 * @return the montant
+	 */
+	public Double getMontant() {
+		return montant;
+	}
+
+	/**
+	 * @param montant the montant to set
+	 */
+	public void setMontant(Double montant) {
+		this.montant = montant;
 	}
 
 	/**

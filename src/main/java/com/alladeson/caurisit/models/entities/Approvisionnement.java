@@ -30,8 +30,10 @@ public class Approvisionnement extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	private Date date; // Date de l'approvisionnement
-	private Long quantite;
-	private Double prixHt;
+	private Double quantite;
+	private Double prixUht;
+	// Le prix unitaire ttc : à calculer
+	private Double prixUttc;
 	private Double montantHt;
 	private Double montantTva;
 	private Double montantTtc;
@@ -94,29 +96,43 @@ public class Approvisionnement extends BaseEntity {
 	/**
 	 * @return the quantite
 	 */
-	public Long getQuantite() {
+	public Double getQuantite() {
 		return quantite;
 	}
 
 	/**
 	 * @param quantite the quantite to set
 	 */
-	public void setQuantite(Long quantite) {
+	public void setQuantite(Double quantite) {
 		this.quantite = quantite;
 	}
 
 	/**
-	 * @return the prixHt
+	 * @return the prixUht
 	 */
-	public Double getPrixHt() {
-		return prixHt;
+	public Double getPrixUht() {
+		return prixUht;
 	}
 
 	/**
-	 * @param prixHt the prixHt to set
+	 * @param prixUht the prixUht to set
 	 */
-	public void setPrixHt(Double prixHt) {
-		this.prixHt = prixHt;
+	public void setPrixUht(Double prixUht) {
+		this.prixUht = prixUht;
+	}
+
+	/**
+	 * @return the prixUttc
+	 */
+	public Double getPrixUttc() {
+		return prixUttc;
+	}
+
+	/**
+	 * @param prixUttc the prixUttc to set
+	 */
+	public void setPrixUttc(Double prixUttc) {
+		this.prixUttc = prixUttc;
 	}
 
 	/**
@@ -187,6 +203,20 @@ public class Approvisionnement extends BaseEntity {
 	 */
 	public void setReferenceFacture(String referenceFacture) {
 		this.referenceFacture = referenceFacture;
+	}
+
+	/**
+	 * @return the remise
+	 */
+	public boolean isRemise() {
+		return remise;
+	}
+
+	/**
+	 * @param remise the remise to set
+	 */
+	public void setRemise(boolean remise) {
+		this.remise = remise;
 	}
 
 	/**

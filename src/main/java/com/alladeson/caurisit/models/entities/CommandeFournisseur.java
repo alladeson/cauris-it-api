@@ -5,12 +5,14 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 
 /**
  * @author William ALLADE
@@ -25,7 +27,8 @@ public class CommandeFournisseur extends BaseEntity {
 	private static final long serialVersionUID = -4613115298679522073L;
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_cmdf")
+    @SequenceGenerator(name="gen_cmdf", sequenceName = "_seq_cmdf", allocationSize = 1)
 	private Long id;
 	// Le numero de la commande
 	private String numero;
@@ -46,6 +49,7 @@ public class CommandeFournisseur extends BaseEntity {
 	// Le montant total TTC
 	private Double montantTtc;
 	// Notes sur la commande
+	@Column(length = 1000, nullable = true)
 	private String notes;
 	// Référence de la facture du fournisseur : 
 	// à renseigner lors de la validation de la commande

@@ -47,7 +47,9 @@ public class DetailCmdFournisseur extends BaseEntity {
 	// Gérer la validation de la ligne de commande
 	private boolean valid;
 	// Date de validation de la ligne de commande
-	private Date date; // 
+	private Date date; 
+	// Pour vérifier si ce détail n'est pas pour la livraison
+	private boolean expedition;
 
 	// Gestion de remise ou modification du prix de l'article
 	private boolean remise;
@@ -230,6 +232,20 @@ public class DetailCmdFournisseur extends BaseEntity {
 	 */
 	public void setDate(Date date) {
 		this.date = date;
+	}
+
+	/**
+	 * @return the expedition
+	 */
+	public boolean isExpedition() {
+		return expedition;
+	}
+
+	/**
+	 * @param expedition the expedition to set
+	 */
+	public void setExpedition(boolean expedition) {
+		this.expedition = expedition;
 	}
 
 	/**

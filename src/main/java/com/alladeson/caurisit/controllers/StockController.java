@@ -14,9 +14,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alladeson.caurisit.models.entities.Approvisionnement;
 import com.alladeson.caurisit.models.entities.Article;
 import com.alladeson.caurisit.models.entities.CategorieArticle;
 import com.alladeson.caurisit.models.entities.Client;
+import com.alladeson.caurisit.models.entities.CommandeFournisseur;
+import com.alladeson.caurisit.models.entities.DetailCmdFournisseur;
+import com.alladeson.caurisit.models.entities.Fournisseur;
+import com.alladeson.caurisit.models.entities.MouvementArticle;
 import com.alladeson.caurisit.services.StockService;
 
 /**
@@ -188,4 +193,294 @@ public class StockController {
 	public boolean deleteClient(@PathVariable(value = "id") Long clientId) {
 		return stockService.deleteClient(clientId);
 	}
+
+	/**
+	 * @param fournisseur
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#createFournisseur(com.alladeson.caurisit.models.entities.Fournisseur)
+	 */
+	@PostMapping("/stock/fournisseur")
+	public Fournisseur createFournisseur(@RequestBody Fournisseur fournisseur) {
+		return stockService.createFournisseur(fournisseur);
+	}
+
+	/**
+	 * @param fournisseurId
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#getFournisseur(java.lang.Long)
+	 */
+	@GetMapping("/stock/fournisseur/{id}")
+	public Fournisseur getFournisseur(@PathVariable(value = "id") Long fournisseurId) {
+		return stockService.getFournisseur(fournisseurId);
+	}
+
+	/**
+	 * @return List<Fournisseur>
+	 * @see com.alladeson.caurisit.services.StockService#getAllFournisseur()
+	 */
+	@GetMapping("/stock/fournisseur")
+	public List<Fournisseur> getAllFournisseur() {
+		return stockService.getAllFournisseur();
+	}
+
+	/**
+	 * @param fournisseur
+	 * @param fournisseurId
+	 * @return Fournisseur
+	 * @see com.alladeson.caurisit.services.StockService#updateFournisseur(com.alladeson.caurisit.models.entities.Fournisseur, java.lang.Long)
+	 */
+	@PutMapping("/stock/fournisseur/{id}")
+	public Fournisseur updateFournisseur(@RequestBody Fournisseur fournisseur, @PathVariable(value = "id") Long fournisseurId) {
+		return stockService.updateFournisseur(fournisseur, fournisseurId);
+	}
+
+	/**
+	 * @param fournisseurId
+	 * @return boolean
+	 * @see com.alladeson.caurisit.services.StockService#deleteFournisseur(java.lang.Long)
+	 */
+	@DeleteMapping("/stock/fournisseur/{id}")
+	public boolean deleteFournisseur(@PathVariable(value = "id") Long fournisseurId) {
+		return stockService.deleteFournisseur(fournisseurId);
+	}
+
+	/**
+	 * @param id
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#getCmdFoournisseur(java.lang.Long)
+	 */
+	@GetMapping("/stock/commande-fournisseur/{id}")
+	public CommandeFournisseur getCmdFoournisseur(@PathVariable(value = "id") Long id) {
+		return stockService.getCmdFoournisseur(id);
+	}
+
+	/**
+	 * @param numero
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#getCmdFournisseurByNumero(java.lang.String)
+	 */
+	@GetMapping("/stock/commande-fournisseur/numero/{numero}")
+	public CommandeFournisseur getCmdFournisseurByNumero(@PathVariable(value = "numero") String numero) {
+		return stockService.getCmdFournisseurByNumero(numero);
+	}
+
+	/**
+	 * @param fournisseurId
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#getCmdValidFalseByFournisseur(java.lang.Long)
+	 */
+	@GetMapping("/stock/commande-fournisseur/fournisseur/{fournisseurId}")
+	public CommandeFournisseur getCmdValidFalseByFournisseur(@PathVariable(value = "fournisseurId") Long fournisseurId) {
+		return stockService.getCmdValidFalseByFournisseur(fournisseurId);
+	}
+
+	/**
+	 * @param fournisseurId
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#getCmdValidTrueByFournisseur(java.lang.Long)
+	 */
+	@GetMapping("/stock/commande-fournisseur/fournisseur/{fournisseurId}/list")
+	public List<CommandeFournisseur> getCmdValidTrueByFournisseur(@PathVariable(value = "fournisseurId") Long fournisseurId) {
+		return stockService.getCmdValidTrueByFournisseur(fournisseurId);
+	}
+
+	/**
+	 * @param commandeId
+	 * @param detailId
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#getDetailCmdFournisseur(java.lang.Long, java.lang.Long)
+	 */
+	@GetMapping("/stock/commande-fournisseur/{id}/detail/{dtId}")
+	public DetailCmdFournisseur getDetailCmdFournisseur(@PathVariable(value = "id") Long commandeId, @PathVariable(value = "dtId") Long detailId) {
+		return stockService.getDetailCmdFournisseur(commandeId, detailId);
+	}
+
+	/**
+	 * @param commandeId
+	 * @param articleId
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#getDetailCmdFournisseurByArticle(java.lang.Long, java.lang.Long)
+	 */
+	@GetMapping("/stock/commande-fournisseur/{id}/article/{artId}")
+	public DetailCmdFournisseur getDetailCmdFournisseurByArticle(@PathVariable(value = "id") Long commandeId, @PathVariable(value = "artId") Long articleId) {
+		return stockService.getDetailCmdFournisseurByArticle(commandeId, articleId);
+	}
+
+	/**
+	 * @param fournisseurId
+	 * @param articleId
+	 * @param detailPayload
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#ajouterDetailCommande(java.lang.Long, java.lang.Long, com.alladeson.caurisit.models.entities.DetailCmdFournisseur)
+	 */
+	@PostMapping("/stock/commande-fournisseur/fournisseur/{fournisseurId}/article/{articleId}")
+	public CommandeFournisseur ajouterDetailCommande(@PathVariable(value = "fournisseurId") Long fournisseurId, @PathVariable(value = "articleId") Long articleId,
+			@RequestBody DetailCmdFournisseur detailPayload) {
+		return stockService.ajouterDetailCommande(fournisseurId, articleId, detailPayload);
+	}
+
+	/**
+	 * @param commandeId
+	 * @param detailId
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#validerDetailCmdFournisseur(java.lang.Long, java.lang.Long)
+	 */
+	@PutMapping("/stock/commande-fournisseur/{cmdId}/detail/{dtId}/valider")
+	public CommandeFournisseur validerDetailCmdFournisseur(@PathVariable(value = "cmdId") Long commandeId, @PathVariable(value = "dtId") Long detailId) {
+		return stockService.validerDetailCmdFournisseur(commandeId, detailId);
+	}
+
+	/**
+	 * @param commandeId
+	 * @param detailId
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#deleteDetailCmdFournisseur(java.lang.Long, java.lang.Long)
+	 */
+	@DeleteMapping("/stock/commande-fournisseur/{cmdId}/detail/{dtId}")
+	public CommandeFournisseur deleteDetailCmdFournisseur(@PathVariable(value = "cmdId") Long commandeId, @PathVariable(value = "dtId") Long detailId) {
+		return stockService.deleteDetailCmdFournisseur(commandeId, detailId);
+	}
+
+	/**
+	 * @param id
+	 * @param payload
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#validerCmdFournisseur(java.lang.Long, com.alladeson.caurisit.models.paylaods.ReglementPayload)
+	 */
+	@PutMapping("/stock/commande-fournisseur/{id}/valider")
+	public CommandeFournisseur validerCmdFournisseur(@PathVariable(value = "id") Long id, @RequestBody CommandeFournisseur payload) {
+		return stockService.validerCmdFournisseur(id, payload);
+	}
+
+	/**
+	 * @param id
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#deleteCmdFournisseur(java.lang.Long)
+	 */
+	@DeleteMapping("/stock/commande-fournisseur/{id}")
+	public boolean deleteCmdFournisseur(@PathVariable(value = "id") Long id) {
+		return stockService.deleteCmdFournisseur(id);
+	}
+
+	/**
+	 * @param commandeId
+	 * @param cmdPayload
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#additionalInfosCmdFournisseur(java.lang.Long, com.alladeson.caurisit.models.entities.CommandeFournisseur)
+	 */
+	@PutMapping("/stock/commande-fournisseur/{id}/infos-additionnelles")
+	public CommandeFournisseur additionalInfosCmdFournisseur(@PathVariable(value = "id") Long commandeId, @RequestBody CommandeFournisseur cmdPayload) {
+		return stockService.additionalInfosCmdFournisseur(commandeId, cmdPayload);
+	}
+
+	/**
+	 * @param fournisseurId
+	 * @param detailPayload
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#ajouterExpeditionCmdFournisseur(java.lang.Long, com.alladeson.caurisit.models.entities.DetailCmdFournisseur)
+	 */
+	@PutMapping("/stock/commande-fournisseur/fournisseur/{fournisseurId}/expdition-data")
+	public CommandeFournisseur ajouterExpeditionCmdFournisseur(@PathVariable(value = "fournisseurId") Long fournisseurId, @RequestBody DetailCmdFournisseur detailPayload) {
+		return stockService.ajouterExpeditionCmdFournisseur(fournisseurId, detailPayload);
+	}
+	
+	/*** Gestion des approvisionnements ***/
+
+	/**
+	 * @param articleId
+	 * @param approvPayload
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#createApprovisionnement(java.lang.Long, com.alladeson.caurisit.models.entities.Approvisionnement)
+	 */
+	@PostMapping("/stock/approvisionnement/article/{artId}")
+	public Approvisionnement createApprovisionnement(@PathVariable(value = "artId") Long articleId, @RequestBody Approvisionnement approvPayload) {
+		return stockService.createApprovisionnement(articleId, approvPayload);
+	}
+
+	/**
+	 * @param approvisionnementId
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#getApprovisionnement(java.lang.Long)
+	 */
+	@GetMapping("/stock/approvisionnement/{id}")
+	public Approvisionnement getApprovisionnement(@PathVariable(value = "id") Long approvisionnementId) {
+		return stockService.getApprovisionnement(approvisionnementId);
+	}
+
+	/**
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#getAllApprovisionnement()
+	 */
+	@GetMapping("/stock/approvisionnement")
+	public List<Approvisionnement> getAllApprovisionnement() {
+		return stockService.getAllApprovisionnement();
+	}
+
+	/**
+	 * @param articleId
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#getAllApprovisionnementByArticle(java.lang.Long)
+	 */
+	@GetMapping("/stock/approvisionnement/article/{artId}")
+	public List<Approvisionnement> getAllApprovisionnementByArticle(@PathVariable(value = "artId") Long articleId) {
+		return stockService.getAllApprovisionnementByArticle(articleId);
+	}
+
+	/**
+	 * @param approvisionnementId
+	 * @param articleId
+	 * @param approvPayload
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#updateApprovisionnement(java.lang.Long, java.lang.Long, com.alladeson.caurisit.models.entities.Approvisionnement)
+	 */
+	@PutMapping("/stock/approvisionnement/{id}/article/{artId}")
+	public Approvisionnement updateApprovisionnement(@PathVariable(value = "id") Long approvisionnementId, @PathVariable(value = "artId") Long articleId,
+			@RequestBody Approvisionnement approvPayload) {
+		return stockService.updateApprovisionnement(approvisionnementId, articleId, approvPayload);
+	}
+
+	/**
+	 * @param approvisionnementId
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#validerApprovisionnement(java.lang.Long)
+	 */
+	@PutMapping("/stock/approvisionnement/{id}/valider")
+	public Approvisionnement validerApprovisionnement(@PathVariable(value = "id") Long approvisionnementId, @RequestBody Approvisionnement approvPayload) {
+		return stockService.validerApprovisionnement(approvisionnementId, approvPayload);
+	}
+
+	/**
+	 * @param approvisionnementId
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#deleteApprovisionnement(java.lang.Long)
+	 */
+	@DeleteMapping("/stock/approvisionnement/{id}")
+	public boolean deleteApprovisionnement(@PathVariable(value = "id") Long approvisionnementId) {
+		return stockService.deleteApprovisionnement(approvisionnementId);
+	}
+
+	/*** Mouvement Article ***/
+	
+	/**
+	 * @param mvtId
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#getOneMvtArticle(java.lang.Long)
+	 */
+	@GetMapping("/stock/mouvement-article/{id}")
+	public MouvementArticle getOneMvtArticle(@PathVariable(value = "id") Long mvtId) {
+		return stockService.getOneMvtArticle(mvtId);
+	}
+
+	/**
+	 * @param articleId
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#getListMvtByArticle(java.lang.Long)
+	 */
+	@GetMapping("/stock/mouvement-article/article/{artId}")
+	public List<MouvementArticle> getListMvtByArticle(@PathVariable(value = "artId") Long articleId) {
+		return stockService.getListMvtByArticle(articleId);
+	}
+	
+	
+	
 }

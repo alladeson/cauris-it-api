@@ -19,5 +19,5 @@ public enum TypeData {
 	 * ENTRE pour le mouvement d'entrée des articles (approvisionnement)
 	 * SORTIE pour le mouvement de sortie des articles (vente)
 	 * */
-	U, IMPOT, AIB, FV, FA, A4, A8, ENTREE, SORTIE
+	U, IMPOT, AIB, FV, FA, A4, A8, ENTREE, SORTIE, RESTAURATION
 }

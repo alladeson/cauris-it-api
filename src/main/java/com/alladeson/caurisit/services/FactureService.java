@@ -36,6 +36,7 @@ import com.alladeson.caurisit.models.entities.Facture;
 import com.alladeson.caurisit.models.entities.FactureFinalisationDgi;
 import com.alladeson.caurisit.models.entities.FactureResponseDgi;
 import com.alladeson.caurisit.models.entities.Feature;
+import com.alladeson.caurisit.models.entities.MouvementArticle;
 import com.alladeson.caurisit.models.entities.Operation;
 import com.alladeson.caurisit.models.entities.Parametre;
 import com.alladeson.caurisit.models.entities.ReglementFacture;
@@ -109,6 +110,8 @@ public class FactureService {
 	private AuditService auditService;
 	@Autowired
 	private Tool tool;
+	@Autowired
+	private MouvementArticleRepository mvtArticleRepos;
 
 	private static final String INVOICE_REPORT_BASE_NAME = "facture-";
 	private static final String INVOICE_REPORT_TEMPLATE_FV = "facture-vente.jrxml";
@@ -277,7 +280,7 @@ public class FactureService {
 	}
 
 	/**
-	 * Recupération du detail de la facture en fonctionde l'article
+	 * Recupération du detail de la facture en fonction de l'article
 	 * 
 	 * @param factureId
 	 * @param articleId
@@ -288,7 +291,7 @@ public class FactureService {
 		if (!accessService.canReadable(Feature.facturationListe))
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
 
-		if (factureId.equals((long) 0) || factureId.equals((long) 0)) {
+		if (factureId.equals((long) 0) || articleId.equals((long) 0)) {
 			return new DetailFacture();
 		}
 
@@ -625,7 +628,7 @@ public class FactureService {
 	 * @return {@link Facture} La facture mise à jour
 	 */
 	private Facture resetFacture(Long factureId) {
-		// Récupération de la facture à valider
+		// Récupération de la facture à mettre à jour
 		Facture facture = repository.findByIdAndValidFalse(factureId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Facture non trouvée"));
 		// Quand la facture n'est pas vide, mettre à jour les montants
@@ -711,7 +714,9 @@ public class FactureService {
 		if (facture.isConfirm()) {
 			for (DetailFacture detail : facture.getDetails()) {
 				detail.setValid(true);
-				dfRepos.save(detail);
+				detail = dfRepos.save(detail);
+				// Générer le mouvement article
+				generateMvtSortieArticle(detail);
 			}
 		}
 		// Tentatif d'impression de la facture
@@ -741,6 +746,52 @@ public class FactureService {
 
 		// Renvoie de la facture
 		return facture;
+	}
+
+	/**
+	 * @param detail
+	 */
+	private void generateMvtSortieArticle(DetailFacture detail) {
+		/*** Début mise à jour de l'article ***/
+		// Mise à jour de la quantité de l'article
+		Article article = detail.getArticle();
+		article.setStock(article.getStock() - detail.getQuantite());
+		article = articleRepos.save(article);
+		/*** Fin mise à jour de l'article ***/
+		
+		// Générer le mouvement article
+		MouvementArticle mvt = new MouvementArticle();
+		// Mise à jour des champs du mouvement article
+		mvt.setDetailFacture(detail);;
+		mvt.setArticle(article);
+		mvt.setDate(new Date());
+		mvt.setType(TypeData.SORTIE);
+		mvt.setDescription("Sortie d'article suite à la validation d'une facture de vente");		
+		// Enregistrement du mouvement de l'article
+		mvtArticleRepos.save(mvt);
+	}
+	
+	/**
+	 * @param detail
+	 */
+	private void generateMvtRestaurationArticle(DetailFacture detail) {
+		/*** Début mise à jour de l'article ***/
+		// Mise à jour de la quantité de l'article
+		Article article = detail.getArticle();
+		article.setStock(article.getStock() + detail.getQuantite());
+		article = articleRepos.save(article);
+		/*** Fin mise à jour de l'article ***/
+		
+		// Générer le mouvement article
+		MouvementArticle mvt = new MouvementArticle();
+		// Mise à jour des champs du mouvement article
+		mvt.setDetailFacture(detail);;
+		mvt.setArticle(article);
+		mvt.setDate(new Date());
+		mvt.setType(TypeData.RESTAURATION);
+		mvt.setDescription("Restauration du stock de l'article suite à la validation d'une facture d'avoir");		
+		// Enregistrement du mouvement de l'article
+		mvtArticleRepos.save(mvt);
 	}
 
 	/**
@@ -1453,7 +1504,8 @@ public class FactureService {
 		if (facture.isConfirm()) {
 			for (DetailFacture detail : facture.getDetails()) {
 				detail.setValid(true);
-				dfRepos.save(detail);
+				detail = dfRepos.save(detail);
+				generateMvtRestaurationArticle(detail);
 			}
 		}
 

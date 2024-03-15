@@ -18,6 +18,23 @@ public enum Operation {
     ARTICLE_CREATE(Feature.gestStockArticle + 1, "Création article"),
     ARTICLE_UPDATE(Feature.gestStockArticle + 2, "Mis à jour article"),
     ARTICLE_DELETE(-(Feature.gestStockArticle + 1), "Suppression article"),
+    // Les fournisseurs
+    FOURNISSEUR_CREATE(Feature.gestStockFournisseur + 1, "Création du fournisseur"),
+    FOURNISSEUR_UPDATE(Feature.gestStockFournisseur + 2, "Mise à jour du fournisseur"),
+    FOURNISSEUR_DELETE(-(Feature.gestStockFournisseur + 1), "Suppression du fournisseur"),
+    // Commande fournisseur
+    COMMANDE_FOURNISSEUR_CREATE(Feature.gestStockCmdFournisseur + 1, "Création commande fournisseur"),
+    COMMANDE_FOURNISSEUR_UPDATE(Feature.gestStockCmdFournisseur + 2, "Mise à jour commande fournisseur"),    
+    COMMANDE_FOURNISSEUR_VALIDATE(Feature.gestStockCmdFournisseur + 3, "Validation commande fournisseur"),
+    COMMANDE_FOURNISSEUR_DETAIL_VALIDATE(Feature.gestStockCmdFournisseur + 4, "Validation détail commande fournisseur"),
+    COMMANDE_FOURNISSEUR_DELETE(-(Feature.gestStockCmdFournisseur + 1), "Suppression commande fournisseur"),
+    COMMANDE_FOURNISSEUR_DETAIL_DELETE(-(Feature.gestStockCmdFournisseur + 11), "Suppression détail commande fournisseur"),
+    // Approvisionnenement
+    APPROVISIONNEMENT_CREATE(Feature.gestStockApprovisionnement + 1, "Création approvisionnement"),
+    APPROVISIONNEMENT_UPDATE(Feature.gestStockApprovisionnement + 2, "Mise à jour approvisionnement"),
+    APPROVISIONNEMENT_VALIDATE(Feature.gestStockApprovisionnement + 3, "Validation approvisionnement"),
+    APPROVISIONNEMENT_DELETE(-(Feature.gestStockApprovisionnement + 1), "Suppression approvisionnement"),
+    
 
     /** Les opérations de facturation **/
     // Émission des factures de vente

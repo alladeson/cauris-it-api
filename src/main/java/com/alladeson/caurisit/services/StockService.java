@@ -666,6 +666,22 @@ public class StockService {
 	/*** Gestion des récupérations sur l'ordre d'achat ***/
 
 	/**
+	 * Récupère la liste des 100 dernières commandes
+	 * 
+	 * @return {@link List<CommandeFournisseur>}
+	 */
+	public List<CommandeFournisseur> getAllCmdFournisseur() {
+		// Check permission
+		if (!accessService.canReadable(Feature.gestStockCmdFournisseur))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+		
+		Page<CommandeFournisseur> page = cmdFournisseurRepos.findAll(PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "id")));
+
+		return page.getContent();
+
+	}
+	
+	/**
 	 * Récupère une commande dont l'identifiant est renseigné
 	 * 
 	 * @param id L'identifiant de la commande
@@ -734,7 +750,7 @@ public class StockService {
 	 * @param fournisseurId L'identifiant du fournisseur
 	 * @return {@link List<CommandeFournisseur>}
 	 */
-	public List<CommandeFournisseur> getCmdValidTrueByFournisseur(Long fournisseurId) {
+	public List<CommandeFournisseur> getCmdByFournisseur(Long fournisseurId) {
 		// Check permission
 		if (!accessService.canReadable(Feature.gestStockCmdFournisseur))
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
@@ -743,7 +759,7 @@ public class StockService {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fournisseur non trouvé"));
 
 		// Recupération de la liste des commandes validées pour le fournisseur
-		return cmdFournisseurRepos.findByFournisseurAndValidTrue(fournisseur);
+		return cmdFournisseurRepos.findAllByFournisseur(fournisseur);
 
 	}
 
@@ -959,17 +975,19 @@ public class StockService {
 		return commande;
 	}
 
-	public CommandeFournisseur ajouterExpeditionCmdFournisseur(Long fournisseurId, DetailCmdFournisseur detailPayload) {
+	public CommandeFournisseur ajouterExpeditionCmdFournisseur(Long commandeId, DetailCmdFournisseur detailPayload) {
 		// Check permission
 		if (!accessService.canWritable(Feature.gestStockCmdFournisseur))
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
 
 		// Récupération du fournisseur
-		Fournisseur fournisseur = fournisseurRepos.findById(fournisseurId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fournisseur non trouvé"));
-		// Récupération de la commande non validée du fournisseur en fonction
-		CommandeFournisseur commande = cmdFournisseurRepos.findByFournisseurAndValidFalse(fournisseur);
-		if (commande == null) {
+		CommandeFournisseur commande = cmdFournisseurRepos.findById(commandeId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ordre d'achat non trouvé"));
+		if (commande.isValid()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+					"Ordre d'achat déjà validé");
+		}
+		if (commande.getDetails().isEmpty()) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
 					"Veuillez ajouter un article à l'ordre d'achat d'abord. Merci !");
 		}

@@ -305,7 +305,7 @@ public class Parametre extends BaseEntity {
 	}
 
 	/**
-	 * Retourne le contact qui lest la combinaison du telephone et de l'email
+	 * Retourne le contact qui est la combinaison du telephone et de l'email
 	 * 
 	 * @return contact
 	 */
@@ -321,6 +321,25 @@ public class Parametre extends BaseEntity {
 
 		}
 		return contact;
+	}
+	
+	/**
+	 * Retourne l'adresse qui est la combinaison de l'adress et de la ville
+	 * 
+	 * @return the complete address
+	 */
+	public String getAddressContact() {
+		String address = "";
+		if (this.address != null)
+			address += this.address;
+		if (this.ville != null) {
+			if (this.address != null)
+				address += ", " + this.ville;
+			else
+				address += this.ville;
+
+		}
+		return address;
 	}
 
 	/**

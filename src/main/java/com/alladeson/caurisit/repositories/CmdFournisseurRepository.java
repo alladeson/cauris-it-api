@@ -40,4 +40,6 @@ public interface CmdFournisseurRepository extends JpaRepository<CommandeFourniss
 	Optional<CommandeFournisseur> findByIdAndValidFalse(Long id);
 
 	Optional<CommandeFournisseur> findByNumero(String numero);
+	
+	List<CommandeFournisseur> findAllByFournisseur(Fournisseur fournisseur);
 }

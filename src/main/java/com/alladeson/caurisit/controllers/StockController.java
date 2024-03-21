@@ -244,6 +244,17 @@ public class StockController {
 		return stockService.deleteFournisseur(fournisseurId);
 	}
 
+	/** Gestion des CommandeFournisseur **/
+	
+	/**
+	 * @return
+	 * @see com.alladeson.caurisit.services.StockService#getAllCmdFournisseur()
+	 */
+	@GetMapping("/stock/commande-fournisseur")
+	public List<CommandeFournisseur> getAllCmdFournisseur() {
+		return stockService.getAllCmdFournisseur();
+	}
+
 	/**
 	 * @param id
 	 * @return
@@ -280,8 +291,8 @@ public class StockController {
 	 * @see com.alladeson.caurisit.services.StockService#getCmdValidTrueByFournisseur(java.lang.Long)
 	 */
 	@GetMapping("/stock/commande-fournisseur/fournisseur/{fournisseurId}/list")
-	public List<CommandeFournisseur> getCmdValidTrueByFournisseur(@PathVariable(value = "fournisseurId") Long fournisseurId) {
-		return stockService.getCmdValidTrueByFournisseur(fournisseurId);
+	public List<CommandeFournisseur> getCmdByFournisseur(@PathVariable(value = "fournisseurId") Long fournisseurId) {
+		return stockService.getCmdByFournisseur(fournisseurId);
 	}
 
 	/**
@@ -379,9 +390,9 @@ public class StockController {
 	 * @return
 	 * @see com.alladeson.caurisit.services.StockService#ajouterExpeditionCmdFournisseur(java.lang.Long, com.alladeson.caurisit.models.entities.DetailCmdFournisseur)
 	 */
-	@PutMapping("/stock/commande-fournisseur/fournisseur/{fournisseurId}/expdition-data")
-	public CommandeFournisseur ajouterExpeditionCmdFournisseur(@PathVariable(value = "fournisseurId") Long fournisseurId, @RequestBody DetailCmdFournisseur detailPayload) {
-		return stockService.ajouterExpeditionCmdFournisseur(fournisseurId, detailPayload);
+	@PutMapping("/stock/commande-fournisseur/{id}/expedition-data")
+	public CommandeFournisseur ajouterExpeditionCmdFournisseur(@PathVariable(value = "id") Long commandeId, @RequestBody DetailCmdFournisseur detailPayload) {
+		return stockService.ajouterExpeditionCmdFournisseur(commandeId, detailPayload);
 	}
 	
 	/*** Gestion des approvisionnements ***/

@@ -3,9 +3,11 @@
  */
 package com.alladeson.caurisit.controllers;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +25,8 @@ import com.alladeson.caurisit.models.entities.DetailCmdFournisseur;
 import com.alladeson.caurisit.models.entities.Fournisseur;
 import com.alladeson.caurisit.models.entities.MouvementArticle;
 import com.alladeson.caurisit.services.StockService;
+
+import net.sf.jasperreports.engine.JRException;
 
 /**
  * @author allad
@@ -395,6 +399,18 @@ public class StockController {
 		return stockService.ajouterExpeditionCmdFournisseur(commandeId, detailPayload);
 	}
 	
+	/**
+	 * @param cmdFournisseurId
+	 * @return
+	 * @throws IOException
+	 * @throws JRException
+	 * @see com.alladeson.caurisit.services.StockService#genererCmdFournisseur(java.lang.Long)
+	 */
+	@GetMapping("/public/commande-fournisseur/{id}/imprimer")
+	public ResponseEntity<byte[]> genererCmdFournisseur(@PathVariable(value = "id") Long cmdFournisseurId) throws IOException, JRException {
+		return stockService.genererCmdFournisseur(cmdFournisseurId);
+	}
+
 	/*** Gestion des approvisionnements ***/
 
 	/**

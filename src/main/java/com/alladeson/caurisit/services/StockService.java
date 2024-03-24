@@ -6,6 +6,7 @@ package com.alladeson.caurisit.services;
 import java.io.IOException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -26,11 +28,13 @@ import com.alladeson.caurisit.repositories.CmdFournisseurRepository;
 import com.alladeson.caurisit.repositories.DetailCmdFournisseurRepository;
 import com.alladeson.caurisit.repositories.FournisseurRepository;
 import com.alladeson.caurisit.repositories.MouvementArticleRepository;
+import com.alladeson.caurisit.repositories.ParametreRepository;
 import com.alladeson.caurisit.repositories.RemiseRepository;
 import com.alladeson.caurisit.repositories.TaxeRepository;
 import com.alladeson.caurisit.utils.Tool;
 
 import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 import com.alladeson.caurisit.models.entities.Approvisionnement;
 import com.alladeson.caurisit.models.entities.Article;
@@ -42,9 +46,11 @@ import com.alladeson.caurisit.models.entities.Feature;
 import com.alladeson.caurisit.models.entities.Fournisseur;
 import com.alladeson.caurisit.models.entities.MouvementArticle;
 import com.alladeson.caurisit.models.entities.Operation;
+import com.alladeson.caurisit.models.entities.Parametre;
 import com.alladeson.caurisit.models.entities.Remise;
 import com.alladeson.caurisit.models.entities.Taxe;
 import com.alladeson.caurisit.models.entities.TypeData;
+import com.alladeson.caurisit.models.reports.CmdFournisseurData;
 
 /**
  * @author William ALLADE
@@ -94,6 +100,15 @@ public class StockService {
 
 	@Autowired
 	private RemiseRepository remiseRepos;
+
+	@Autowired
+	private ParametreRepository paramRepos;
+
+	@Autowired
+	private ReportService reportService;
+
+	// Le template d'impression de la commande de fournisseur
+	private static final String CMD_FOURNISSEUR_TEMPLATE = "commande-fournisseur/template.jrxml";
 
 	/* Gestion du catégorie des articles */
 	/**
@@ -560,7 +575,7 @@ public class StockService {
 				exception.printStackTrace();
 				if (delete && exception.getMessage().contains("foreign key constraint"))
 					throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-							"Ce fournisseur est déjà associé à d'autres données, un ordre d'achat par exemple");
+							"Ce fournisseur est déjà associé à d'autres données, un bon de commande par exemple");
 				else if (exception.getMessage().contains("UniqueIfu"))
 					throw new ResponseStatusException(HttpStatus.FORBIDDEN,
 							"Un autre fournisseur est déjà enregistré avec cet ifu");
@@ -661,9 +676,9 @@ public class StockService {
 		return true;
 	}
 
-	/**** Gestion de l'ordre d'achat : CommandeFournisseur *****/
+	/**** Gestion du bon de commande : CommandeFournisseur *****/
 
-	/*** Gestion des récupérations sur l'ordre d'achat ***/
+	/*** Gestion des récupérations sur le bon de commande ***/
 
 	/**
 	 * Récupère la liste des 100 dernières commandes
@@ -674,13 +689,14 @@ public class StockService {
 		// Check permission
 		if (!accessService.canReadable(Feature.gestStockCmdFournisseur))
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
-		
-		Page<CommandeFournisseur> page = cmdFournisseurRepos.findAll(PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "id")));
+
+		Page<CommandeFournisseur> page = cmdFournisseurRepos
+				.findAll(PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "id")));
 
 		return page.getContent();
 
 	}
-	
+
 	/**
 	 * Récupère une commande dont l'identifiant est renseigné
 	 * 
@@ -698,7 +714,7 @@ public class StockService {
 
 		Optional<CommandeFournisseur> optional = cmdFournisseurRepos.findById(id);
 		if (optional.isEmpty())
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ordre d'achat non trouvé");
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bon de commande non trouvé");
 		return optional.get();
 	}
 
@@ -715,7 +731,7 @@ public class StockService {
 
 		Optional<CommandeFournisseur> optional = cmdFournisseurRepos.findByNumero(numero);
 		if (optional.isEmpty())
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ordre d'achat non trouvé");
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bon de commande non trouvé");
 		return optional.get();
 	}
 
@@ -789,7 +805,7 @@ public class StockService {
 	/**
 	 * Recupération du detail de la commande en fonction de l'article
 	 * 
-	 * @param commandeId L'id de l'ordre d'achat
+	 * @param commandeId L'id du bon de commande
 	 * @param articleId  L'id de l'article
 	 * @return {@link DetailCmdFournisseur}
 	 */
@@ -982,14 +998,13 @@ public class StockService {
 
 		// Récupération du fournisseur
 		CommandeFournisseur commande = cmdFournisseurRepos.findById(commandeId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ordre d'achat non trouvé"));
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bon de commande non trouvé"));
 		if (commande.isValid()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-					"Ordre d'achat déjà validé");
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bon de commande déjà validé");
 		}
 		if (commande.getDetails().isEmpty()) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-					"Veuillez ajouter un article à l'ordre d'achat d'abord. Merci !");
+					"Veuillez ajouter un article au  bon de commande d'abord. Merci !");
 		}
 
 		// Gestion audit : valeurAvant
@@ -1114,7 +1129,7 @@ public class StockService {
 	private CommandeFournisseur resetCommande(Long commandeId) {
 		// Récupération de la commande à mettre à jour
 		CommandeFournisseur commande = cmdFournisseurRepos.findByIdAndValidFalse(commandeId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ordre d'achat non trouvé"));
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bon de commande non trouvé"));
 		// Quand la commande n'est pas vide, mettre à jour les montants
 		if (!commande.getDetails().isEmpty())
 			return this.calculer(commande);
@@ -1144,11 +1159,11 @@ public class StockService {
 		// Récupération de la commande à valider
 		Optional<CommandeFournisseur> optional = cmdFournisseurRepos.findByIdAndValidFalse(id);
 		if (optional.isEmpty())
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ordre d'achat non trouvé ou déjà validé");
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bon de commande non trouvé ou déjà validé");
 		CommandeFournisseur commande = optional.get();
 		// Vérification si la commande n'est pas vide
 		if (commande.getDetails().isEmpty())
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ordre d'achat vide");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bon de commande vide");
 
 		// Gestion audit : valeurAvant
 		String valAvant = tool.toJson(commande);
@@ -1158,10 +1173,24 @@ public class StockService {
 		if (payload.getReferenceFactureFournisseur() == null) // Si la référence n'est pas renseignée
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					"Veuillez renseigner la référence de la facture du fournisseur");
-		// la référence a été renseignée, le système l'enregistre
-		commande.setReferenceFactureFournisseur(payload.getReferenceFactureFournisseur());
+
+		// Mise à jour de la date de création
+		if (payload.getDateCreation() != null)
+			commande.setDateCreation(payload.getDateCreation());
 		// Mise à jour Date de livraison (= date de validation de la commande)
-		commande.setDateLivraison(payload.getDateLivraison());
+		if (payload.getDateLivraison() != null)
+			commande.setDateLivraison(payload.getDateLivraison());
+		// Mise à jour de la référence externe
+		if (payload.getReferenceExterne() != null)
+			commande.setReferenceExterne(payload.getReferenceExterne());
+		// la référence de la facture du fournisseur a été renseignée, le système
+		// l'enregistre
+		if (payload.getReferenceFactureFournisseur() != null)
+			commande.setReferenceFactureFournisseur(payload.getReferenceFactureFournisseur());
+		// Mise à jour de la note du bon de commande
+		if (payload.getNotes() != null)
+			commande.setNotes(payload.getNotes());
+
 		// Validatation de la commande
 		commande.setValid(true);
 		// Enregistrement de la commande
@@ -1177,7 +1206,7 @@ public class StockService {
 				// Générer approvisisonnnment
 				Approvisionnement approvisionnement = generateApprovisionnement(commande, detail);
 				// Générer le mouvement article
-				String description = "Entrée d'article suite à la validation d'un ordre d'achat";
+				String description = "Entrée d'article suite à la validation d'un bon de commande";
 				generateMvtEntreeArticle(approvisionnement, description);
 			}
 		}
@@ -1260,11 +1289,11 @@ public class StockService {
 		// Récupération de la commande à valider
 		Optional<CommandeFournisseur> optional = cmdFournisseurRepos.findById(id);
 		if (optional.isEmpty())
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ordre d'achat non trouvé");
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bon de commande non trouvé");
 		CommandeFournisseur commande = optional.get();
 		// Vérification si la commande n'est pas encore valider
 		if (commande.isValid())
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ordre d'achat déjà validé");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bon de commande déjà validé");
 		// Gestion audit : valeurAvant
 		String valAvant = tool.toJson(commande);
 		// Suppression de la commande
@@ -1289,22 +1318,32 @@ public class StockService {
 		// Récupération de la commande à valider
 		Optional<CommandeFournisseur> optional = cmdFournisseurRepos.findByIdAndValidFalse(commandeId);
 		if (optional.isEmpty())
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ordre d'achat non trouvé");
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bon de commande non trouvé");
 		CommandeFournisseur commande = optional.get();
 		// Vérification si la commande n'est pas encore valider
 		if (commande.isValid())
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ordre d'achat déjà validé");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bon de commande déjà validé");
 
 		// Gestion audit : valeurAvant
 		String valAvant = tool.toJson(commande);
 
-		// Mise à jour des champs additionnels de la commande
+		// Mise à jour de la date de création
 		if (cmdPayload.getDateCreation() != null)
 			commande.setDateCreation(cmdPayload.getDateCreation());
-		if (cmdPayload.getNotes() != null)
-			commande.setNotes(cmdPayload.getNotes());
+		// Mise à jour Date de livraison (= date de validation de la commande)
+		if (cmdPayload.getDateLivraison() != null)
+			commande.setDateLivraison(cmdPayload.getDateLivraison());
+		// Mise à jour de la référence externe
 		if (cmdPayload.getReferenceExterne() != null)
 			commande.setReferenceExterne(cmdPayload.getReferenceExterne());
+		// la référence de la facture du fournisseur a été renseignée, le système
+		// l'enregistre
+		if (cmdPayload.getReferenceFactureFournisseur() != null)
+			commande.setReferenceFactureFournisseur(cmdPayload.getReferenceFactureFournisseur());
+		// Mise à jour de la note du bon de commande
+		if (cmdPayload.getNotes() != null)
+			commande.setNotes(cmdPayload.getNotes());
+
 		// Enregistrement de la commande
 		commande = cmdFournisseurRepos.save(commande);
 
@@ -1607,5 +1646,57 @@ public class StockService {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
 
 		return mvtArticleRepos.findAllByArticleIdOrderByIdDesc(articleId);
+	}
+
+	/** Génération du pdf de la commande de fournisseur **/
+	
+	/**
+	 * Générer le fichier pdf de la commande du fournisseur 
+	 * @param cmdFournisseurId L'id de la commande à imprimer
+	 * @return {@link ResponseEntity}
+	 * @throws IOException
+	 * @throws JRException
+	 */
+	public ResponseEntity<byte[]> genererCmdFournisseur(Long cmdFournisseurId) throws IOException, JRException {
+
+		// Récupération de la commande de fournisseur
+		Optional<CommandeFournisseur> optional = cmdFournisseurRepos.findById(cmdFournisseurId);
+		if (optional.isEmpty())
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bon de commande non trouvé");
+		CommandeFournisseur cmdf = optional.get();
+
+		return getCmdFournisseurPrint(cmdf);
+	}
+
+	/**
+	 * Imprimer et renvoyer le fichier pdf de la commande du fournisseur
+	 * @param cmdf La commande à imprimer
+	 * @return {@link ResponseEntity}
+	 * @throws IOException
+	 * @throws JRException
+	 */
+	private ResponseEntity<byte[]> getCmdFournisseurPrint(CommandeFournisseur cmdf) throws IOException, JRException {
+		// Récupération des données du parametres
+		Parametre param = paramRepos.findOneParams().orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre système n'est pas encore paramètré."));
+
+		// Template de l'impression
+		var template = CMD_FOURNISSEUR_TEMPLATE;
+
+		// Les données de la commande
+		CmdFournisseurData cmdfData = reportService.setCmdFournisseurData(cmdf, param);
+
+		// Les données des détails de la commande
+		var details = reportService.setCmdFournisseurDetailData(cmdf);
+		System.out.println("Nom de ligne de la commande : " + details.size());		
+
+		// Instanciation de la liste des paramètres
+		HashMap<String, Object> reportParams = new HashMap<>();
+		// Ajout des paramètres
+		reportParams.put("details", new JRBeanCollectionDataSource(details));
+
+		// Générer la facture
+		var fileName = "bon-de-commande-" + cmdf.getNumero() + ".pdf";
+		return reportService.cmdFournisseurReport(cmdfData, reportParams, template, fileName);
 	}
 }

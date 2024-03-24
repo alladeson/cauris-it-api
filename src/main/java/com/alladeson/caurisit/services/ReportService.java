@@ -2,6 +2,7 @@ package com.alladeson.caurisit.services;
 
 import com.alladeson.caurisit.config.AppConfig;
 import com.alladeson.caurisit.models.entities.Client;
+import com.alladeson.caurisit.models.entities.CommandeFournisseur;
 import com.alladeson.caurisit.models.entities.DetailFacture;
 import com.alladeson.caurisit.models.entities.Facture;
 import com.alladeson.caurisit.models.entities.FactureResponseDgi;
@@ -11,6 +12,7 @@ import com.alladeson.caurisit.models.entities.TypeData;
 import com.alladeson.caurisit.models.reports.BilanPeriodiqueData;
 import com.alladeson.caurisit.repositories.FactureRepository.BilanRecapMontant;
 import com.alladeson.caurisit.models.reports.ClientData;
+import com.alladeson.caurisit.models.reports.CmdFournisseurData;
 import com.alladeson.caurisit.models.reports.CompanyContact;
 import com.alladeson.caurisit.models.reports.ConfigReportData;
 import com.alladeson.caurisit.models.reports.ConfigTableData;
@@ -18,6 +20,7 @@ import com.alladeson.caurisit.models.reports.InvoiceData;
 import com.alladeson.caurisit.models.reports.InvoiceDetailData;
 import com.alladeson.caurisit.models.reports.InvoicePayement;
 import com.alladeson.caurisit.models.reports.InvoiceRecapData;
+import com.alladeson.caurisit.models.reports.cmdFournisseurDetailData;
 import com.alladeson.caurisit.utils.Tool;
 import net.sf.jasperreports.engine.JRException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,8 +70,8 @@ public class ReportService {
 	}
 
 	/**
-	 * Instanciation de remplissage de la liste des lignes de la facture pour
-	 * l'impression
+	 * Instanciation des données de remplissage de la liste des lignes de la facture
+	 * pour l'impression
 	 * 
 	 * @param facture
 	 * @return {@link List<InvoiceDetailData>}
@@ -317,7 +320,7 @@ public class ReportService {
 	 */
 	public ResponseEntity<byte[]> invoiceReport(InvoiceData invoice, HashMap<String, Object> params,
 			String invoiceTemplate, String invoiceFileName) throws IOException, JRException {
-		return tool.generateInvoice(Collections.singleton(invoice), params, invoiceTemplate, invoiceFileName);
+		return tool.generatePdf(Collections.singleton(invoice), params, invoiceTemplate, invoiceFileName);
 	}
 
 	/**
@@ -333,7 +336,7 @@ public class ReportService {
 	 */
 	public String invoiceReportAndStoreIt(InvoiceData invoice, HashMap<String, Object> params, String invoiceTemplate,
 			String invoiceFileName) throws IOException, JRException {
-		return tool.generateInvoiceAndStoreIt(Collections.singleton(invoice), params, invoiceTemplate, invoiceFileName);
+		return tool.generatePdfAndStoreIt(Collections.singleton(invoice), params, invoiceTemplate, invoiceFileName);
 	}
 
 	/*** Bilan Périodique ***/
@@ -483,7 +486,7 @@ public class ReportService {
 	 */
 	public ResponseEntity<byte[]> bilanPeriodiqueReport(BilanPeriodiqueData bilanData, HashMap<String, Object> params,
 			String bilanTemplate, String bilanFileName) throws IOException, JRException {
-		return tool.generateInvoice(Collections.singleton(bilanData), params, bilanTemplate, bilanFileName);
+		return tool.generatePdf(Collections.singleton(bilanData), params, bilanTemplate, bilanFileName);
 	}
 
 	/** Rapport de configuration **/
@@ -621,6 +624,116 @@ public class ReportService {
 	public ResponseEntity<byte[]> generateConfigReport(ConfigReportData reportData, HashMap<String, Object> params,
 			String reportTemplate, String reportFileName) throws IOException, JRException {
 		return tool.generateConfigReport(Collections.singleton(reportData), params, reportTemplate, reportFileName);
+	}
+
+	/** Gestion de la commande du fournisseur **/
+	/**
+	 * Mise en place des données de la commande pour l'impression
+	 * 
+	 * @param cmdf   La commandeFournisseur à imprimer
+	 * @param params Les données de paramètre de l'application
+	 * @return {@link CmdFournisseurData}
+	 */
+	public CmdFournisseurData setCmdFournisseurData(CommandeFournisseur cmdf, Parametre params) {
+		// Instanciation de InvoiceData
+		CmdFournisseurData cmdfData = new CmdFournisseurData();
+		// Mise à jour des champs pour la commande
+		cmdfData.setNumero(cmdf.getNumero());
+		cmdfData.setDateCreation(Tool.formatDate(cmdf.getDateCreation(), "dd/MM/yyyy"));
+		cmdfData.setDateLivraison(Tool.formatDate(cmdf.getDateLivraison(), "dd/MM/yyyy"));
+		cmdfData.setReferenceExterne(cmdf.getReferenceExterne());
+		cmdfData.setNotes(cmdf.getNotes());
+		cmdfData.setQteTotal(cmdf.getQteTotal());
+		cmdfData.setMontantRemise(cmdf.getMontantRemise());
+		cmdfData.setMontantHt(cmdf.getMontantHt());
+		cmdfData.setMontantTva(cmdf.getMontantTva());
+		cmdfData.setMontantTtc(cmdf.getMontantTtc());
+		// Mise à jour des champs pour la société
+		cmdfData.setSteName(params.getName());
+		cmdfData.setSteIfu(params.getIfu());
+		cmdfData.setSteAddress(params.getAddress());
+		cmdfData.setSteVille(params.getVille());
+		cmdfData.setSteAddressContact(params.getAddressContact());
+		cmdfData.setSteEmail(params.getEmail());
+		cmdfData.setSteRccm(params.getRcm());
+		cmdfData.setSteTelephone(params.getTelephone());
+		// Mise à jour du logo de la société
+		cmdfData.setSteLogo(appConfig.getUploadDir() + "/" + params.getLogo());
+
+		// Les données du fournisseur
+		cmdfData.setFournisseurName(cmdf.getFournisseur().getName());
+		cmdfData.setFournisseurAddress(cmdf.getFournisseur().getAddress());
+		cmdfData.setFournisseurVille(cmdf.getFournisseur().getVille());
+		cmdfData.setFournisseurAddressContact(cmdf.getFournisseur().getAddressContact());
+		cmdfData.setFournisseurTelephone(cmdf.getFournisseur().getTelephone());
+
+		// Renvoie des données
+		return cmdfData;
+	}
+
+	/**
+	 * Instanciation des données de remplissage de la liste des lignes de la facture
+	 * pour l'impression
+	 * 
+	 * @param cmdf La commandeFournisseur à imprimer
+	 * @return {@link List<cmdFournisseurDetailData>}
+	 */
+	public List<cmdFournisseurDetailData> setCmdFournisseurDetailData(CommandeFournisseur cmdf) {
+		// Instanciation de la liste des cmdFournisseurDetailData
+		List<cmdFournisseurDetailData> liste = new ArrayList<cmdFournisseurDetailData>();
+
+		// Récupération de la liste des détails de la facture
+		var details = cmdf.getDetails();
+
+		// Pour récupérer le détail de l'expédition 
+		// Utile pour l'ajouter à la fin de la liste
+		var detailExpedition = new cmdFournisseurDetailData();
+
+		for (var detail : details) {
+			// Initialisation du detail pour le reporting
+			var cmdfDetail = new cmdFournisseurDetailData();
+			// Mise à jour des champs du detail
+			cmdfDetail.setId(detail.getId());
+			cmdfDetail.setReference(detail.getReference());
+			cmdfDetail.setName(detail.getName());
+			cmdfDetail.setTaxe(detail.getTaxe().getValeur());
+			cmdfDetail.setPrixUht(detail.isRemise() ? detail.getDiscount().getOriginalPrice() : detail.getPrixUht());
+			cmdfDetail.setQuantite(detail.getQuantite());
+			cmdfDetail.setMontantHt(detail.getMontantHt());
+			cmdfDetail.setRemise(detail.isRemise() ? detail.getDiscount().getTaux() : 0);
+			// Si c'est un detail des données d'expédition, on le récupère car il sera
+			// ajouté à la fin de la liste
+			if (detail.isExpedition()) {
+				detailExpedition = cmdfDetail;
+			} else { // Ajouter tous les autres détails à la liste
+				// Ajout du detail à la liste
+				liste.add(cmdfDetail);
+			}
+		}
+		
+		// Ajout de l'expéditon à la liste en dernière postion
+		// Si elle existe bien-sur
+		if(detailExpedition.getId() != null) {
+			liste.add(detailExpedition);		
+		}
+		// Retourner la liste
+		return liste;
+	}
+
+	/**
+	 * Générer le pdf de la commande et le renvoyer
+	 * 
+	 * @param cmdf         La commandeFournisseur à imprimer
+	 * @param reportParams Les données de paramètre pour JasperReport
+	 * @param cmdfTemplate Le fichier du template de l'impression
+	 * @param cmdfFileName Le nom du fichier de sortie
+	 * @return {@link ResponseEntity}
+	 * @throws IOException
+	 * @throws JRException
+	 */
+	public ResponseEntity<byte[]> cmdFournisseurReport(CmdFournisseurData cmdf, HashMap<String, Object> reportParams,
+			String cmdfTemplate, String cmdfFileName) throws IOException, JRException {
+		return tool.generatePdf(Collections.singleton(cmdf), reportParams, cmdfTemplate, cmdfFileName);
 	}
 
 }

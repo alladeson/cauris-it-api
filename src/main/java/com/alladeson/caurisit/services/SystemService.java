@@ -273,8 +273,8 @@ public class SystemService {
 				// Gestion de stock : Fournisseur et ajout de permission pour le super-admin
 				feature = accessService.saveFeature(Feature.gestStockFournisseur, "Fournisseur", true, true, true);
 				accessService.saveAccess(sa, feature, true);
-				// Gestion de stock : Commande Fournisseur (ou ordre d'achat) et ajout de permission pour le super-admin
-				feature = accessService.saveFeature(Feature.gestStockCmdFournisseur, "Ordre d'achat", true, true, true);
+				// Gestion de stock : Commande Fournisseur (ou bon de commande) et ajout de permission pour le super-admin
+				feature = accessService.saveFeature(Feature.gestStockCmdFournisseur, "Bon de commande", true, true, true);
 				accessService.saveAccess(sa, feature, true);
 			}
 		} finally {

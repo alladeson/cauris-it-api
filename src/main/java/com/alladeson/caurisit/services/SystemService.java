@@ -227,7 +227,7 @@ public class SystemService {
 				paramService.saveTypePaiement(tp);
 			}
 
-			/* Les fonctionnalités de l'application uniquement pour la facture normalisée*/
+			/* Les fonctionnalités de l'application */
 			if (accessService.countFeature() == 0) {
 				// Gestion de stock
 				accessService.saveFeature(Feature.gestStock, "Gestion de Stock", true, false, false);
@@ -273,22 +273,6 @@ public class SystemService {
 					accessService.saveAccess(sa, f, true);
 				}
 			}
-			
-			/* Les fonctionnalités de l'application pour la gestion de stock*/
-			/*if (accessService.countFeature() == 22) {
-				// Gestion de stock : Approvisionnement et ajout de permission pour le super-admin
-				Feature feature = accessService.saveFeature(Feature.gestStockApprovisionnement, "Approvisionnement", true, true, true);
-				accessService.saveAccess(sa, feature, true);
-				// Gestion de stock : Fournisseur et ajout de permission pour le super-admin
-				feature = accessService.saveFeature(Feature.gestStockFournisseur, "Fournisseur", true, true, true);
-				accessService.saveAccess(sa, feature, true);
-				// Gestion de stock : Commande Fournisseur (ou bon de commande) et ajout de permission pour le super-admin
-				feature = accessService.saveFeature(Feature.gestStockCmdFournisseur, "Bon de commande", true, true, true);
-				accessService.saveAccess(sa, feature, true);
-				// Gestion de stock : Inventaire
-				feature = accessService.saveFeature(Feature.gestStockInventaire, "Inventaire", true, false, false);
-				accessService.saveAccess(sa, feature, true);
-			}*/
 			
 		} finally {
 			logger.info(watch.prettyPrint());

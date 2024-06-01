@@ -232,6 +232,10 @@ public class SystemService {
 				accessService.saveFeature(Feature.gestStock, "Gestion de Stock", true, false, false);
 				accessService.saveFeature(Feature.gestStockCategorie, "Catégorie Articles", true, true, true);
 				accessService.saveFeature(Feature.gestStockArticle, "Articles", true, true, true);
+				accessService.saveFeature(Feature.gestStockApprovisionnement, "Approvisionnement", true, true, true);
+				accessService.saveFeature(Feature.gestStockFournisseur, "Fournisseur", true, true, true);
+				accessService.saveFeature(Feature.gestStockCmdFournisseur, "Bon de commande", true, true, true);
+				accessService.saveFeature(Feature.gestStockInventaire, "Inventaire", true, false, false);
 				// Emission des factures
 				accessService.saveFeature(Feature.facturation, "Facture", true, false, false);
 				accessService.saveFeature(Feature.facturationFV, "Facture de Vente", true, true, true);
@@ -266,7 +270,7 @@ public class SystemService {
 			}
 			
 			/* Les fonctionnalités de l'application pour la gestion de stock*/
-			if (accessService.countFeature() == 22) {
+			/*if (accessService.countFeature() == 22) {
 				// Gestion de stock : Approvisionnement et ajout de permission pour le super-admin
 				Feature feature = accessService.saveFeature(Feature.gestStockApprovisionnement, "Approvisionnement", true, true, true);
 				accessService.saveAccess(sa, feature, true);
@@ -276,7 +280,11 @@ public class SystemService {
 				// Gestion de stock : Commande Fournisseur (ou bon de commande) et ajout de permission pour le super-admin
 				feature = accessService.saveFeature(Feature.gestStockCmdFournisseur, "Bon de commande", true, true, true);
 				accessService.saveAccess(sa, feature, true);
-			}
+				// Gestion de stock : Inventaire
+				feature = accessService.saveFeature(Feature.gestStockInventaire, "Inventaire", true, false, false);
+				accessService.saveAccess(sa, feature, true);
+			}*/
+			
 		} finally {
 			logger.info(watch.prettyPrint());
 			logger.info(">> APP INIT DATA - END");

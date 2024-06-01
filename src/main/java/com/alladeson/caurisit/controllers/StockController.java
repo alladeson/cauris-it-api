@@ -508,6 +508,19 @@ public class StockController {
 		return stockService.getListMvtByArticle(articleId);
 	}
 	
+	/** Inventaire de stock **/
+	
+	/**
+	 * @return
+	 * @throws IOException
+	 * @throws JRException
+	 * @see com.alladeson.caurisit.services.StockService#getInventairePrint()
+	 */
+	@GetMapping("/public/inventaire-stock/imprimer")
+	public ResponseEntity<byte[]> getInventairePrint() throws IOException, JRException {
+		return stockService.getInventairePrint();
+	}
+	
 	
 	
 }

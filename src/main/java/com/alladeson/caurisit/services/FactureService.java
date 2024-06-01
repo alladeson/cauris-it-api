@@ -651,13 +651,16 @@ public class FactureService {
 	 * 
 	 * @param id L'identifiant de la facture
 	 * @return {@link Facture} La facture validée
-	 * @throws JRException 
-	 * @throws IOException 
+	 * @throws JRException
+	 * @throws IOException
 	 */
 	public Facture validerFacture(Long id, ReglementPayload payload) {
 		// Check permission
 		if (!accessService.canWritable(Feature.facturationFV))
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+		// Récupération du parametre system
+		Parametre param = paramRepos.findOneParams().orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre système n'est pas encore paramètré"));
 
 		// Récupération de la facture à valider
 		Optional<Facture> optional = repository.findByIdAndValidFalse(id);
@@ -716,7 +719,9 @@ public class FactureService {
 				detail.setValid(true);
 				detail = dfRepos.save(detail);
 				// Générer le mouvement article
-				generateMvtSortieArticle(detail);
+				if(param.isGestionStock() && param.isStockEtFacture()) {
+					generateMvtSortieArticle(detail);
+				}
 			}
 		}
 		// Tentatif d'impression de la facture
@@ -739,8 +744,9 @@ public class FactureService {
 
 			// Enregistrement de l'audit
 			auditService.traceChange(Operation.FACTURATION_VALIDATE, valAvant, valApres);
-			
-			// Envoie du rapport de validation de la facture par mail à l'adresse email défini par le fournisseur
+
+			// Envoie du rapport de validation de la facture par mail à l'adresse email
+			// défini par le fournisseur
 			sendMailFactureValidee(facture);
 		}
 
@@ -755,22 +761,26 @@ public class FactureService {
 		/*** Début mise à jour de l'article ***/
 		// Mise à jour de la quantité de l'article
 		Article article = detail.getArticle();
+		// Récupération du stock initial de l'article
+		Double stockInitial = article.getStock();
+		// Mise à jour du stock de l'article
 		article.setStock(article.getStock() - detail.getQuantite());
 		article = articleRepos.save(article);
 		/*** Fin mise à jour de l'article ***/
-		
+
 		// Générer le mouvement article
 		MouvementArticle mvt = new MouvementArticle();
 		// Mise à jour des champs du mouvement article
-		mvt.setDetailFacture(detail);;
+		mvt.setDetailFacture(detail);
 		mvt.setArticle(article);
 		mvt.setDate(new Date());
 		mvt.setType(TypeData.SORTIE);
-		mvt.setDescription("Sortie d'article suite à la validation d'une facture de vente");		
+		mvt.setDescription("Sortie d'article suite à la validation d'une facture de vente");
+		mvt.setStockInitial(stockInitial);
 		// Enregistrement du mouvement de l'article
 		mvtArticleRepos.save(mvt);
 	}
-	
+
 	/**
 	 * @param detail
 	 */
@@ -778,18 +788,23 @@ public class FactureService {
 		/*** Début mise à jour de l'article ***/
 		// Mise à jour de la quantité de l'article
 		Article article = detail.getArticle();
+		// Récupération du stock initial de l'article
+		Double stockInitial = article.getStock();
+		// Mise à jour du stock de l'article
 		article.setStock(article.getStock() + detail.getQuantite());
 		article = articleRepos.save(article);
 		/*** Fin mise à jour de l'article ***/
-		
+
 		// Générer le mouvement article
 		MouvementArticle mvt = new MouvementArticle();
 		// Mise à jour des champs du mouvement article
-		mvt.setDetailFacture(detail);;
+		mvt.setDetailFacture(detail);
+		;
 		mvt.setArticle(article);
 		mvt.setDate(new Date());
 		mvt.setType(TypeData.RESTAURATION);
-		mvt.setDescription("Restauration du stock de l'article suite à la validation d'une facture d'avoir");		
+		mvt.setDescription("Restauration du stock de l'article suite à la validation d'une facture d'avoir");
+		mvt.setStockInitial(stockInitial);
 		// Enregistrement du mouvement de l'article
 		mvtArticleRepos.save(mvt);
 	}
@@ -1242,7 +1257,8 @@ public class FactureService {
 		// Récupération du type de la facture
 		var type = facture.getType();
 		var templateDir = format.equals("A8") ? "report-A8/" : "report/";
-		// var templateDir = param.getFormatFacture().equals(TypeData.A8) ? "report-A8/" : "report/";
+		// var templateDir = param.getFormatFacture().equals(TypeData.A8) ? "report-A8/"
+		// : "report/";
 		var template = "";
 		if (type.getGroupe().equals(TypeData.FV)) {
 			template = templateDir + INVOICE_REPORT_TEMPLATE_FV;
@@ -1283,7 +1299,7 @@ public class FactureService {
 
 		// Les données des détails de la facture
 		List<InvoiceDetailData> details = reportService.setInvoiceDetailData(facture);
-		System.out.println("Nom de ligne de la facture : " + facture.getDetails().size());
+		System.out.println("Nombre de ligne de la facture : " + facture.getDetails().size());
 		// Les données du client
 		ClientData client = reportService.setClientData(facture.getClient());
 		// Les données de payement
@@ -1477,6 +1493,10 @@ public class FactureService {
 		if (!accessService.canWritable(Feature.facturationFA))
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
 
+		// Récupération du parametre system
+		Parametre param = paramRepos.findOneParams().orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre système n'est pas encore paramètré"));
+
 		// Récupération de la facture à valider
 		Optional<Facture> optional = repository.findByIdAndValidFalse(id);
 		if (optional.isEmpty())
@@ -1505,7 +1525,10 @@ public class FactureService {
 			for (DetailFacture detail : facture.getDetails()) {
 				detail.setValid(true);
 				detail = dfRepos.save(detail);
-				generateMvtRestaurationArticle(detail);
+				// Gestion du mouvement de l'article concerné
+				if(param.isGestionStock() && param.isStockEtFacture()) {
+					generateMvtRestaurationArticle(detail);
+				}
 			}
 		}
 
@@ -1529,8 +1552,9 @@ public class FactureService {
 
 			// Enregistrement de l'audit
 			auditService.traceChange(Operation.FACTURATION_FA_VALIDATE, valAvant, valApres);
-			
-			// Envoie du rapport de validation de la facture par mail à l'adresse email défini par le fournisseur
+
+			// Envoie du rapport de validation de la facture par mail à l'adresse email
+			// défini par le fournisseur
 			sendMailFactureValidee(facture);
 		}
 
@@ -1633,9 +1657,10 @@ public class FactureService {
 
 		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Les dates ne sont pas correctement définies");
 	}
-	
+
 	/**
-	 * Une méthode asynchrone pour l'envoye d'une facture par mail après que cette dernière soit validée
+	 * Une méthode asynchrone pour l'envoye d'une facture par mail après que cette
+	 * dernière soit validée
 	 * 
 	 * @param facture La facture à envoyer par mail
 	 * @return True si le mail est envoyé, False sinon
@@ -1649,16 +1674,17 @@ public class FactureService {
 		try {
 			// Impression et enregistrement du fichier de la facture
 			String fileName = printInvoiceAndStoreIt(facture, "A4");
-			// Vérifier si la facture est bien imprimée, le nom du fichier deverait être renvoyé
+			// Vérifier si la facture est bien imprimée, le nom du fichier deverait être
+			// renvoyé
 			if (!StringUtils.hasText(fileName))
 				return mailSended;
-			//Ici la facture est bien imprimée, nous pouvons donc l'envoyer par mail		
+			// Ici la facture est bien imprimée, nous pouvons donc l'envoyer par mail
 			mailSended = accessService.sendMailFactureValidee(fileName, INVOICE_MAIL_TRANSFERT_TEMPLATE);
 		} catch (IOException | JRException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return mailSended;
 	}
 

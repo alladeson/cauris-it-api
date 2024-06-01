@@ -29,6 +29,8 @@ public class MouvementArticle extends BaseEntity {
 	private Long id;
 	// La date de la création du mouvement
 	private Date date;
+	// Le stock initiale de l'article
+	private Double stockInitial;
 	// Pour la description : utile pour le reporting
 	@Column(length = 1000, nullable = true)
 	private String description;
@@ -74,6 +76,20 @@ public class MouvementArticle extends BaseEntity {
 	 */
 	public void setDate(Date date) {
 		this.date = date;
+	}
+
+	/**
+	 * @return the stockInitial
+	 */
+	public Double getStockInitial() {
+		return stockInitial;
+	}
+
+	/**
+	 * @param stockInitial the stockInitial to set
+	 */
+	public void setStockInitial(Double stockInitial) {
+		this.stockInitial = stockInitial;
 	}
 
 	/**

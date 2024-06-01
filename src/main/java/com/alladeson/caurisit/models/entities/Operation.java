@@ -57,6 +57,7 @@ public enum Operation {
     SYSTEM_UPDATE(Feature.parametreSysteme + 2, "Mis à jour des données du système"),
     SYSTEM_LOGO_UPDATE(Feature.parametreSysteme + 21, "Mis à jour du logo"),
     SYSTEM_FORMAT_FACTURE_UPDATE(Feature.parametreSysteme + 22, "Mis à jour du format de la facture"),
+    SYSTEM_GESTION_STOCK_PROPERTIES_UPDATE(Feature.parametreSysteme + 23, "Mis à jour des propriétés de la gestion de stock"),
     SYSTEM_DELETE(-(Feature.parametreSysteme + 1), "Suppression des données du système"),
 
     /** Les opérations de contrôle d'accès **/

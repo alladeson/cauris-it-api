@@ -112,6 +112,10 @@ public class AccessService {
 		var codes = new ArrayList<Integer>();
 		// codes.add(Feature.parametreSysteme);
 		// codes.add(Feature.gestStock);
+		codes.add(Feature.gestStockApprovisionnement);
+		codes.add(Feature.gestStockFournisseur);
+		codes.add(Feature.gestStockCmdFournisseur);
+		codes.add(Feature.gestStockInventaire);
 		codes.add(Feature.parametreDonneSysteme);
 		// codes.add(Feature.accessCtrl);
 		// codes.add(Feature.accessCtrlAccess);
@@ -134,6 +138,10 @@ public class AccessService {
 		var codes = new ArrayList<Integer>();
 		// codes.add(Feature.gestStock);
 		// codes.add(Feature.parametreSysteme);
+		codes.add(Feature.gestStockApprovisionnement);
+		codes.add(Feature.gestStockFournisseur);
+		codes.add(Feature.gestStockCmdFournisseur);
+		codes.add(Feature.gestStockInventaire);
 		codes.add(Feature.parametre);
 		codes.add(Feature.parametreDonneSysteme);
 		codes.add(Feature.accessCtrl);

@@ -1,6 +1,7 @@
 package com.alladeson.caurisit.services;
 
 import com.alladeson.caurisit.config.AppConfig;
+import com.alladeson.caurisit.models.entities.Article;
 import com.alladeson.caurisit.models.entities.Client;
 import com.alladeson.caurisit.models.entities.CommandeFournisseur;
 import com.alladeson.caurisit.models.entities.DetailFacture;
@@ -16,6 +17,8 @@ import com.alladeson.caurisit.models.reports.CmdFournisseurData;
 import com.alladeson.caurisit.models.reports.CompanyContact;
 import com.alladeson.caurisit.models.reports.ConfigReportData;
 import com.alladeson.caurisit.models.reports.ConfigTableData;
+import com.alladeson.caurisit.models.reports.InventaireData;
+import com.alladeson.caurisit.models.reports.InventaireDetailData;
 import com.alladeson.caurisit.models.reports.InvoiceData;
 import com.alladeson.caurisit.models.reports.InvoiceDetailData;
 import com.alladeson.caurisit.models.reports.InvoicePayement;
@@ -23,6 +26,7 @@ import com.alladeson.caurisit.models.reports.InvoiceRecapData;
 import com.alladeson.caurisit.models.reports.cmdFournisseurDetailData;
 import com.alladeson.caurisit.utils.Tool;
 import net.sf.jasperreports.engine.JRException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -31,7 +35,9 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -734,6 +740,74 @@ public class ReportService {
 	public ResponseEntity<byte[]> cmdFournisseurReport(CmdFournisseurData cmdf, HashMap<String, Object> reportParams,
 			String cmdfTemplate, String cmdfFileName) throws IOException, JRException {
 		return tool.generatePdf(Collections.singleton(cmdf), reportParams, cmdfTemplate, cmdfFileName);
+	}
+	
+	/** Gestion de la fichie d'inventaire de stock **/
+	/**
+	 * Mise en place des données d'inventaire pour l'impression
+	 * 
+	 * @param params Les données de paramètre de l'application
+	 * @return {@link InventaireData}
+	 */
+	public InventaireData setInventaireData(Parametre params) {
+		// Instanciation de InvoiceData
+		InventaireData inventaire = new InventaireData();
+		// Mise à jour des champs pour la commande
+		inventaire.setDate(Tool.formatDate(new Date(), "dd/MM/yyyy"));
+		
+		// Mise à jour des champs pour la société
+		inventaire.setSteName(params.getName());
+		inventaire.setSteIfu(params.getIfu());
+		inventaire.setSteAddress(params.getAddress());
+		inventaire.setSteVille(params.getVille());
+		inventaire.setSteAddressContact(params.getAddressContact());
+		inventaire.setSteEmail(params.getEmail());
+		inventaire.setSteRccm(params.getRcm());
+		inventaire.setSteTelephone(params.getTelephone());
+		// Mise à jour du logo de la société
+		inventaire.setSteLogo(appConfig.getUploadDir() + "/" + params.getLogo());
+
+		// Renvoie des données
+		return inventaire;
+	}
+
+	/**
+	 * Instanciation des données de remplissage de la liste des lignes de l'inventaire pour l'impression
+	 * 
+	 * @return {@link List<cmdFournisseurDetailData>}
+	 */
+	public List<InventaireDetailData> setInventaireDetailData(List<Article> articles) {
+		// Instanciation de la liste des inventaireDetailData
+		List<InventaireDetailData> liste = new ArrayList<InventaireDetailData>();
+
+		for (Article article : articles) {
+			// Initialisation du detail pour le reporting
+			var inventaireDetail = new InventaireDetailData();
+			// Mise à jour des champs du detail
+			inventaireDetail.setReference(article.getReference());
+			inventaireDetail.setName(article.getDesignation());
+			inventaireDetail.setQte(article.getStock());
+			liste.add(inventaireDetail);
+		}
+		
+		// Retourner la liste
+		return liste;
+	}
+
+	/** 
+	 * Générer le pdf et le renvoyer
+	 * 
+	 * @param collection L'ensemble des données du reporting, ex: Collections.singleton(Object)
+	 * @param reportParams Les données de paramètre du reporting, ex: new JRBeanCollectionDataSource(List<Object>)
+	 * @param template Le chemin vers le fichier.jrxml du reporting
+	 * @param filename Le nom du fichier de sortie
+	 * @return {@link ResponseEntity<byte[]>}
+	 * @throws IOException
+	 * @throws JRException
+	 */
+	public ResponseEntity<byte[]> generateReport(Collection<?> collection, HashMap<String, Object> reportParams,
+			String template, String filename) throws IOException, JRException {
+		return tool.generatePdf(collection, reportParams, template, filename);
 	}
 
 }

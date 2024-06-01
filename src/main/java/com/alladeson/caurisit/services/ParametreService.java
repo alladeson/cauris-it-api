@@ -528,6 +528,41 @@ public class ParametreService {
 		// Renvoie du paramètre
 		return param;
 	}
+	
+	
+	/**
+	 * Mise à jour des propriétés de la gestion de stock
+	 * 
+	 * @param paramId
+	 * @param format
+	 * @return
+	 */
+	public Parametre setGestionStockProperties(Long paramId, boolean gestionStock, boolean stockEtFacture) {
+		// Check permission
+		if (!accessService.canWritable(Feature.parametreSysteme))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
+		Parametre param = paramRepos.findById(paramId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Parametre non trouvé"));
+
+		// Gestion audit : valeurAvant
+		String valAvant = tool.toJson(param);
+		// Mise à jour du propriété de la gestion de stock
+		param.setGestionStock(gestionStock);
+		// Mise à jour du propriété de la gestion de stock et facuturation
+		param.setStockEtFacture(stockEtFacture);
+		// Enregistrement et renvoie du parametre
+		param = paramRepos.save(param);
+
+		// Gestion audit : valeurApres
+		String valApres = tool.toJson(param);
+
+		// Enregistrement des traces de changement
+		auditService.traceChange(Operation.SYSTEM_GESTION_STOCK_PROPERTIES_UPDATE, valAvant, valApres);
+
+		// Renvoie du paramètre
+		return param;
+	}
 
 	/**
 	 * Générer la facture normalisée

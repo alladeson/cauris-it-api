@@ -5,6 +5,7 @@ package com.alladeson.caurisit.services;
 
 import java.io.IOException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -51,6 +52,7 @@ import com.alladeson.caurisit.models.entities.Remise;
 import com.alladeson.caurisit.models.entities.Taxe;
 import com.alladeson.caurisit.models.entities.TypeData;
 import com.alladeson.caurisit.models.reports.CmdFournisseurData;
+import com.alladeson.caurisit.models.reports.InventaireData;
 
 /**
  * @author William ALLADE
@@ -109,6 +111,8 @@ public class StockService {
 
 	// Le template d'impression de la commande de fournisseur
 	private static final String CMD_FOURNISSEUR_TEMPLATE = "commande-fournisseur/template.jrxml";
+	// Le template d'impression de la commande de fournisseur
+	private static final String INVENTAIRE_TEMPLATE = "commande-fournisseur/inventaire.jrxml";
 
 	/* Gestion du catégorie des articles */
 	/**
@@ -1200,14 +1204,15 @@ public class StockService {
 		for (DetailCmdFournisseur detail : commande.getDetails()) {
 			detail.setValid(true);
 			detail = detailCmdFournissieurRepos.save(detail);
-			// Si le detail n'est les données d'une expédition,
+			// Si le detail n'est pas les infos d'une expédition,
 			// C'est donc lié à un article
 			if (!detail.isExpedition()) {
 				// Générer approvisisonnnment
 				Approvisionnement approvisionnement = generateApprovisionnement(commande, detail);
 				// Générer le mouvement article
 				String description = "Entrée d'article suite à la validation d'un bon de commande";
-				generateMvtEntreeArticle(approvisionnement, description);
+				// Gérer le mouvement de l'article concerné
+				this.generateMvtEntreeArticle(approvisionnement, description);
 			}
 		}
 
@@ -1231,6 +1236,9 @@ public class StockService {
 		/*** Début mise à jour de l'article ***/
 		// Mise à jour de la quantité de l'article
 		Article article = approvisionnement.getArticle();
+		// Récupération du stock initial de l'article
+		Double stockInitial = article.getStock();
+		// Mise à jour du stock de l'article
 		article.setStock(article.getStock() + approvisionnement.getQuantite());
 		article = articleRepos.save(article);
 		/*** Fin mise à jour de l'article ***/
@@ -1242,6 +1250,7 @@ public class StockService {
 		mvt.setDate(new Date());
 		mvt.setType(TypeData.ENTREE);
 		mvt.setDescription(description);
+		mvt.setStockInitial(stockInitial);
 		// Enregistrement du mouvement de l'article
 		mvtArticleRepos.save(mvt);
 	}
@@ -1574,7 +1583,8 @@ public class StockService {
 
 		// Générer le mouvement article
 		String description = "Entrée d'article suite à la validation d'un approvisionnement";
-		generateMvtEntreeArticle(approvisionnement, description);
+		// Gérer le mouvement de l'article concerné
+		this.generateMvtEntreeArticle(approvisionnement, description);
 
 		// Gestion audit : valeurApres
 		String valApres = tool.toJson(approvisionnement);
@@ -1688,7 +1698,7 @@ public class StockService {
 
 		// Les données des détails de la commande
 		var details = reportService.setCmdFournisseurDetailData(cmdf);
-		System.out.println("Nom de ligne de la commande : " + details.size());		
+		System.out.println("Nombre de ligne de la commande : " + details.size());		
 
 		// Instanciation de la liste des paramètres
 		HashMap<String, Object> reportParams = new HashMap<>();
@@ -1698,5 +1708,39 @@ public class StockService {
 		// Générer la facture
 		var fileName = "bon-de-commande-" + cmdf.getNumero() + ".pdf";
 		return reportService.cmdFournisseurReport(cmdfData, reportParams, template, fileName);
+	}
+	
+	/**
+	 * Imprimer et renvoyer la fiche d'inventaire du stock
+	 * @return {@link ResponseEntity}
+	 * @throws IOException
+	 * @throws JRException
+	 */
+	public ResponseEntity<byte[]> getInventairePrint() throws IOException, JRException {
+		// Récupération des données du parametres
+		Parametre param = paramRepos.findOneParams().orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Votre système n'est pas encore paramètré."));
+
+		// Template de l'impression
+		var template = INVENTAIRE_TEMPLATE;
+
+		// Les données de l'inventaire
+		InventaireData inventaireData = reportService.setInventaireData(param);
+
+		// Les données des détails de la commande
+		// Récupération des articles
+		List<Article> articles =  articleRepos.findAll();
+		// 
+		var details = reportService.setInventaireDetailData(articles);
+		System.out.println("Nombre de ligne de l'invenataire : " + details.size());		
+
+		// Instanciation de la liste des paramètres
+		HashMap<String, Object> reportParams = new HashMap<>();
+		// Ajout des paramètres
+		reportParams.put("details", new JRBeanCollectionDataSource(details));
+
+		// Générer la fiche
+		var fileName = "fiche-inventaire-de-stock-" + Tool.formatDate(new Date(), "dd-MM-yyyy") + ".pdf";
+		return reportService.generateReport(Collections.singleton(inventaireData), reportParams, template, fileName);
 	}
 }

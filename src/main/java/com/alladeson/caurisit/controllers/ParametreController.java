@@ -134,6 +134,18 @@ public class ParametreController {
 	}
 
 	/**
+	 * @param paramId
+	 * @param gestionStock
+	 * @param stockEtFacture
+	 * @return
+	 * @see com.alladeson.caurisit.services.ParametreService#setGestionStockProperties(java.lang.Long, boolean, boolean)
+	 */
+	@PutMapping("parametre/params/{id}/gestion-stock/{gestionStock}/stock-et-facture/{stockEtFacture}")
+	public Parametre setGestionStockProperties(@PathVariable(value = "id") Long paramId, @PathVariable(value = "gestionStock") boolean gestionStock, @PathVariable(value = "stockEtFacture") boolean stockEtFacture) {
+		return paramService.setGestionStockProperties(paramId, gestionStock, stockEtFacture);
+	}
+
+	/**
 	 * @param taxe
 	 * @return
 	 * @see com.alladeson.caurisit.services.ParametreService#createTaxe(com.alladeson.caurisit.models.entities.Taxe)

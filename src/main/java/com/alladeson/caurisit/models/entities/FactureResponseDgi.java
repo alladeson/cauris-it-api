@@ -12,7 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
 @Entity

@@ -23,6 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * @author William ALLADE
+ *
+ */
 @Service
 public class AuditService {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());

@@ -8,6 +8,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * @author William ALLADE
+ *
+ */
 public interface AuditRepository extends JpaRepository<Audit, Long> {
 
     List<Audit> findByUserIdOrderByDateHeureDesc(Long userId);

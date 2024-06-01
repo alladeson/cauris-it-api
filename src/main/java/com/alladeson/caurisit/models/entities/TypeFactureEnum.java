@@ -4,7 +4,7 @@
 package com.alladeson.caurisit.models.entities;
 
 /**
- * @author William
+ * @author William ALLADE
  *
  */
 public enum TypeFactureEnum {

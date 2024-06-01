@@ -13,6 +13,10 @@ import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+/**
+ * @author William ALLADE
+ *
+ */
 @Entity
 public class DetailFacture extends BaseEntity {
 

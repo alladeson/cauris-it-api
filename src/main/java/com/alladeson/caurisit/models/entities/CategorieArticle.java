@@ -12,7 +12,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
 @Table(uniqueConstraints = { @UniqueConstraint(name = "UniqueLibelle", columnNames = { "libelle" }) })

@@ -6,7 +6,7 @@ package com.alladeson.caurisit.models.entities;
 import org.hibernate.dialect.MySQL5InnoDBDialect;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
 @SuppressWarnings("deprecation")

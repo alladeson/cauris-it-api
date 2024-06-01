@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.alladeson.caurisit.models.entities.Client;
 
 /**
- * @author William
+ * @author William ALLADE
  *
  */
 public interface ClientRepository extends JpaRepository<Client, Long> {

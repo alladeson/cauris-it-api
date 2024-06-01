@@ -14,10 +14,13 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
-@Table(uniqueConstraints = { @UniqueConstraint(name = "UniqueDesignation", columnNames = { "designation" }) })
+@Table(uniqueConstraints = { 
+		@UniqueConstraint(name = "UniqueDesignation", columnNames = { "designation" }),
+		@UniqueConstraint(name = "UniqueReference", columnNames = { "reference" }),
+})
 @Entity
 public class Article extends BaseEntity {
 
@@ -29,6 +32,9 @@ public class Article extends BaseEntity {
 	@Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+	// La référence de l'article
+	@Column(nullable = false)
+	private String reference;
 	@Column(nullable = false)
 	private String designation;
 	private Double prix;
@@ -57,6 +63,20 @@ public class Article extends BaseEntity {
 	 */
 	public void setId(Long id) {
 		this.id = id;
+	}	
+
+	/**
+	 * @return the reference
+	 */
+	public String getReference() {
+		return reference;
+	}
+
+	/**
+	 * @param reference the reference to set
+	 */
+	public void setReference(String reference) {
+		this.reference = reference;
 	}
 
 	/**
@@ -91,7 +111,7 @@ public class Article extends BaseEntity {
 	 * @return the stock
 	 */
 	public Double getStock() {
-		return stock;
+		return stock == null ? 0 : stock;
 	}
 
 	/**

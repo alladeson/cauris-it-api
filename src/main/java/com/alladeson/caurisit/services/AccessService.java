@@ -39,7 +39,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.alladeson.caurisit.config.AppConfig;
 import com.alladeson.caurisit.models.entities.Access;
-import com.alladeson.caurisit.models.entities.Facture;
 import com.alladeson.caurisit.models.entities.Feature;
 import com.alladeson.caurisit.models.entities.Operation;
 import com.alladeson.caurisit.models.entities.Parametre;
@@ -63,7 +62,7 @@ import net.sf.jasperreports.engine.JRException;
 import reactor.netty.http.client.HttpClient;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
 @Service
@@ -98,8 +97,13 @@ public class AccessService {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé"));
 	}
 
-	/** Gestion du feature **/
+	/** feature Management **/
 
+	/**
+	 * Retrieve minimum features required for administrators, 
+	 * While super-administrator have access to all features
+	 * @return
+	 */
 	public List<Feature> getAllFeatureForAdmin() {
 		// Check permission
 		if (!this.canReadable(Feature.accessCtrlFeatures))
@@ -107,10 +111,41 @@ public class AccessService {
 
 		var codes = new ArrayList<Integer>();
 		// codes.add(Feature.parametreSysteme);
-		codes.add(Feature.gestStock);
+		// codes.add(Feature.gestStock);
+		codes.add(Feature.gestStockApprovisionnement);
+		codes.add(Feature.gestStockFournisseur);
+		codes.add(Feature.gestStockCmdFournisseur);
+		codes.add(Feature.gestStockInventaire);
+		codes.add(Feature.parametreDonneSysteme);
+		// codes.add(Feature.accessCtrl);
+		// codes.add(Feature.accessCtrlAccess);
+		codes.add(Feature.accessCtrlFeatures);
+		codes.add(Feature.accessCtrlUser);
+		codes.add(Feature.accessCtrlUserGroup);
+		// codes.add(Feature.audit);
+		return featureRepos.findAllByCodeNotIn(codes);
+	}
+	
+	/**
+	 * Retrieve minimum features required for other users, 
+	 * @return
+	 */
+	public List<Feature> getAllFeatureForOthers() {
+		// Check permission
+		if (!this.canReadable(Feature.accessCtrlFeatures))
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
+
+		var codes = new ArrayList<Integer>();
+		// codes.add(Feature.gestStock);
+		// codes.add(Feature.parametreSysteme);
+		codes.add(Feature.gestStockApprovisionnement);
+		codes.add(Feature.gestStockFournisseur);
+		codes.add(Feature.gestStockCmdFournisseur);
+		codes.add(Feature.gestStockInventaire);
+		codes.add(Feature.parametre);
 		codes.add(Feature.parametreDonneSysteme);
 		codes.add(Feature.accessCtrl);
-		codes.add(Feature.accessCtrlAccess);
+		// codes.add(Feature.accessCtrlAccess);
 		codes.add(Feature.accessCtrlFeatures);
 		codes.add(Feature.accessCtrlUser);
 		codes.add(Feature.accessCtrlUserGroup);
@@ -241,6 +276,16 @@ public class AccessService {
 
 		return groupeRepos.findByRoleNot(TypeRole.SUPER_ADMIN);
 	}
+	
+	public UserGroup getGroupeByRole(TypeRole role) {
+		// Retrieve the Group of the role
+		Optional<UserGroup> ug = groupeRepos.findByRole(role);
+		// Return null if no Group for the role
+		if(ug.isEmpty())
+			return null;
+		// Otherwise return the Group found
+		return ug.get();
+	}
 
 	public UserGroup getGroupe(Long id) {
 		// Check permission
@@ -351,9 +396,15 @@ public class AccessService {
 			}
 		} else {
 			// Permissions
-			var features = this.getAllFeatureForAdmin();
+			List<Feature> features = new ArrayList<Feature>();
+			if(ug.getRole().equals(TypeRole.ADMIN))
+				features = this.getAllFeatureForAdmin();
+			else 
+				features = this.getAllFeatureForOthers();
+			// Save access for the new group
 			for (Feature f : features) {
-				this.saveAccess(ug, f, ug.getRole().equals(TypeRole.ADMIN) ? true : false);
+				// this.saveAccess(ug, f, ug.getRole().equals(TypeRole.ADMIN) ? true : false);
+				this.saveAccess(ug, f, true);
 			}
 		}
 		return ug;

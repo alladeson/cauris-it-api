@@ -13,6 +13,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+/**
+ * @author William ALLADE
+ *
+ */
 @Entity
 public class Facture extends BaseEntity {
 

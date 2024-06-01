@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import com.alladeson.caurisit.models.entities.Parametre;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
 public interface ParametreRepository extends JpaRepository<Parametre, Long> {

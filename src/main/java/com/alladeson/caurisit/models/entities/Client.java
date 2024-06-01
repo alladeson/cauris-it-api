@@ -13,7 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 /**
- * @author William
+ * @author William ALLADE
  *
  */
 @Table(uniqueConstraints = { 
@@ -210,5 +210,24 @@ public class Client extends BaseEntity {
 
 		}
 		return contact;
+	}
+	
+	/**
+	 * Retourne l'adresse qui est la combinaison de l'adress et de la ville
+	 * 
+	 * @return the complete address
+	 */
+	public String getAddressContact() {
+		String address = "";
+		if (this.address != null)
+			address += this.address;
+		if (this.ville != null) {
+			if (this.address != null)
+				address += ", " + this.ville;
+			else
+				address += this.ville;
+
+		}
+		return address;
 	}
 }

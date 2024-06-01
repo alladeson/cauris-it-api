@@ -30,6 +30,10 @@ import org.springframework.web.server.ResponseStatusException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.*;
 
+/**
+ * @author William ALLADE
+ *
+ */
 @Service
 public class UserService {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());

@@ -7,7 +7,6 @@ import com.alladeson.caurisit.config.AppConfig;
 import com.alladeson.caurisit.models.paylaods.UploadFileResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -30,7 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author TechDigita
+ * @author William ALLADE
  *
  */
 
@@ -40,7 +39,6 @@ public class FileService {
 
 	private final Path fileStorageLocation;
 
-	@Autowired
 	public FileService(AppConfig appConfig) {
 		try {
 			this.fileStorageLocation = Paths.get(appConfig.getUploadDir()).toAbsolutePath().normalize();

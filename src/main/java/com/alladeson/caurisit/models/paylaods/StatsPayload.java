@@ -20,6 +20,8 @@ public class StatsPayload {
 	private Instant finAt;
 
 	private String keyword;
+	
+	private double tauxImpot;
 
 	/**
 	 * @return the debut
@@ -89,5 +91,19 @@ public class StatsPayload {
 	 */
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
+	}
+
+	/**
+	 * @return the tauxImpot
+	 */
+	public double getTauxImpot() {
+		return tauxImpot;
+	}
+
+	/**
+	 * @param tauxImpot the tauxImpot to set
+	 */
+	public void setTauxImpot(double tauxImpot) {
+		this.tauxImpot = tauxImpot;
 	}
 }

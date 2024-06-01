@@ -232,6 +232,9 @@ public class StatsService {
 		// Mise à jour des champ du bilan périodique
 		String dateDebut = Tool.formatDate(payload.getDebut(), "dd/MM/yyyy HH:mm:ss");
 		String dateFin = Tool.formatDate(payload.getFin(), "dd/MM/yyyy HH:mm:ss");
+		// Calcul du montant d'imposition
+		Long montantImpot = Math.round((payload.getTauxImpot() * recapMontantRecap.getTotal())/100);
+		//
 		bilanData.setDateDebut(dateDebut);
 		bilanData.setDateFin(dateFin);
 		bilanData.setNbFv(nbFv);
@@ -240,6 +243,8 @@ public class StatsService {
 		bilanData.setTotalFv(recapMontantFv.getTotal());
 		bilanData.setTotalFa(recapMontantFa.getTotal() * (-1));
 		bilanData.setTotalFvRecap(recapMontantRecap.getTotal());
+		bilanData.setTauxImpot(payload.getTauxImpot());
+		bilanData.setMontantImpot(montantImpot);
 		/** Fin formatage des données du bilan pour l'impression **/
 
 		// Les données de récapitulatif des montants

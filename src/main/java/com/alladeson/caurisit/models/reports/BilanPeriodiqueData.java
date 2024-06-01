@@ -25,6 +25,10 @@ public class BilanPeriodiqueData {
 	private Long totalFa;
 	// Le montant total des factures de vente n'ayant pas fait objet de facture d'avoir dans la période
 	private Long totalFvRecap;
+	// Le taux d'imposition
+	private double tauxImpot;
+	// Montant impot
+	private Long montantImpot;
 	
 	// Les informations de la société
 	private String ste_ifu;
@@ -151,6 +155,34 @@ public class BilanPeriodiqueData {
 	 */
 	public void setTotalFvRecap(Long totalFvRecap) {
 		this.totalFvRecap = totalFvRecap;
+	}
+
+	/**
+	 * @return the tauxImpot
+	 */
+	public double getTauxImpot() {
+		return tauxImpot;
+	}
+
+	/**
+	 * @return the montantImpot
+	 */
+	public Long getMontantImpot() {
+		return montantImpot;
+	}
+
+	/**
+	 * @param tauxImpot the tauxImpot to set
+	 */
+	public void setTauxImpot(double tauxImpot) {
+		this.tauxImpot = tauxImpot;
+	}
+
+	/**
+	 * @param montantImpot the montantImpot to set
+	 */
+	public void setMontantImpot(Long montantImpot) {
+		this.montantImpot = montantImpot;
 	}
 
 	/**

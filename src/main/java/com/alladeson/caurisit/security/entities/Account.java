@@ -15,9 +15,12 @@ public class Account extends BaseEntity {
 	 * 
 	 */
 	private static final long serialVersionUID = 8295803199012737655L;
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_user_account")
+	@SequenceGenerator(name = "gen_user_account", sequenceName = "_seq_user_account", allocationSize = 1)
 	private Long id;
+	//
 	@Column(unique = true)
 	private String username;
 	@JsonIgnore

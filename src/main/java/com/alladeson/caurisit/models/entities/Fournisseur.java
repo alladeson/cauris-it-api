@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -31,9 +32,12 @@ public class Fournisseur extends BaseEntity {
 	 */
 	private static final long serialVersionUID = 124807912428741457L;
 
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_fournisseur")
+	@SequenceGenerator(name = "gen_fournisseur", sequenceName = "_seq_fournisseur", allocationSize = 1)
 	private Long id;
+	//
 
 	// @Column(nullable = false)
 	private String ifu;

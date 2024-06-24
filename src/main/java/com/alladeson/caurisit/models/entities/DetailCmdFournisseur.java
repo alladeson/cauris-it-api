@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -25,9 +26,12 @@ public class DetailCmdFournisseur extends BaseEntity {
 	 * 
 	 */
 	private static final long serialVersionUID = -4895466564591129199L;
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_detail_cmdf")
+	@SequenceGenerator(name = "gen_detail_cmdf", sequenceName = "_seq_detail_cmdf", allocationSize = 1)
 	private Long id;
+	//
 	// La référence de l'article
 	private String reference;
 	// Le nom ou désignation de l'article

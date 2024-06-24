@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 
 /**
  * @author William ALLADE
@@ -21,9 +22,12 @@ public class FactureFinalisationDgi extends BaseEntity {
 	 */
 	private static final long serialVersionUID = -3786954616225248627L;
 
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_ffdgi")
+	@SequenceGenerator(name = "gen_ffdgi", sequenceName = "_seq_ffdgi", allocationSize = 1)
 	private Long id;
+	//
 	
 	// Les champs de l'objet de finalisation
 	// 	Date et heure de la facture

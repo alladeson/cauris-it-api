@@ -4,7 +4,7 @@
 package com.alladeson.caurisit.models.entities;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
 public enum TypeSystem {

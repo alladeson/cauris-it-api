@@ -13,7 +13,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.util.Collection;
 /**
- * @author TechDigita
+ * @author William ALLADE
  *
  */
 //@Table(uniqueConstraints = { 
@@ -26,9 +26,12 @@ public class User extends BaseEntity {
 	 * 
 	 */
 	private static final long serialVersionUID = 6209084795534331740L;
+	//
 	@Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_user")
+	@SequenceGenerator(name = "gen_user", sequenceName = "_seq_user", allocationSize = 1)
+	private Long id;
+	//
     @NotBlank
     private String firstname;
     @NotBlank

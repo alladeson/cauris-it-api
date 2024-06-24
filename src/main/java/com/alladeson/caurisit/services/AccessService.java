@@ -68,7 +68,7 @@ import net.sf.jasperreports.engine.JRException;
 import reactor.netty.http.client.HttpClient;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
 @Service
@@ -120,6 +120,10 @@ public class AccessService {
 		var codes = new ArrayList<Integer>();
 		// codes.add(Feature.parametreSysteme);
 		// codes.add(Feature.gestStock);
+		codes.add(Feature.gestStockApprovisionnement);
+		codes.add(Feature.gestStockFournisseur);
+		codes.add(Feature.gestStockCmdFournisseur);
+		codes.add(Feature.gestStockInventaire);
 		codes.add(Feature.parametreDonneSysteme);
 		// codes.add(Feature.accessCtrl);
 		// codes.add(Feature.accessCtrlAccess);
@@ -142,6 +146,10 @@ public class AccessService {
 		var codes = new ArrayList<Integer>();
 		// codes.add(Feature.gestStock);
 		// codes.add(Feature.parametreSysteme);
+		codes.add(Feature.gestStockApprovisionnement);
+		codes.add(Feature.gestStockFournisseur);
+		codes.add(Feature.gestStockCmdFournisseur);
+		codes.add(Feature.gestStockInventaire);
 		codes.add(Feature.parametre);
 		codes.add(Feature.parametreDonneSysteme);
 		codes.add(Feature.accessCtrl);
@@ -276,6 +284,16 @@ public class AccessService {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réfusé");
 
 		return groupeRepos.findByRoleNot(TypeRole.SUPER_ADMIN);
+	}
+	
+	public UserGroup getGroupeByRole(TypeRole role) {
+		// Retrieve the Group of the role
+		Optional<UserGroup> ug = groupeRepos.findByRole(role);
+		// Return null if no Group for the role
+		if(ug.isEmpty())
+			return null;
+		// Otherwise return the Group found
+		return ug.get();
 	}
 
 	public UserGroup getGroupe(Long id) {

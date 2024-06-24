@@ -16,9 +16,12 @@ public class Access extends BaseEntity {
 	 * 
 	 */
 	private static final long serialVersionUID = -8056954868217096617L;
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_access")
+	@SequenceGenerator(name = "gen_access", sequenceName = "_seq_access", allocationSize = 1)
 	private Long id;
+	//
 	private boolean readable;
 	private boolean writable;
 	private boolean deletable;
@@ -119,3 +122,4 @@ public class Access extends BaseEntity {
 	}
 
 }
+

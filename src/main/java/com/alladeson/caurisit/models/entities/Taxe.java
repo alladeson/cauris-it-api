@@ -7,9 +7,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
 @Entity
@@ -20,9 +21,12 @@ public class Taxe extends BaseEntity {
 	 */
 	private static final long serialVersionUID = 2014954712004806447L;
 
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_taxe")
+	@SequenceGenerator(name = "gen_taxe", sequenceName = "_seq_taxe", allocationSize = 1)
 	private Long id;
+	//
 	private TypeData type;
 	private TaxeGroups groupe;
 	private String libelle;

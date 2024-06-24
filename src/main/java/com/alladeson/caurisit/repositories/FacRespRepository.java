@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.alladeson.caurisit.models.entities.FactureResponseDgi;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
 public interface FacRespRepository extends JpaRepository<FactureResponseDgi, Long> {

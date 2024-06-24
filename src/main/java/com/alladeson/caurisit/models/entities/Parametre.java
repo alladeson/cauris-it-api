@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -17,7 +18,7 @@ import javax.persistence.UniqueConstraint;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * @author William
+ * @author William ALLADE
  *
  */
 @Table(uniqueConstraints = { 
@@ -38,9 +39,12 @@ public class Parametre extends BaseEntity {
 	 */
 	private static final long serialVersionUID = 2201597649100566773L;
 
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_parametre")
+	@SequenceGenerator(name = "gen_parametre", sequenceName = "_seq_parametre", allocationSize = 1)
 	private Long id;
+	//
 
 	@Column(nullable = false)
 	private String ifu;
@@ -85,6 +89,11 @@ public class Parametre extends BaseEntity {
 	// Pour la format d'impression de la facture
 	@Column(nullable = false)
 	private TypeData formatFacture;
+	
+	// Pour la gestion des stocks
+	private boolean gestionStock;
+	// Vérifie si la gestion de stock est liée à la facturation
+	private boolean stockEtFacture;
 
 	/**
 	 * @return the id
@@ -305,7 +314,7 @@ public class Parametre extends BaseEntity {
 	}
 
 	/**
-	 * Retourne le contact qui lest la combinaison du telephone et de l'email
+	 * Retourne le contact qui est la combinaison du telephone et de l'email
 	 * 
 	 * @return contact
 	 */
@@ -321,6 +330,25 @@ public class Parametre extends BaseEntity {
 
 		}
 		return contact;
+	}
+	
+	/**
+	 * Retourne l'adresse qui est la combinaison de l'adress et de la ville
+	 * 
+	 * @return the complete address
+	 */
+	public String getAddressContact() {
+		String address = "";
+		if (this.address != null)
+			address += this.address;
+		if (this.ville != null) {
+			if (this.address != null)
+				address += ", " + this.ville;
+			else
+				address += this.ville;
+
+		}
+		return address;
 	}
 
 	/**
@@ -391,5 +419,33 @@ public class Parametre extends BaseEntity {
 	 */
 	public void setFormatFacture(TypeData formatFacture) {
 		this.formatFacture = formatFacture;
+	}
+
+	/**
+	 * @return the gestionStock
+	 */
+	public boolean isGestionStock() {
+		return gestionStock;
+	}
+
+	/**
+	 * @return the stockEtFacture
+	 */
+	public boolean isStockEtFacture() {
+		return stockEtFacture;
+	}
+
+	/**
+	 * @param gestionStock the gestionStock to set
+	 */
+	public void setGestionStock(boolean gestionStock) {
+		this.gestionStock = gestionStock;
+	}
+
+	/**
+	 * @param stockEtFacture the stockEtFacture to set
+	 */
+	public void setStockEtFacture(boolean stockEtFacture) {
+		this.stockEtFacture = stockEtFacture;
 	}
 }

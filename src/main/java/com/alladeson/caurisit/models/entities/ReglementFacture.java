@@ -8,9 +8,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
 @Entity
@@ -21,9 +22,12 @@ public class ReglementFacture extends BaseEntity {
 	 */
 	private static final long serialVersionUID = -2517398394030798540L;
 
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_regfacture")
+	@SequenceGenerator(name = "gen_regfacture", sequenceName = "_seq_regfacture", allocationSize = 1)
 	private Long id;
+	//
 
 	// Type de Paiement
 	@ManyToOne

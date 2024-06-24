@@ -12,7 +12,12 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 
+/**
+ * @author William ALLADE
+ *
+ */
 @Entity
 public class Facture extends BaseEntity {
 
@@ -20,9 +25,12 @@ public class Facture extends BaseEntity {
 	 * 
 	 */
 	private static final long serialVersionUID = 2469748665214237679L;
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_facture")
+	@SequenceGenerator(name = "gen_facture", sequenceName = "_seq_facture", allocationSize = 1)
 	private Long id;
+	//
 	// Date de validation de la facture
 	private Date date;
 	private Double montantHt;

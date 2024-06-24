@@ -217,33 +217,32 @@ public class Tool {
 		return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF).body(reportPdf);
 	}
 
-	public String generateInvoiceAndStoreIt(Collection<?> collection, HashMap<String, Object> params,
-			String invoiceTemplate, String invoiceFileName) throws JRException, IOException {
+	public String generatePdfAndStoreIt(Collection<?> collection, HashMap<String, Object> params,
+			String template, String fileName) throws JRException, IOException {
 		JRBeanCollectionDataSource beanCollectionDataSource = new JRBeanCollectionDataSource(collection);
-		JasperReport compileReport = JasperCompileManager.compileReport(this.getResourceAsStream(invoiceTemplate));
+		JasperReport compileReport = JasperCompileManager.compileReport(this.getResourceAsStream(template));
 		JasperPrint report = JasperFillManager.fillReport(compileReport, params, beanCollectionDataSource);
-		JasperExportManager.exportReportToPdfFile(report, appConfig.getUploadDir() + "/" + invoiceFileName);
-
-		return invoiceFileName;
+		JasperExportManager.exportReportToPdfFile(report, appConfig.getUploadDir() + "/" +fileName);
+		return fileName;
 	}
-
-	public ResponseEntity<byte[]> generateInvoice(Collection<?> collection, HashMap<String, Object> params,
-			String invoiceTemplate, String invoiceFileName) throws JRException, IOException {
+	
+	public ResponseEntity<byte[]> generatePdf(Collection<?> collection, HashMap<String, Object> reportParams,
+			String template, String fileName) throws JRException, IOException {
 		JRBeanCollectionDataSource beanCollectionDataSource = new JRBeanCollectionDataSource(collection);
-		JasperReport compileReport = JasperCompileManager.compileReport(this.getResourceAsStream(invoiceTemplate));
-		JasperPrint report = JasperFillManager.fillReport(compileReport, params, beanCollectionDataSource);
+		JasperReport compileReport = JasperCompileManager.compileReport(this.getResourceAsStream(template));
+		JasperPrint report = JasperFillManager.fillReport(compileReport, reportParams, beanCollectionDataSource);
 //		JasperExportManager.exportReportToPdfFile(report, appConfig.getUploadDir() + "/" +invoiceFileName);
 		byte[] reportPdf = JasperExportManager.exportReportToPdf(report);
 		HttpHeaders headers = new HttpHeaders();
-		headers.set(HttpHeaders.CONTENT_DISPOSITION, "inline;filename=" + invoiceFileName);
+		headers.set(HttpHeaders.CONTENT_DISPOSITION, "inline;filename=" + fileName);
 		return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF).body(reportPdf);
 	}
 	
-	public ResponseEntity<byte[]> generateConfigReport(Collection<?> collection, HashMap<String, Object> params,
+	public ResponseEntity<byte[]> generateConfigReport(Collection<?> collection, HashMap<String, Object> reportParams,
 			String reportTemplate, String reportFileName) throws JRException, IOException {
 		JRBeanCollectionDataSource beanCollectionDataSource = new JRBeanCollectionDataSource(collection);
 		JasperReport compileReport = JasperCompileManager.compileReport(this.getResourceAsStream(reportTemplate));
-		JasperPrint report = JasperFillManager.fillReport(compileReport, params, beanCollectionDataSource);
+		JasperPrint report = JasperFillManager.fillReport(compileReport, reportParams, beanCollectionDataSource);
 		JasperExportManager.exportReportToPdfFile(report, appConfig.getUploadDir() + "/" + reportFileName);
 		byte[] reportPdf = JasperExportManager.exportReportToPdf(report);
 		HttpHeaders headers = new HttpHeaders();

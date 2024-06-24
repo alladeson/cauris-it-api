@@ -20,7 +20,7 @@ import com.alladeson.caurisit.models.entities.TypeData;
 import com.alladeson.caurisit.models.entities.TypeFacture;
 
 /**
- * @author William
+ * @author William ALLADE
  *
  */
 public interface FactureRepository extends JpaRepository<Facture, Long> {

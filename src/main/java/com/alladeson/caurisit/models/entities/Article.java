@@ -9,15 +9,19 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 //import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
-@Table(uniqueConstraints = { @UniqueConstraint(name = "UniqueDesignation", columnNames = { "designation" }) })
+@Table(uniqueConstraints = { 
+		@UniqueConstraint(name = "UniqueDesignation", columnNames = { "designation" }),
+		@UniqueConstraint(name = "UniqueReference", columnNames = { "reference" }),
+})
 @Entity
 public class Article extends BaseEntity {
 
@@ -26,9 +30,15 @@ public class Article extends BaseEntity {
 	 */
 	private static final long serialVersionUID = 122269624782441070L;
 
+	//
 	@Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_article")
+	@SequenceGenerator(name = "gen_article", sequenceName = "_seq_article", allocationSize = 1)
+	private Long id;
+	//
+	// La référence de l'article
+	@Column(nullable = true)
+	private String reference;
 	@Column(nullable = false)
 	private String designation;
 	private Double prix;
@@ -57,6 +67,20 @@ public class Article extends BaseEntity {
 	 */
 	public void setId(Long id) {
 		this.id = id;
+	}	
+
+	/**
+	 * @return the reference
+	 */
+	public String getReference() {
+		return reference;
+	}
+
+	/**
+	 * @param reference the reference to set
+	 */
+	public void setReference(String reference) {
+		this.reference = reference;
 	}
 
 	/**
@@ -91,7 +115,7 @@ public class Article extends BaseEntity {
 	 * @return the stock
 	 */
 	public Double getStock() {
-		return stock;
+		return stock == null ? 0 : stock;
 	}
 
 	/**

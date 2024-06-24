@@ -14,6 +14,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 
 /**
  * @author William ALLADE
@@ -32,6 +33,10 @@ public class Feature extends BaseEntity {
 	public static final int gestStock = 10000;
 	public static final int gestStockCategorie = 11000;
 	public static final int gestStockArticle = 12000;
+	public static final int gestStockApprovisionnement = 13000;
+	public static final int gestStockFournisseur = 14000;
+	public static final int gestStockCmdFournisseur = 15000;
+	public static final int gestStockInventaire = 16000;
 	// Emission des factures
 	public static final int facturation = 20000;
 	public static final int facturationFV = 21000;
@@ -63,9 +68,12 @@ public class Feature extends BaseEntity {
 	public static final int parametreList = 72000;
 	/** Fin des constantes de codes des fonctionnalités **/
 
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_feature")
+	@SequenceGenerator(name = "gen_feature", sequenceName = "_seq_feature", allocationSize = 1)
 	private Long id;
+	//
 	@Column(unique = true)
 	private Integer code; // Le code de la fonctionnalité
 	private String name;

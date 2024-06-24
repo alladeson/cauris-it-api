@@ -38,7 +38,7 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 /**
- * @author allade
+ * @author William ALLADE
  *
  */
 @Service

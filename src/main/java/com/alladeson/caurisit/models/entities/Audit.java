@@ -8,12 +8,19 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
+/**
+ * @author William ALLADE
+ *
+ */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class Audit/* extends Auditable */{
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+	//
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_audit")
+	@SequenceGenerator(name = "gen_audit", sequenceName = "_seq_audit", allocationSize = 1)
+	private Long id;
+	//
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

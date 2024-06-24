@@ -10,9 +10,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
 @Entity
@@ -22,9 +23,12 @@ public class FactureResponseDgi extends BaseEntity {
 	 * 
 	 */
 	private static final long serialVersionUID = -5427992458719359740L;
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_frdgi")
+	@SequenceGenerator(name = "gen_frdgi", sequenceName = "_seq_frdgi", allocationSize = 1)
 	private Long id;
+	//
 	// Date de validation de la facture
 	private Date date;
 	// Les champs de la reponse

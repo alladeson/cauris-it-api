@@ -11,7 +11,7 @@ import com.alladeson.caurisit.models.entities.Access;
 import com.alladeson.caurisit.security.entities.TypeRole;
 
 /**
- * @author allad
+ * @author William ALLADE
  *
  */
 public interface AccessRepository extends JpaRepository<Access, Long> {

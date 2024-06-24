@@ -16,6 +16,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+/**
+ * @author William ALLADE
+ *
+ */
 @MappedSuperclass
 public class BaseEntity implements Serializable {
 	

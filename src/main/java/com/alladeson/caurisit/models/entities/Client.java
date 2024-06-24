@@ -8,12 +8,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 //import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 /**
- * @author William
+ * @author William ALLADE
  *
  */
 @Table(uniqueConstraints = { 
@@ -31,9 +32,12 @@ public class Client extends BaseEntity {
 	 */
 	private static final long serialVersionUID = -3179188902873955865L;
 
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_client")
+	@SequenceGenerator(name = "gen_client", sequenceName = "_seq_client", allocationSize = 1)
 	private Long id;
+	//
 
 	private String ifu;
 	@Column(nullable = false)
@@ -210,5 +214,24 @@ public class Client extends BaseEntity {
 
 		}
 		return contact;
+	}
+	
+	/**
+	 * Retourne l'adresse qui est la combinaison de l'adress et de la ville
+	 * 
+	 * @return the complete address
+	 */
+	public String getAddressContact() {
+		String address = "";
+		if (this.address != null)
+			address += this.address;
+		if (this.ville != null) {
+			if (this.address != null)
+				address += ", " + this.ville;
+			else
+				address += this.ville;
+
+		}
+		return address;
 	}
 }

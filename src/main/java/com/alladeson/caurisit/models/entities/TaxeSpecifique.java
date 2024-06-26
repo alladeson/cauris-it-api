@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 
 /**
  * @author William ALLADE
@@ -20,9 +21,12 @@ public class TaxeSpecifique extends BaseEntity {
 	 * 
 	 */
 	private static final long serialVersionUID = 6297984190197404167L;
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_taxe_spec")
+	@SequenceGenerator(name = "gen_taxe_spec", sequenceName = "_seq_taxe_spec", allocationSize = 1)
 	private Long id;
+	//
 	// Le nom de la taxe spécifique
 	private String name;
 	// La taxe spécifique HT par unité de l'article

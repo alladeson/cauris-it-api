@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -24,9 +25,12 @@ public class DetailFacture extends BaseEntity {
 	 * 
 	 */
 	private static final long serialVersionUID = 7510041209697636112L;
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_detailf")
+	@SequenceGenerator(name = "gen_detailf", sequenceName = "_seq_detailf", allocationSize = 1)
 	private Long id;
+	//
 	private Date date; // Date de validation de la ligne de facture
 	// Le nom de l'article
 	private String name;

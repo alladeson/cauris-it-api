@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 
 /**
  * @author William ALLADE
@@ -21,9 +22,12 @@ public class TypeFacture extends BaseEntity {
 	 */
 	private static final long serialVersionUID = -5827981536854743886L;
 
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_type_facture")
+	@SequenceGenerator(name = "gen_type_facture", sequenceName = "_seq_type_facture", allocationSize = 1)
 	private Long id;
+	//
 	private TypeData groupe;
 	// Le type de la facture
 	private TypeFactureEnum type;

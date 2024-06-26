@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 
 /**
  * @author William ALLADE
@@ -20,9 +21,12 @@ public class Remise extends BaseEntity {
 	 */
 	private static final long serialVersionUID = -5810883768037890917L;
 
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_remise")
+	@SequenceGenerator(name = "gen_remise", sequenceName = "_seq_remise", allocationSize = 1)
 	private Long id;
+	//
 	// Le pourcentage de la remise
 	private Integer taux;
 	// Prix originale de l'article

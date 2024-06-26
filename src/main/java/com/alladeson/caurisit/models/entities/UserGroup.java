@@ -25,9 +25,12 @@ public class UserGroup extends BaseEntity {
 	 * 
 	 */
 	private static final long serialVersionUID = -5936237106297268500L;
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_user_group")
+	@SequenceGenerator(name = "gen_user_group", sequenceName = "_seq_user_group", allocationSize = 1)
 	private Long id;
+	//
 	@Column(nullable = false)
 	private String name;
 	private String description;

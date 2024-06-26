@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 
 /**
  * @author William ALLADE
@@ -24,9 +25,12 @@ public class MouvementArticle extends BaseEntity {
 	 * 
 	 */
 	private static final long serialVersionUID = -3000244193512304919L;
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_mvt_article")
+	@SequenceGenerator(name = "gen_mvt_article", sequenceName = "_seq_mvt_article", allocationSize = 1)
 	private Long id;
+	//
 	// La date de la création du mouvement
 	private Date date;
 	// Le stock initiale de l'article

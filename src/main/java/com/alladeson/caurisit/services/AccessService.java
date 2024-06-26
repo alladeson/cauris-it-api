@@ -125,12 +125,12 @@ public class AccessService {
 		codes.add(Feature.gestStockCmdFournisseur);
 		codes.add(Feature.gestStockInventaire);
 		codes.add(Feature.parametreDonneSysteme);
-		// codes.add(Feature.accessCtrl);
-		// codes.add(Feature.accessCtrlAccess);
+		codes.add(Feature.accessCtrl);
+		codes.add(Feature.accessCtrlAccess);
 		codes.add(Feature.accessCtrlFeatures);
 		codes.add(Feature.accessCtrlUser);
 		codes.add(Feature.accessCtrlUserGroup);
-		// codes.add(Feature.audit);
+		codes.add(Feature.audit);
 		return featureRepos.findAllByCodeNotIn(codes);
 	}
 	
@@ -153,7 +153,7 @@ public class AccessService {
 		codes.add(Feature.parametre);
 		codes.add(Feature.parametreDonneSysteme);
 		codes.add(Feature.accessCtrl);
-		// codes.add(Feature.accessCtrlAccess);
+		codes.add(Feature.accessCtrlAccess);
 		codes.add(Feature.accessCtrlFeatures);
 		codes.add(Feature.accessCtrlUser);
 		codes.add(Feature.accessCtrlUserGroup);

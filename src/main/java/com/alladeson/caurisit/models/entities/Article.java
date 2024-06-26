@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 //import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -29,11 +30,14 @@ public class Article extends BaseEntity {
 	 */
 	private static final long serialVersionUID = 122269624782441070L;
 
+	//
 	@Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_article")
+	@SequenceGenerator(name = "gen_article", sequenceName = "_seq_article", allocationSize = 1)
+	private Long id;
+	//
 	// La référence de l'article
-	@Column(nullable = false)
+	@Column(nullable = true)
 	private String reference;
 	@Column(nullable = false)
 	private String designation;

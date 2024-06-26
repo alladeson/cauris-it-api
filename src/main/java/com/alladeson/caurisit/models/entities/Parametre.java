@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -38,9 +39,12 @@ public class Parametre extends BaseEntity {
 	 */
 	private static final long serialVersionUID = 2201597649100566773L;
 
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_parametre")
+	@SequenceGenerator(name = "gen_parametre", sequenceName = "_seq_parametre", allocationSize = 1)
 	private Long id;
+	//
 
 	@Column(nullable = false)
 	private String ifu;

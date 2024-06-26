@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Transient;
 
 /**
@@ -26,9 +27,12 @@ public class Approvisionnement extends BaseEntity {
 	 */
 	private static final long serialVersionUID = 844136332994530176L;
 
+	//
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gen_approv")
+	@SequenceGenerator(name = "gen_approv", sequenceName = "_seq_approv", allocationSize = 1)
 	private Long id;
+	//
 	private Date date; // Date de l'approvisionnement
 	private Double quantite;
 	private Double prixUht;

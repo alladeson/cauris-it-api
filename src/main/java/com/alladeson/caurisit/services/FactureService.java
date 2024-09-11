@@ -487,7 +487,7 @@ public class FactureService {
 	private Facture calculer(Facture facture) {
 		// Mise à jour du montantHT
 		facture.setMontantHt(repository.calcMontantHt(facture));
-		// Mise à jour du montantHT
+		// Mise à jour du montantHTAib
 		var taxeGroupe1 = new ArrayList<TaxeGroups>();
 		taxeGroupe1.add(TaxeGroups.C);
 		taxeGroupe1.add(TaxeGroups.D);

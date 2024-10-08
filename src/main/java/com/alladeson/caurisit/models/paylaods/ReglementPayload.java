@@ -19,8 +19,10 @@ public class ReglementPayload {
 	private Long montantPayer;
 	// Montant Rendu
 	private Long montantRendu;
-	// Description supplémentaire
+	// Description supplémentaire (objet de la facture)
 	private String description;
+	// NB de la facture
+	private String nb;
 	
 	/**
 	 * @return the aibId
@@ -93,6 +95,18 @@ public class ReglementPayload {
 	 */
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	/**
+	 * @return the nb
+	 */
+	public String getNb() {
+		return nb;
+	}
+	/**
+	 * @param nb the nb to set
+	 */
+	public void setNb(String nb) {
+		this.nb = nb;
 	}
 	
 }

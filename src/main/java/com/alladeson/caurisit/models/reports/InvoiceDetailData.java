@@ -12,6 +12,8 @@ public class InvoiceDetailData {
 	private Long prix_u;
 	// La quantité de l'article
 	private Double qte;
+	// L'unité de l'article
+	private String unite;
 	// Le montant T.T.C pour l'article
 	private String montant_ttc;
 	// Le taux de la remise
@@ -85,6 +87,20 @@ public class InvoiceDetailData {
 	 */
 	public void setQte(Double qte) {
 		this.qte = qte;
+	}
+
+	/**
+	 * @return the unite
+	 */
+	public String getUnite() {
+		return unite;
+	}
+
+	/**
+	 * @param unite the unite to set
+	 */
+	public void setUnite(String unite) {
+		this.unite = unite;
 	}
 
 	/**

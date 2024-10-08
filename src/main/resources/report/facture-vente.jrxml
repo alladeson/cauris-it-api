@@ -255,6 +255,7 @@
 		<field name="prix_u" class="java.lang.Long"/>
 		<field name="qte" class="java.lang.Double"/>
 		<field name="montant_ttc" class="java.lang.String"/>
+		<field name="unite" class="java.lang.String"/>
 	</subDataset>
 	<parameter name="detailFacture" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
 	<parameter name="client" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
@@ -281,6 +282,8 @@
 	<field name="invoice_type" class="java.lang.String"/>
 	<field name="ste_logo" class="java.lang.String"/>
 	<field name="invoice_total_toWord" class="java.lang.String"/>
+	<field name="objet" class="java.lang.String"/>
+	<field name="nb" class="java.lang.String"/>
 	<title>
 		<band height="132" splitType="Stretch">
 			<line>
@@ -289,26 +292,6 @@
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 			</line>
-			<textField pattern="EEEEE dd MMMMM yyyy">
-				<reportElement x="370" y="43" width="184" height="15" uuid="bb10dbe1-0a4f-4722-9953-c163b63cf979"/>
-				<textFieldExpression><![CDATA["Date :  " + $F{invoice_date}]]></textFieldExpression>
-			</textField>
-			<textField pattern="EEEEE dd MMMMM yyyy">
-				<reportElement x="370" y="27" width="184" height="16" uuid="3836ce65-eca3-4cad-a6de-b1818def0a2b"/>
-				<textElement textAlignment="Left"/>
-				<textFieldExpression><![CDATA["Facture #  " + $F{invoice_id}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="370" y="10" width="184" height="17" uuid="ef38f642-e7b0-43d5-a8de-8e09fccb2531"/>
-				<textElement textAlignment="Left">
-					<font isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{invoice_type}]]></textFieldExpression>
-			</textField>
-			<textField pattern="EEEEE dd MMMMM yyyy">
-				<reportElement x="370" y="58" width="184" height="14" uuid="2b006469-34da-488c-904a-843b1dc23a1b"/>
-				<textFieldExpression><![CDATA["Vendeur :  " + $F{invoice_operator}]]></textFieldExpression>
-			</textField>
 			<textField>
 				<reportElement x="95" y="0" width="265" height="25" uuid="f9a89072-3677-4007-903e-25ab80d782b7">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -354,6 +337,22 @@
 				<reportElement x="140" y="53" width="220" height="19" uuid="9ec44b5e-8549-4b16-a501-359a237a2223"/>
 				<textFieldExpression><![CDATA[$F{ste_rccm}  != null ? $F{ste_rccm} : "-"]]></textFieldExpression>
 			</textField>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="370" y="52" width="184" height="15" uuid="39d807f7-65e6-4fc6-af11-607d6f0bb680"/>
+				<textFieldExpression><![CDATA["Date :  " + $F{invoice_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="370" y="32" width="184" height="16" uuid="7938810c-ea57-4cbc-a09c-903fe84c65d5"/>
+				<textElement textAlignment="Left"/>
+				<textFieldExpression><![CDATA["Facture #  " + $F{invoice_id}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="370" y="10" width="184" height="17" uuid="af9a8448-040a-4932-a179-e35dc39bd92f"/>
+				<textElement textAlignment="Left">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{invoice_type}]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<detail>
@@ -364,9 +363,29 @@
 				<subreportExpression><![CDATA["report/sub_report_emcef.jasper"]]></subreportExpression>
 			</subreport>
 		</band>
-		<band height="53">
+		<band height="36">
+			<staticText>
+				<reportElement x="0" y="11" width="40" height="19" uuid="f66b6c7d-a11d-4d0f-b564-d021a6938ee7">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Top" markup="none">
+					<font size="12" isBold="true" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Objet :]]></text>
+			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="45" y="11" width="509" height="19" uuid="e691855c-9464-4d4d-ae75-8361b7f99fd0">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="12" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{objet} != null ? $F{objet} : '-']]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="52">
 			<componentElement>
-				<reportElement x="0" y="5" width="554" height="45" uuid="9dd2f1c4-688e-49f6-9ea4-c1babeecfa9b">
+				<reportElement x="0" y="3" width="554" height="45" uuid="9dd2f1c4-688e-49f6-9ea4-c1babeecfa9b">
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
 					<property name="com.jaspersoft.studio.table.style.table_header" value="Table 3_TH"/>
 					<property name="com.jaspersoft.studio.table.style.column_header" value="Table 3_CH"/>
@@ -458,7 +477,7 @@
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="10" isBold="false"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{qte}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{qte} + ($F{unite} =="KG" ?  " " + $F{unite} : "")]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -611,7 +630,7 @@
 		</band>
 	</detail>
 	<summary>
-		<band height="143" splitType="Stretch">
+		<band height="117" splitType="Stretch">
 			<property name="local_mesure_unitheight" value="pixel"/>
 			<componentElement>
 				<reportElement x="0" y="14" width="554" height="40" uuid="dd1d569b-b715-4d61-8bce-b742a23886fd">
@@ -713,21 +732,14 @@
 					</jr:column>
 				</jr:table>
 			</componentElement>
-			<textField>
-				<reportElement x="0" y="60" width="554" height="26" uuid="3cc11cd9-41e0-4a96-9ad1-4e6d904eb5cf"/>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="0" y="60" width="554" height="20" uuid="3cc11cd9-41e0-4a96-9ad1-4e6d904eb5cf"/>
 				<textElement textAlignment="Justified" markup="html">
 					<font size="10" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Arrêté la présente facture à la somme de  <b>" + $F{invoice_total_toWord} + " (" +new DecimalFormat("#,###.##", 
   new DecimalFormatSymbols(Locale.ITALIAN)).format(Double.valueOf($F{invoice_total}))  + ")</b> Francs CFA."]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement x="415" y="92" width="139" height="48" uuid="53f776af-4c52-4f50-878a-0ab57dba267c"/>
-				<textElement textAlignment="Center">
-					<font size="10" isBold="true" isItalic="true" isUnderline="true"/>
-				</textElement>
-				<text><![CDATA[Le Responsable]]></text>
-			</staticText>
 			<staticText>
 				<reportElement x="10" y="2" width="230" height="12" uuid="7ef990f4-e87f-4310-acbf-d4e71dd2459d">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -736,6 +748,26 @@
 					<font size="9" isItalic="false"/>
 				</textElement>
 				<text><![CDATA[RÉPARTITION DES PAIEMENTS]]></text>
+			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement positionType="Float" x="36" y="92" width="204" height="19" isRemoveLineWhenBlank="true" uuid="51b502e2-ad24-4b5c-90f9-366d4b378c8a">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<printWhenExpression><![CDATA[$F{nb} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="12" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nb}!= null ? $F{nb} : '-']]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="92" width="30" height="19" isRemoveLineWhenBlank="true" uuid="72b822bb-6785-4b4d-be5e-d00efb3933bf">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<printWhenExpression><![CDATA[$F{nb} != null]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Top" markup="none">
+					<font size="12" isBold="true" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[NB :]]></text>
 			</staticText>
 		</band>
 	</summary>

@@ -38,8 +38,10 @@ public class ReglementFacture extends BaseEntity {
 	private Long montantPayer;
 	// Montant Rendu
 	private Long montantRendu;
-	// Description supplémentaire
+	// Description supplémentaire (Objet de la facture)
 	private String description;
+	// La NB de la facture
+	private String nb;
 	/**
 	 * @return the id
 	 */
@@ -111,6 +113,18 @@ public class ReglementFacture extends BaseEntity {
 	 */
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	/**
+	 * @return the nb
+	 */
+	public String getNb() {
+		return nb;
+	}
+	/**
+	 * @param nb the nb to set
+	 */
+	public void setNb(String nb) {
+		this.nb = nb;
 	}
 	/**
 	 * @return the serialversionuid

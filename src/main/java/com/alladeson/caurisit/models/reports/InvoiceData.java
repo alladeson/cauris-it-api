@@ -38,6 +38,10 @@ public class InvoiceData {
 	private String ste_contact;
 	// Le numero de la machine e-mcef
 	private String emcef_nim;
+	// L'objet de la facture
+	private String objet;
+	// La NB de la facture
+	private String nb;
 
 	/**
 	 * @return the invoice_id
@@ -303,6 +307,34 @@ public class InvoiceData {
 	 */
 	public void setEmcef_nim(String emcef_nim) {
 		this.emcef_nim = emcef_nim;
+	}
+
+	/**
+	 * @return the objet
+	 */
+	public String getObjet() {
+		return objet;
+	}
+
+	/**
+	 * @param objet the objet to set
+	 */
+	public void setObjet(String objet) {
+		this.objet = objet;
+	}
+
+	/**
+	 * @return the nb
+	 */
+	public String getNb() {
+		return nb;
+	}
+
+	/**
+	 * @param nb the nb to set
+	 */
+	public void setNb(String nb) {
+		this.nb = nb;
 	}
 
 }

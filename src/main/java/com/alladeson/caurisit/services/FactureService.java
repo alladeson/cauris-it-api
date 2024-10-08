@@ -873,6 +873,7 @@ public class FactureService {
 		ReglementFacture reglement = new ReglementFacture();
 		// Mise à jour des champs
 		reglement.setDescription(payload.getDescription());
+		reglement.setNb(payload.getNb());
 		reglement.setMontantPayer(payload.getMontantPayer());
 		reglement.setMontantRecu(payload.getMontantRecu());
 		reglement.setMontantRendu(payload.getMontantRendu());
@@ -1419,6 +1420,7 @@ public class FactureService {
 		reglement.setMontantPayer(reglementOrigine.getMontantPayer() * (-1));
 		reglement.setMontantRendu(reglementOrigine.getMontantRendu());
 		reglement.setDescription(reglementOrigine.getDescription());
+		reglement.setNb(reglementOrigine.getNb());
 		facture.setReglement(reglementRepos.save(reglement));
 		// Sauvegarde de la facture
 		facture = repository.save(facture);

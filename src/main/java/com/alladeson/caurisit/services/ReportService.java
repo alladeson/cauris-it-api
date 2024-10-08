@@ -98,6 +98,7 @@ public class ReportService {
 			invoiceDetail.setTaxe(detail.getTaxe().getAbreviation());
 			invoiceDetail.setPrix_u(detail.getPrixUnitaire().longValue());
 			invoiceDetail.setQte(detail.getQuantite());
+			invoiceDetail.setUnite(detail.getUnite().name());
 			// Formatage du montant ttc
 			invoiceDetail.setMontant_ttc(
 					formatNumber(detail.getMontantTtc()) + " [" + detail.getTaxe().getGroupe().name() + "]");
@@ -290,6 +291,11 @@ public class ReportService {
 		invoice.setSte_logo(appConfig.getUploadDir() + "/" + params.getLogo());
 		// Mise à jour du numéro nim de la machine e-mcef
 		invoice.setEmcef_nim(params.getNim());
+		// Mise à jour de l'objet de la facture
+		invoice.setObjet(facture.getReglement().getDescription());
+		// Mise à jour de la NB de la facture
+		invoice.setNb(facture.getReglement().getNb());
+		// Retour
 		return invoice;
 	}
 
